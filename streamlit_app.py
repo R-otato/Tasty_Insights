@@ -1,16 +1,16 @@
 #--Team--
-# Tutorial Group: 	T01 Group 4 <br>
+# Tutorial Group: 	T01 Group 4 
 
-# Student Name 1:	Ryan Liam Poon Yang<br>
-# Student Number: 	S10222131E <br>
-# Student Name 2:	Teh Zhi Xian<br>
-# Student Number: 	S10221851J<br>
-# Student Name 3:	Chuah Kai Yi<br>
-# Student Number: 	S10219179E<br>
-# Student Name 4:	Don Sukkram<br>
-# Student Number: 	S10223354J<br>
-# Student Name 5:	Darryl Koh<br>
-# Student Number: 	S10221893J<br>
+# Student Name 1:	Ryan Liam Poon Yang
+# Student Number: 	S10222131E 
+# Student Name 2:	Teh Zhi Xian
+# Student Number: 	S10221851J
+# Student Name 3:	Chuah Kai Yi
+# Student Number: 	S10219179E
+# Student Name 4:	Don Sukkram
+# Student Number: 	S10223354J
+# Student Name 5:	Darryl Koh
+# Student Number: 	S10221893J
 
 #--Import statements--
 import streamlit
