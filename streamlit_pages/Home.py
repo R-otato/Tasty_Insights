@@ -16,7 +16,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-from urllib.error import URLError
 
 #--Page 1--
 st.set_page_config(
