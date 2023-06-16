@@ -19,32 +19,7 @@ import requests
 import numpy as np
 import time
 
-st.sidebar.write('# **Parameters Input**')
-
-def input_features():
-  def get_sidebar_radio(title, choices=('No', 'Yes'), horizontal=True):
-    return st.sidebar.radio(f'**{title}:**', choices, horizontal=horizontal)
-
-  gender = get_sidebar_radio('Gender', ('Male', 'Female'))
-  seniorCitizen = get_sidebar_radio('Senior')
-  partner = get_sidebar_radio('Partner')
-  dependents = get_sidebar_radio('Dependents')
-  phoneService = get_sidebar_radio('Phone Service')
-  multipleLines = get_sidebar_radio('Multiple Lines')
-  internetService = get_sidebar_radio('Internet Service', ('No', 'Fiber optic', 'DSL'), horizontal=False)
-  onlineSecurity = get_sidebar_radio('Online Security')
-  onlineBackup = get_sidebar_radio('Online Backup')
-  deviceProtection = get_sidebar_radio('Device Protection')
-  techSupport = get_sidebar_radio('Tech Support')
-  streamingTV = get_sidebar_radio('TV Streaming')
-  streamingMovies = get_sidebar_radio('Movie Streaming')
-  contract = get_sidebar_radio('Contract', ('Month-to-month', 'One year', 'Two year'), horizontal=False)
-  paperlessBilling = get_sidebar_radio('Paperless Billing')
-  paymentMethod = get_sidebar_radio('Payment Method', ('Credit card (automatic)', 'Bank transfer (automatic)', 'Electronic check', 'Mailed check'), horizontal=False)
-  tenure = st.sidebar.slider('**Tenure (Months):**', min_value=0, max_value=70, value=12)
-  monthlyCharges = st.sidebar.number_input('**Monthly Charges ($):**', min_value=10.0, max_value=120.0, value=65.0)
-
-data = input_features()
+uploaded_file = st.file_uploader('Upload a file')
 
 st.set_page_config(page_title="Plotting Demo", page_icon="📈")
 
