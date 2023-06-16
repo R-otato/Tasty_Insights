@@ -30,6 +30,7 @@ Streamlit. We're generating a bunch of random numbers in a loop for around
 5 seconds. Enjoy!"""
 )
 
-uploaded_file = st.file_uploader('# Multiple File Upload', accept_multiple_files=True)
+st.markdown("# Multiple File Upload")
+uploaded_file = st.file_uploader('Upload your file', accept_multiple_files=True)
 
 st.button("Re-run")
