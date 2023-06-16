@@ -13,10 +13,20 @@
 # Student Number: 	S10221893J
 
 #--Import statements--
-import streamlit
+import streamlit as st
 import pandas as pd
 import requests
 import snowflake.connector
 from urllib.error import URLError
 
-#--Import statements--
+#--Page 1--
+st.set_page_config(
+    page_title="Home",
+    page_icon="👋",
+)
+
+st.write("# Welcome to Streamlit! 👋")
+
+st.sidebar.success("Select a demo above.")
+
+
