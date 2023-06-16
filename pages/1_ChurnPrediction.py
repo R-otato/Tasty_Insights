@@ -17,7 +17,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import numpy as np
-import joblib
+#import joblib - Some error importing
 from snowflake.snowpark import Session
 import json
 from snowflake.snowpark.functions import call_udf, col
@@ -90,14 +90,14 @@ def get_prediction(data):
     'Not Churn': f'{model.predict_proba(data)[0][0] * 100 :.1f}%',
     'Churn': f'{model.predict_proba(data)[0][1] * 100 :.1f}%'}, index=['Predictions'])
 
-#-- Prediction Result --
-st.write('## Prediction Results:')
+# #-- Prediction Result --
+# st.write('## Prediction Results:')
 
-prediction = get_prediction(data)
-predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
-predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
+# prediction = get_prediction(data)
+# predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
+# predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
 
-st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
-st.write(prediction)
+# st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
+# st.write(prediction)
 
 st.button("Re-run")
