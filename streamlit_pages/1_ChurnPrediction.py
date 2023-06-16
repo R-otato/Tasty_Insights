@@ -18,6 +18,8 @@ import pandas as pd
 import requests
 import snowflake.connector
 from urllib.error import URLError
+import numpy as np
+import time
 
 st.set_page_config(page_title="Plotting Demo", page_icon="📈")
 
