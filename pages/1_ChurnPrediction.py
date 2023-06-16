@@ -19,7 +19,6 @@ import requests
 import numpy as np
 import time
 
-uploaded_file = st.file_uploader('Upload a file')
 
 st.set_page_config(page_title="Plotting Demo", page_icon="📈")
 
@@ -30,6 +29,8 @@ st.write(
 Streamlit. We're generating a bunch of random numbers in a loop for around
 5 seconds. Enjoy!"""
 )
+
+uploaded_file = st.file_uploader('Upload a file')
 
 progress_bar = st.sidebar.progress(0)
 status_text = st.sidebar.empty()
