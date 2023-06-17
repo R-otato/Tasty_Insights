@@ -17,7 +17,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import numpy as np
-#import joblib - Some error importing
+from joblib import load
 from snowflake.snowpark import Session
 import json
 from snowflake.snowpark.functions import call_udf, col
@@ -57,15 +57,18 @@ Streamlit. We're generating a bunch of random numbers in a loop for around
 #--File Upload--
 st.markdown("## Multiple File Upload")
 uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
-for f in uploaded_files:
-    st.write(f)
-data_list = []
-for f in uploaded_files:
-    temp_data = pd.read_csv(f)
-    data_list.append(temp_data)
 
-data = pd.concat(data_list)
+if uploaded_files!=[]:
+    for f in uploaded_files:
+        st.write(f)
+    data_list = []
+    for f in uploaded_files:
+        temp_data = pd.read_csv(f)
+        data_list.append(temp_data)
 
+    data = pd.concat(data_list)
+
+    st.dataframe(data)
 
 #--Get Prediction--
 def get_prediction(data):

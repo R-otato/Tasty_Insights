@@ -17,7 +17,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import numpy as np
-import joblib
+from joblib import load
 from snowflake.snowpark import Session
 import json
 from snowflake.snowpark.functions import call_udf, col
