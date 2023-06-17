@@ -14,13 +14,6 @@
 
 # --Import statements--
 import streamlit as st
-import pandas as pd
-import requests
-import numpy as np
-from joblib import load
-from snowflake.snowpark import Session
-import json
-from snowflake.snowpark.functions import call_udf, col
 
 # --Page 1--
 st.set_page_config(

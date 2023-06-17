@@ -17,10 +17,12 @@ import streamlit as st
 import pandas as pd
 import requests
 import numpy as np
-from joblib import load
+import joblib 
 from snowflake.snowpark import Session
 import json
 from snowflake.snowpark.functions import call_udf, col
+import snowflake.snowpark.types as T
+from cachetools import cached
 
 # Get account credentials from a json file
 with open("data_scientist_auth.json") as f:
@@ -71,7 +73,29 @@ if uploaded_files!=[]:
     st.dataframe(data)
 
 #--Get Prediction--
-def get_prediction(data):
+
+
+# Function to load the model from file and cache the result
+@cached(cache={})
+#Load model
+def load_model(model_path: str) -> object:
+    from joblib import load
+    model = load(model_path)
+    return model
+
+#Get predictions
+def udf_score_xgboost_model_vec_cached(df: pd.DataFrame) -> pd.Series:
+    import sys
+    # file-dependencies of UDFs are available in snowflake_import_directory
+    IMPORT_DIRECTORY_NAME = "snowflake_import_directory"
+    import_dir = sys._xoptions[IMPORT_DIRECTORY_NAME]
+    model_name = 'xgboost_model.sav'
+    model = load_model(import_dir+model_name)
+    df.columns = feature_cols
+    scored_data = pd.Series(model.predict(df))
+    return scored_data
+
+def transforma(data):
 #   for feature, fit in joblib.load('assets/labelEncoder_fit.jbl'):
 #     if feature != 'Churn':
 #       data[feature] = fit.transform(data[feature])
@@ -81,18 +105,27 @@ def get_prediction(data):
 
 #   for feature, scaler in joblib.load('assets/minMaxScaler_fit.jbl'):
 #     data[feature] = scaler.transform(data[feature].values.reshape(-1,1))
+    return
+#Specify inputs
+train_table = session.table(name="train_table")
+# get feature columns
+feature_cols = train_table.drop('Churned').columns
 
-  model = joblib.load('./assets/churn-prediction-model.jbl')
-  import sys
-  #file-dependencies of UDFs are available in snowflake_import_directory
-  IMPORT_DIRECTORY_NAME = "snowflake_import_directory"
-  import_dir = sys._xoptions[IMPORT_DIRECTORY_NAME]
-  model_name = 'xgboost_model.sav'
-
-  return pd.DataFrame({
-    'Not Churn': f'{model.predict_proba(data)[0][0] * 100 :.1f}%',
-    'Churn': f'{model.predict_proba(data)[0][1] * 100 :.1f}%'}, index=['Predictions'])
-
+udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_score_xgboost_model_vec_cached, 
+                                                                   name="udf_score_xgboost_model", 
+                                                                   stage_location='@MODEL_STAGE',
+                                                                   input_types=[T.FloatType()]*len(feature_cols),
+                                                                   return_type = T.FloatType(),
+                                                                   replace=True, 
+                                                                   is_permanent=True, 
+                                                                   imports=['@MODEL_STAGE/xgboost_model.sav'],
+                                                                   packages=[f'xgboost==1.7.3'
+                                                                             ,f'joblib==1.1.1'
+                                                                             ,f'cachetools==4.2.2'], 
+                                                                   session=session)
+data=session.create_dataframe(data)
+pred=data.with_column('PREDICTION', udf_score_xgboost_model_vec_cached(*feature_cols))
+st.dataframe(pred)
 # #-- Prediction Result --
 # st.write('## Prediction Results:')
 
