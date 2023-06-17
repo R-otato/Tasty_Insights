@@ -45,36 +45,7 @@ connection_parameters = {
 # Create Snowpark session
 session = Session.builder.configs(connection_parameters).create()
 
-#--Introduction--
-st.set_page_config(page_title="Churn Prediction", page_icon="📈")
-
-st.markdown("# Churn Prediction")
-st.sidebar.header("Churn Prediction Demo")
-st.write(
-    """This demo illustrates a combination of plotting and animation with
-Streamlit. We're generating a bunch of random numbers in a loop for around
-5 seconds. Enjoy!"""
-)
-
-#--File Upload--
-st.markdown("## Multiple File Upload")
-uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
-
-if uploaded_files!=[]:
-    for f in uploaded_files:
-        st.write(f)
-    data_list = []
-    for f in uploaded_files:
-        temp_data = pd.read_csv(f)
-        data_list.append(temp_data)
-
-    data = pd.concat(data_list)
-
-    st.dataframe(data)
-
-#--Get Prediction--
-
-
+#--Functions--
 # Function to load the model from file and cache the result
 @cached(cache={})
 #Load model
@@ -106,34 +77,66 @@ def transforma(data):
 #   for feature, scaler in joblib.load('assets/minMaxScaler_fit.jbl'):
 #     data[feature] = scaler.transform(data[feature].values.reshape(-1,1))
     return
-#Specify inputs
-train_table = session.table(name="train_table")
-# get feature columns
-feature_cols = train_table.drop('Churned').columns
 
-udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_score_xgboost_model_vec_cached, 
-                                                                   name="udf_score_xgboost_model", 
-                                                                   stage_location='@MODEL_STAGE',
-                                                                   input_types=[T.FloatType()]*len(feature_cols),
-                                                                   return_type = T.FloatType(),
-                                                                   replace=True, 
-                                                                   is_permanent=True, 
-                                                                   imports=['@MODEL_STAGE/xgboost_model.sav'],
-                                                                   packages=[f'xgboost==1.7.3'
-                                                                             ,f'joblib==1.1.1'
-                                                                             ,f'cachetools==4.2.2'], 
-                                                                   session=session)
-data=session.create_dataframe(data)
-pred=data.with_column('PREDICTION', udf_score_xgboost_model_vec_cached(*feature_cols))
-st.dataframe(pred)
-# #-- Prediction Result --
-# st.write('## Prediction Results:')
 
-# prediction = get_prediction(data)
-# predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
-# predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
+#--Introduction--
+st.set_page_config(page_title="Churn Prediction", page_icon="📈")
 
-# st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
-# st.write(prediction)
+st.markdown("# Churn Prediction")
+st.sidebar.header("Churn Prediction Demo")
+st.write(
+    """This demo illustrates a combination of plotting and animation with
+Streamlit. We're generating a bunch of random numbers in a loop for around
+5 seconds. Enjoy!"""
+)
+
+#--File Upload--
+st.markdown("## Multiple File Upload")
+uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
+
+if uploaded_files!=[]:
+    for f in uploaded_files:
+        st.write(f)
+    data_list = []
+    for f in uploaded_files:
+        temp_data = pd.read_csv(f)
+        data_list.append(temp_data)
+
+    data = pd.concat(data_list)
+
+    st.dataframe(data)
+
+    #--Get Prediction--
+    #Specify inputs
+    train_table = session.table(name="train_table")
+    # get feature columns
+    feature_cols = train_table.drop('Churned').columns
+
+    udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_score_xgboost_model_vec_cached, 
+                                                                    name="udf_score_xgboost_model", 
+                                                                    stage_location='@MODEL_STAGE',
+                                                                    input_types=[T.FloatType()]*len(feature_cols),
+                                                                    return_type = T.FloatType(),
+                                                                    replace=True, 
+                                                                    is_permanent=True, 
+                                                                    imports=['@MODEL_STAGE/xgboost_model.sav'],
+                                                                    packages=[f'xgboost==1.7.3'
+                                                                                ,f'joblib==1.1.1'
+                                                                                ,f'cachetools==4.2.2'], 
+                                                                    session=session)
+    data=session.create_dataframe(data)
+    pred=data.with_column('PREDICTION', udf_score_xgboost_model_vec_cached(*feature_cols))
+
+    st.markdown("# Results")
+    st.dataframe(pred)
+    # #-- Prediction Result --
+    # st.write('## Prediction Results:')
+
+    # prediction = get_prediction(data)
+    # predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
+    # predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
+
+    # st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
+    # st.write(prediction)
 
 st.button("Re-run")
