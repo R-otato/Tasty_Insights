@@ -14,6 +14,7 @@
 
 # --Import statements--
 import streamlit as st
+from PIL import Image
 
 # --Page 1--
 st.set_page_config(
@@ -21,6 +22,15 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.write("# Welcome to Streamlit! 👋")
+st.write("# Welcome to Tasty Insights! 👋")
+st.image(Image.open('Images/Logo.png'))
+st.write("""
+  ## What Problem we're Tying to Solve?
+
+  Imagine you own a telecommunication company and you want to have a Machine Learning model to predict the custumers that may probably churn in the next months. So I developed one and deployed in this prototype web application that would help you in this situation!
+
+  For those who don't know, churn is when a custumer stops paying for a company's service. And as I've heard once, it is cheaper to keep the custumer you already have instead of spending more and more money and time to gather new ones.
+""")
+
 
 st.sidebar.success("Select a demo above.")

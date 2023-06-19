@@ -18,6 +18,7 @@ import pandas as pd
 import requests
 import numpy as np
 import joblib 
+import time
 from snowflake.snowpark import Session
 import json
 from snowflake.snowpark.functions import call_udf, col
@@ -89,12 +90,28 @@ st.write(
 Streamlit. We're generating a bunch of random numbers in a loop for around
 5 seconds. Enjoy!"""
 )
+st.write("""
+  ## How to use this tool?
+
+  You only need to provide the parameters to the machine learning model at the sidebar on the left side of this page. And the predictions made by the model will be outputted right below.
+""")
+
+st.write("""
+  ## Parameters Imputed:
+
+  - Down below are the parameters setted up to the model by the inputs of the sidebar.
+""")
+test_data=pd.read_csv('assets/testdata.csv').drop('CHURNED',axis=1)
+st.write(test_data)
+type='Example'
 
 #--File Upload--
 st.markdown("## Multiple File Upload")
 uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
 
+
 if uploaded_files!=[]:
+    type='Your'
     for f in uploaded_files:
         st.write(f)
     data_list = []
@@ -106,12 +123,22 @@ if uploaded_files!=[]:
 
     st.dataframe(data)
 
-    #--Get Prediction--
-    #Specify inputs
-    train_table = session.table(name="train_table")
-    # get feature columns
-    feature_cols = train_table.drop('Churned').columns
+    # #-- Prediction Result --
+    # st.write('## Prediction Results:')
 
+    # prediction = get_prediction(data)
+    # predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
+    # predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
+
+    # st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
+    # st.write(prediction)
+else:
+    data=test_data.copy()
+#--Get Prediction--
+
+# get feature columns
+feature_cols = test_data.columns
+with st.spinner('Wait for it...'):
     udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_score_xgboost_model_vec_cached, 
                                                                     name="udf_score_xgboost_model", 
                                                                     stage_location='@MODEL_STAGE',
@@ -126,17 +153,9 @@ if uploaded_files!=[]:
                                                                     session=session)
     data=session.create_dataframe(data)
     pred=data.with_column('PREDICTION', udf_score_xgboost_model_vec_cached(*feature_cols))
+    st.markdown("# "+type+" Results")
+    st.dataframe(pred)  
+    st.success('Done!')  
 
-    st.markdown("# Results")
-    st.dataframe(pred)
-    # #-- Prediction Result --
-    # st.write('## Prediction Results:')
-
-    # prediction = get_prediction(data)
-    # predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
-    # predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
-
-    # st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
-    # st.write(prediction)
 
 st.button("Re-run")
