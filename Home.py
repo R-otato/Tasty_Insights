@@ -23,7 +23,7 @@ st.set_page_config(
 )
 
 st.write("# Welcome to Tasty Insights! 👋")
-st.image(Image.open('Images/Logo.png'))
+st.image(Image.open('assets/Logo.png'))
 st.write("""
   ## What Problem we're Tying to Solve?
 
