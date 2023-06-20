@@ -22,8 +22,9 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.write("# Welcome to Tasty Insights! 👋")
 st.image(Image.open('assets/Logo.png'))
+st.write("# Welcome to Tasty Insights! 👋")
+
 st.write("""
   ## What Problem we're Tying to Solve?
 
