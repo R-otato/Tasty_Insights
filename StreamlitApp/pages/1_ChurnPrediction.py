@@ -15,81 +15,83 @@
 #--Import statements--
 import streamlit as st
 import pandas as pd
+from xgboost import XGBClassifier
 import requests
 import numpy as np
 import joblib 
 import time
-from snowflake.snowpark import Session
+# from snowflake.snowpark import Session
 import json
-from snowflake.snowpark.functions import call_udf, col
-import snowflake.snowpark.types as T
+# from snowflake.snowpark.functions import call_udf, col
+# import snowflake.snowpark.types as T
 from cachetools import cached
 
-# Get account credentials from a json file
-with open("data_scientist_auth.json") as f:
-    data = json.load(f)
-    username = data["username"]
-    password = data["password"]
-    account = data["account"]
+#----------------------Snowflake---------------------------------#
+# # Get account credentials from a json file
+# with open("data_scientist_auth.json") as f:
+#     data = json.load(f)
+#     username = data["username"]
+#     password = data["password"]
+#     account = data["account"]
 
-# Specify connection parameters
-connection_parameters = {
-    "account": account,
-    "user": username,
-    "password": password,
-    "role": "TASTY_BI",
-    "warehouse": "TASTY_BI_WH",
-    "database": "frostbyte_tasty_bytes",
-    "schema": "analytics",
-}
+# # Specify connection parameters
+# connection_parameters = {
+#     "account": account,
+#     "user": username,
+#     "password": password,
+#     "role": "TASTY_BI",
+#     "warehouse": "TASTY_BI_WH",
+#     "database": "frostbyte_tasty_bytes",
+#     "schema": "analytics",
+# }
 
-# Create Snowpark session
-session = Session.builder.configs(connection_parameters).create()
+# # Create Snowpark session
+# session = Session.builder.configs(connection_parameters).create()
 
-#--Functions--
-# Function to load the model from file and cache the result
-@cached(cache={})
-#Load model
-def load_model(model_path: str) -> object:
-    from joblib import load
-    model = load(model_path)
-    return model
+# #--Functions--
+# # Function to load the model from file and cache the result
+# @cached(cache={})
+# #Load model
+# def load_model(model_path: str) -> object:
+#     from joblib import load
+#     model = load(model_path)
+#     return model
 
-#Get predictions
-def udf_score_xgboost_model_vec_cached(df: pd.DataFrame) -> pd.Series:
-    import sys
-    # file-dependencies of UDFs are available in snowflake_import_directory
-    IMPORT_DIRECTORY_NAME = "snowflake_import_directory"
-    import_dir = sys._xoptions[IMPORT_DIRECTORY_NAME]
-    model_name = 'xgboost_model.sav'
-    model = load_model(import_dir+model_name)
-    df.columns = feature_cols
-    scored_data = pd.Series(model.predict(df))
-    return scored_data
+# #Get predictions
+# def udf_score_xgboost_model_vec_cached(df: pd.DataFrame) -> pd.Series:
+#     import sys
+#     # file-dependencies of UDFs are available in snowflake_import_directory
+#     IMPORT_DIRECTORY_NAME = "snowflake_import_directory"
+#     import_dir = sys._xoptions[IMPORT_DIRECTORY_NAME]
+#     model_name = 'xgboost_model.sav'
+#     model = load_model(import_dir+model_name)
+#     df.columns = feature_cols
+#     scored_data = pd.Series(model.predict(df))
+#     return scored_data
 
-def udf_proba_xgboost_model_vec_cached(df: pd.DataFrame) -> pd.Series:
-    import sys
-    # file-dependencies of UDFs are available in snowflake_import_directory
-    IMPORT_DIRECTORY_NAME = "snowflake_import_directory"
-    import_dir = sys._xoptions[IMPORT_DIRECTORY_NAME]
-    model_name = 'xgboost_model.sav'
-    model = load_model(import_dir+model_name)
-    df.columns = feature_cols
-    scored_data = pd.Series(model.predict(df))
-    proba_data = pd.Series(model.predict_proba(df)[:, 1])
-    return proba_data
+# def udf_proba_xgboost_model_vec_cached(df: pd.DataFrame) -> pd.Series:
+#     import sys
+#     # file-dependencies of UDFs are available in snowflake_import_directory
+#     IMPORT_DIRECTORY_NAME = "snowflake_import_directory"
+#     import_dir = sys._xoptions[IMPORT_DIRECTORY_NAME]
+#     model_name = 'xgboost_model.sav'
+#     model = load_model(import_dir+model_name)
+#     df.columns = feature_cols
+#     scored_data = pd.Series(model.predict(df))
+#     proba_data = pd.Series(model.predict_proba(df)[:, 1])
+#     return proba_data
 
-def transforma(data):
-#   for feature, fit in joblib.load('assets/labelEncoder_fit.jbl'):
-#     if feature != 'Churn':
-#       data[feature] = fit.transform(data[feature])
+# def transforma(data):
+# #   for feature, fit in joblib.load('assets/labelEncoder_fit.jbl'):
+# #     if feature != 'Churn':
+# #       data[feature] = fit.transform(data[feature])
 
-#   for feature in data.drop(['MonthlyCharges', 'tenure'], axis=1).columns:
-#     data[feature] = data[feature].astype('category')
+# #   for feature in data.drop(['MonthlyCharges', 'tenure'], axis=1).columns:
+# #     data[feature] = data[feature].astype('category')
 
-#   for feature, scaler in joblib.load('assets/minMaxScaler_fit.jbl'):
-#     data[feature] = scaler.transform(data[feature].values.reshape(-1,1))
-    return
+# #   for feature, scaler in joblib.load('assets/minMaxScaler_fit.jbl'):
+# #     data[feature] = scaler.transform(data[feature].values.reshape(-1,1))
+#     return
 
 
 #--Introduction--
@@ -112,7 +114,7 @@ with tab2:
 
     - Down below are the parameters setted up to the model by the inputs of the sidebar.
     """)
-    test_data=pd.read_csv('assets/testdata.csv').drop(['CHURNED'],axis=1)
+    test_data=pd.read_csv('assets/testdata.csv').drop(['CHURNED'],axis=1,errors='ignore')
 
     st.write(test_data)
     type='Example'
@@ -151,27 +153,35 @@ with tab2:
 
     # get feature columns
     feature_cols = test_data.columns
+    
     with st.spinner('Wait for it...'):
-        udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_proba_xgboost_model_vec_cached, 
-                                                                        name="udf_score_xgboost_model", 
-                                                                        stage_location='@MODEL_STAGE',
-                                                                        input_types=[T.FloatType()]*len(feature_cols),
-                                                                        return_type = T.FloatType(),
-                                                                        replace=True, 
-                                                                        is_permanent=True, 
-                                                                        imports=['@MODEL_STAGE/xgboost_model.sav'],
-                                                                        packages=[f'xgboost==1.7.3'
-                                                                                    ,f'joblib==1.1.1'
-                                                                                    ,f'cachetools==4.2.2'], 
-                                                                        session=session)
-        data = pd.concat([customer_id, data], axis=1)
-        data=session.create_dataframe(data)
-        proba_data=udf_score_xgboost_model_vec_cached(*feature_cols)
-        pred=data.with_column('CHURN_PROBABILITY', proba_data)
-        st.markdown("# "+type+" Results")
-        st.write('*Tips: Click on column name to sort!')
-        st.dataframe(pred[['CUSTOMER_ID','CHURN_PROBABILITY']])  
-        st.success('Done!')  
-
+        # udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_proba_xgboost_model_vec_cached, 
+        #                                                                 name="udf_score_xgboost_model", 
+        #                                                                 stage_location='@MODEL_STAGE',
+        #                                                                 input_types=[T.FloatType()]*len(feature_cols),
+        #                                                                 return_type = T.FloatType(),
+        #                                                                 replace=True, 
+        #                                                                 is_permanent=True, 
+        #                                                                 imports=['@MODEL_STAGE/xgboost_model.sav'],
+        #                                                                 packages=[f'xgboost==1.7.3'
+        #                                                                             ,f'joblib==1.1.1'
+        #                                                                             ,f'cachetools==4.2.2'], 
+        #                                                                 session=session)
+        # data = pd.concat([customer_id, data], axis=1)
+        # data=session.create_dataframe(data)
+        # proba_data=udf_score_xgboost_model_vec_cached(*feature_cols)
+        # pred=data.with_column('CHURN_PROBABILITY', proba_data)
+        # st.markdown("# "+type+" Results")
+        # st.write('*Tips: Click on column name to sort!')
+        # st.dataframe(pred[['CUSTOMER_ID','CHURN_PROBABILITY']])  
+        # st.success('Done!')  
+        model = XGBClassifier()
+        model.load_model("assets/model.json")
+        predictions= pd.DataFrame(model.predict_proba(data),columns=['NotChurn','Churned'])
+        
+        st.dataframe(predictions)
+        data=pd.concat([customer_id, predictions], axis=1)
+        
+        st.dataframe(data)
 
     st.button("Re-run")
