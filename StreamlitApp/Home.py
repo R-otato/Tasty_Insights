@@ -42,5 +42,13 @@ st.write("""
   
   """)
 
+'''
+Tabs:
+1) What kinds of customers are churning the most
+2) CFO - Next months Sales Predictions (Based on churn rate and average days to next order)
+3) CEO - Operationally where is performing the best?
+4) Marketing - Where are customers churning more and how do we advertise to the groups churning?
+5) Food Truck - Do customers continue to use the service after I serve them?
+'''
 
 st.sidebar.success("Select a demo above.")
