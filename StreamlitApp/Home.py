@@ -29,10 +29,18 @@ st.write("# Welcome to Tasty Insights! 👋")
 st.write("""
   ## What Problem we're Tying to Solve?
 
-  Imagine you own a telecommunication company and you want to have a Machine Learning model to predict the custumers that may probably churn in the next months. So I developed one and deployed in this prototype web application that would help you in this situation!
+  Tasty bytes goals over the next 5 years are to improve its sales, 25% YOY expecting to grow
+  from \$105M/Year to $320M/Year.
 
-  For those who don't know, churn is when a custumer stops paying for a company's service. And as I've heard once, it is cheaper to keep the custumer you already have instead of spending more and more money and time to gather new ones.
-""")
+  Customer churn is when a customer stops paying for a company's service, in the case of tasty bytes
+  it is when a customer stops buying products with tasty bytes trucks. It is more expensive to gain
+  new customers than it is to retain existing customers and for a company that is looking to grow its profits
+  customer retention is important in ensuring a sustainable growth in sales.
+
+  This product aims to assist sales and marketing representatives better understand when customers churn so as to take appropriate action
+  to prevent customers from leaving the service and to work towards creating a better customer experience.
+  
+  """)
 
 
 st.sidebar.success("Select a demo above.")
