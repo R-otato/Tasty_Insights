@@ -100,6 +100,25 @@ st.set_page_config(page_title="Churn Prediction", page_icon="📈")
 st.markdown("# Churn Prediction")
 tab1, tab2 = st.tabs(['Explore', 'Predict'])
 
+with tab1:
+
+    df = pd.read_csv('assets/testcoord.csv')
+    df.columns = ['lat', 'lon', 'name', 'sum']
+
+    st.write("""
+    ## What is this?
+
+    This is a map that represents the distribution of the churn based on the level at which the data is analysed. i.e. Country/City/Truck
+    """)
+
+    import plotly.express as px
+
+    fig = px.scatter_mapbox(df, lat="lat", lon="lon", size = df['sum'])
+
+    fig.update_layout(mapbox_style="open-street-map")
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    st.plotly_chart(fig)
+
 with tab2:
     st.sidebar.header("Churn Prediction Demo")
 
