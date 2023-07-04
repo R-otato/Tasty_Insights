@@ -26,10 +26,11 @@ st.set_page_config(
 st.image(Image.open('assets/Logo.png'))
 st.write("# Welcome to Tasty Insights! 👋")
 
-st.write("""
-  ## What Problem we're Tying to Solve?
+st.write("## What Problem we're Tying to Solve?")
 
-  Tasty bytes goals over the next 5 years are to improve its sales, 25% YOY expecting to grow
+st.image(Image.open('assets/tasty_byte_goals.jpg'))
+
+st.write("""  Tasty bytes goals over the next 5 years are to improve its sales, 25% YOY expecting to grow
   from \$105M/Year to $320M/Year.
 
   Customer churn is when a customer stops paying for a company's service, in the case of tasty bytes
