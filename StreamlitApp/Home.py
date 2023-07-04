@@ -37,8 +37,9 @@ st.write("""
   new customers than it is to retain existing customers and for a company that is looking to grow its profits
   customer retention is important in ensuring a sustainable growth in sales.
 
-  This product aims to assist sales and marketing representatives better understand when customers churn so as to take appropriate action
-  to prevent customers from leaving the service and to work towards creating a better customer experience.
+  This product aims to serve the understanding of churn rate and its affect on company KPI's relative to the stakeholders view
+  so as to provide an actionable insight for the user to understand what they can do to reduce churn and the link their action has
+  towards achieving company goals.
   
   """)
 
