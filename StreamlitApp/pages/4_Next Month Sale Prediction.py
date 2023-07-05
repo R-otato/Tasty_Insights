@@ -20,6 +20,8 @@ st.set_page_config(page_title="CFO-Sales Prediction")
 st.markdown("# Sales Prediction")
 tab1, tab2 = st.tabs(['Churn to Sales Relation', 'Prediction'])
 
+# link_data = 
+
 with tab1:
 
     st.write("""
@@ -33,4 +35,7 @@ with tab1:
     following month allowing for projection in sales and allow for informed steps to be taken in terms of operations and strategy.
     """)
 
-    # insert table lining the average DTNO with the Churn rate of month with order totals and explain the percentage changes    
+    # insert table lining the average DTNO with the Churn rate of month with order totals and explain the percentage changes
+
+    # showing historical data linking the churn rate to the changes in sales
+    # st.table(link_data)
