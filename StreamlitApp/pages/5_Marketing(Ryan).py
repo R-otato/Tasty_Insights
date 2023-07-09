@@ -12,25 +12,29 @@ import json
 # import snowflake.snowpark.types as T
 from cachetools import cached
 
+# Setting page configuration
 st.set_page_config(page_title="Marketing", page_icon="📈")
 
+# Page title
 st.markdown("# Marketing")
 
+# Default customer information
 st.write("""
-    ## Last updated customer information
-    Based on the last transaction of all the customers in the United States
+    ## Default Data
+    The default data is the last updated information of the members in United States.
     """)
 
-
-test_data=pd.read_csv('assets/without_transformation.csv').drop(['CHURNED'],axis=1,errors='ignore')
-
+# Loading test data
+test_data = pd.read_csv('assets/without_transformation.csv').drop(['CHURNED'], axis=1, errors='ignore')
 st.write(test_data.head())
+
+# Populating customer ID column
 customer_id = test_data.pop("CUSTOMER_ID")
 
-#--File Upload--
-st.markdown("## Multiple File Upload")
+# File Upload section
+st.markdown("## Add your own data by uploading files")
 uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
 
-
+# Model loading
 model = XGBClassifier()
 model.load_model("assets/model.json")
