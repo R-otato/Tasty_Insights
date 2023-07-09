@@ -19,9 +19,11 @@ st.set_page_config(page_title="Marketing", page_icon="📈")
 st.markdown("# Marketing")
 
 # How to use this page
+st.write('Hello! I see you are browsing my shit. What you trying do huh?')
+
 with st.expander("How to Use This Page"):
     #Going to add some stuff here 
-    st.write('Hello! I see you are browsing my shit. What you trying do huh?')
+    st.write('Hello! I see you are still browsing my shit. What you trying do huh?')
 
 # Input data
 ## File Upload section
@@ -57,4 +59,4 @@ customer_id = df.pop("CUSTOMER_ID")
 # Visualizations using the model
 ## Model loading
 model = XGBClassifier()
-model.load_model("assets/improvedmodel.txt")
+model.load_model("assets/improvedmodel.json")
