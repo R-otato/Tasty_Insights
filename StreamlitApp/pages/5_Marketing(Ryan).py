@@ -18,23 +18,43 @@ st.set_page_config(page_title="Marketing", page_icon="📈")
 # Page title
 st.markdown("# Marketing")
 
-# Default customer information
-st.write("""
-    ## Default Data
-    The default data is the last updated information of the members in United States.
-    """)
+# How to use this page
+with st.expander("How to Use This Page"):
+    #Going to add some stuff here 
+    st.write('Hello')
 
-# Loading test data
-test_data = pd.read_csv('assets/without_transformation.csv').drop(['CHURNED'], axis=1, errors='ignore')
-st.write(test_data.head())
+# Input data
+## File Upload section
+st.markdown("## Input Data")
+uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
+df=''
+### If uploaded file is not empty
+if uploaded_files!=[]:
+    data_list = []
+    #Append all uploaded files into the list
+    for f in uploaded_files:
+        st.write(f)
+        temp_data = pd.read_csv(f)
+        data_list.append(temp_data)
+    st.success("Uploaded your file!")
+    #concat the files together if there are more than one file uploaded
+    df = pd.concat(data_list)
+else:
+    st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
+    df=pd.read_csv('assets/without_transformation.csv')
 
-# Populating customer ID column
-customer_id = test_data.pop("CUSTOMER_ID")
+## Display uploaded or defaul file
+with st.expander("Raw Dataframe"):
+    st.write(df)
+#df = clean_data(df)
+with st.expander("Cleaned and Transformed Data"):
+    df=pd.read_csv('assets/with_transformation.csv')
+    st.write(df)
 
-# File Upload section
-st.markdown("## Add your own data by uploading files")
-uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
+## Removing Customer ID column
+customer_id = df.pop("CUSTOMER_ID")
 
-# Model loading
+# Visualizations using the model
+## Model loading
 model = XGBClassifier()
 model.load_model("assets/model.json")
