@@ -2,5 +2,5 @@ snowflake-snowpark-python
 joblib
 plotly
 xgboost
-sklearn
+scikit-learn==0.22
 pandas

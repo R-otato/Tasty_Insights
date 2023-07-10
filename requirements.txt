@@ -1,6 +1,0 @@
-snowflake-snowpark-python
-joblib
-plotly
-xgboost
-sklearn
-pandas
