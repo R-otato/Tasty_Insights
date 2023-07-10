@@ -12,6 +12,25 @@ import json
 # import snowflake.snowpark.types as T
 from cachetools import cached
 
+def pipeline(data):
+    # Load the necessary transformations
+    windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
+    windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
+    yjt = joblib.load("assets/yjt.jbl")
+    ohe_enc = joblib.load("assets/ohe_enc.jbl")
+    minMaxScaler = joblib.load("assets/minMaxScaler.jbl")
+
+    # Apply the transformations to the data
+    data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
+    data = windsorizer_gau.transform(data)  # Apply Gaussian Windsorization
+    data = yjt.transform(data)  # Apply Yeo-Johnson Transformation
+    data = ohe_enc.transform(data)  # Apply One-Hot Encoding
+    data.columns = data.columns.str.upper()
+    data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
+    
+    return data
+    
+
 # Setting page configuration
 st.set_page_config(page_title="Marketing", page_icon="📈")
 
@@ -43,21 +62,23 @@ if uploaded_files!=[]:
     df = pd.concat(data_list)
 else:
     st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
-    df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
+    #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
+    df=pd.read_csv('assets/without_transformation.csv')
 
 ## Display uploaded or defaul file
 with st.expander("Raw Dataframe"):
     st.write(df)
-#df = clean_data(df)
-with st.expander("Cleaned and Transformed Data"):
-    df=pd.read_csv('StreamlitApp/assets/with_transformation.csv')
-    st.write(df)
 
 ## Removing Customer ID column
 customer_id = df.pop("CUSTOMER_ID")
+df=pipeline(df)
+
+with st.expander("Cleaned and Transformed Data"):
+    st.write(df)
+
 
 # Visualizations using the model
 ## Model loading
-model = XGBClassifier()
-model.load_model("StreamlitApp/assets/improvedmodel.json")
+model = joblib.load("assets/churn-prediction-model.jbl")
+#model = joblib.load("StreamlitApp/assets/improvedmodel.json")
 st.dataframe(model.predict(df))
