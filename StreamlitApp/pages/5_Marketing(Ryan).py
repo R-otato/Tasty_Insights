@@ -1,7 +1,6 @@
 #--Import statements--
 import streamlit as st
 import pandas as pd
-from xgboost import XGBClassifier
 import requests
 import numpy as np
 import joblib 
@@ -52,11 +51,12 @@ with st.expander("Raw Dataframe"):
 with st.expander("Cleaned and Transformed Data"):
     df=pd.read_csv('StreamlitApp/assets/with_transformation.csv')
     st.write(df)
-
+    
 ## Removing Customer ID column
 customer_id = df.pop("CUSTOMER_ID")
 
 # Visualizations using the model
 ## Model loading
-model = XGBClassifier()
-model.load_model("assets/improvedmodel.json")
+model = joblib.load('StreamlitApp/assets/churn-prediction-model.jbl')
+st.write('Hello')
+st.write(model.predict(df)) 
