@@ -1,3 +1,4 @@
 snowflake-snowpark-python
 joblib
 plotly
+xgboost
