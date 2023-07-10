@@ -43,14 +43,14 @@ if uploaded_files!=[]:
     df = pd.concat(data_list)
 else:
     st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
-    df=pd.read_csv('assets/without_transformation.csv')
+    df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
 
 ## Display uploaded or defaul file
 with st.expander("Raw Dataframe"):
     st.write(df)
 #df = clean_data(df)
 with st.expander("Cleaned and Transformed Data"):
-    df=pd.read_csv('assets/with_transformation.csv')
+    df=pd.read_csv('StreamlitApp/assets/with_transformation.csv')
     st.write(df)
 
 ## Removing Customer ID column
@@ -59,5 +59,5 @@ customer_id = df.pop("CUSTOMER_ID")
 # Visualizations using the model
 ## Model loading
 model = XGBClassifier()
-model.load_model("assets/improvedmodel.json")
+model.load_model("StreamlitApp/assets/improvedmodel.json")
 st.dataframe(model.predict(df))
