@@ -15,12 +15,34 @@ import json
 # import snowflake.snowpark.types as T
 from cachetools import cached
 
+import snowflake.connector
+
+# hide this using secrets
+my_cnx = snowflake.connector.connect(
+    user = "RLIAM",
+    password = "Cats2004",
+    account = "LGHJQKA-DJ92750",
+    role = "TASTY_BI",
+    warehouse = "TASTY_BI_WH",
+    database = "frostbyte_tasty_bytes",
+    schema = "analytics"
+)
+
+my_cur = my_cnx.cursor()
+my_cur.execute("select * from churn_to_sales")
+churn_to_sales = my_cur.fetchall()
+
+# not really efficient figure out a way to extract snowflake dataframe instead of tuple
+df = pd.DataFrame(churn_to_sales, columns=["YEAR", "MONTH", "CHURN RATE", "SALES"])
+
+df = df.sort_values(by=["YEAR", "MONTH"])
+
 st.set_page_config(page_title="CFO-Sales Prediction")
 
 st.markdown("# Sales Prediction")
 tab1, tab2 = st.tabs(['Churn to Sales Relation', 'Prediction'])
 
-# link_data = 
+
 
 with tab1:
 
@@ -38,4 +60,7 @@ with tab1:
     # insert table lining the average DTNO with the Churn rate of month with order totals and explain the percentage changes
 
     # showing historical data linking the churn rate to the changes in sales
-    # st.table(link_data)
+    st.dataframe(
+        df,
+        hide_index=True
+    )
