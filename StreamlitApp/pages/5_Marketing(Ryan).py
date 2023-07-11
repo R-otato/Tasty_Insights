@@ -29,7 +29,12 @@ def pipeline(data):
     data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
     
     return data
-    
+
+@cached(cache={})
+#Load model
+def load_model(model_path: str) -> object:
+    model = joblib.load(model_path)
+    return model    
 
 # Setting page configuration
 st.set_page_config(page_title="Marketing", page_icon="📈")
@@ -78,7 +83,9 @@ with st.expander("Cleaned and Transformed Data"):
 
 
 # Visualizations using the model
-## Model loading
-model = joblib.load("assets/churn-prediction-model.jbl")
-#model = joblib.load("StreamlitApp/assets/improvedmodel.json")
-st.dataframe(model.predict(df))
+## Model loading and predictions
+model = load_model("assets/churn-prediction-model.jbl")
+predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
+data=pd.concat([customer_id, predictions], axis=1)
+
+st.dataframe(data.value_counts('CHURNED'))
