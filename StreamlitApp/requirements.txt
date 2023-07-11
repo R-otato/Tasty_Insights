@@ -4,3 +4,4 @@ plotly
 xgboost
 scikit-learn==0.22
 pandas
+feature_engine
