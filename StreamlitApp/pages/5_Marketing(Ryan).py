@@ -12,9 +12,6 @@ import json
 # import snowflake.snowpark.types as T
 from cachetools import cached
 import plotly.express as px
-import plotly.graph_objects as go
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 def pipeline(data):
     # Load the necessary transformations
