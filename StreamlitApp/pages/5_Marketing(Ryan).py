@@ -37,35 +37,82 @@ def load_model(model_path: str) -> object:
     model = joblib.load(model_path)
     return model    
 
-def cat_plots(data):
+def demo_plots(data):
     # Convert 'CHURNED' column to string type
     data['CHURNED'] = data['CHURNED'].astype("string")
-    
-    # Create a stacked bar chart for 'GENDER' against 'CHURNED'
+
+    # Create a grouped  bar chart for 'GENDER' against 'CHURNED'
     gender_df = data.groupby(by=["GENDER", "CHURNED"]).size().reset_index(name="counts")
-    gender_chart = px.bar(data_frame=gender_df, x="GENDER", y="counts", color="CHURNED", barmode="group")
+    gender_chart = px.bar(data_frame=gender_df, x="GENDER", y="counts", color="CHURNED", barmode="group",color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
 
-    # Create a stacked bar chart for 'MARITAL_STATUS' against 'CHURNED'
+    # Create a grouped  bar chart for 'MARITAL_STATUS' against 'CHURNED'
     marital_status_df = data.groupby(by=["MARITAL_STATUS", "CHURNED"]).size().reset_index(name="counts")
-    marital_status_chart = px.bar(data_frame=marital_status_df, x="MARITAL_STATUS", y="counts", color="CHURNED", barmode="group")
+    marital_status_chart = px.bar(data_frame=marital_status_df, x="MARITAL_STATUS", y="counts", color="CHURNED", barmode="group",color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
 
-    # Create a stacked bar chart for 'CITY' against 'CHURNED'
+    # Create a grouped  bar chart for 'CITY' against 'CHURNED'
     city_df = data.groupby(by=["CITY", "CHURNED"]).size().reset_index(name="counts")
-    city_chart = px.bar(data_frame=city_df, x="CITY", y="counts", color="CHURNED", barmode="group")
+    city_chart = px.bar(data_frame=city_df, x="CITY", y="counts", color="CHURNED", barmode="group",color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
 
-    # Create a stacked bar chart for 'CHILDREN_COUNT' against 'CHURNED'
+    # Create a grouped bar chart for 'CHILDREN_COUNT' against 'CHURNED'
     children_count_df = data.groupby(by=["CHILDREN_COUNT", "CHURNED"]).size().reset_index(name="counts")
-    children_count_chart = px.bar(data_frame=children_count_df, x="CHILDREN_COUNT", y="counts", color="CHURNED", barmode="group")
+    children_count_chart = px.bar(data_frame=children_count_df, x="CHILDREN_COUNT", y="counts", color="CHURNED", barmode="group",color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
     children_count_chart.update_layout(xaxis_type='category')
+
+    # Create a box plot for 'Age' against 'CHURNED'
+    age_chart=px.box(data_frame=data, x="CHURNED", y="AGE", color='CHURNED',color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
     
     # Render the charts using Streamlit in a 2 by 2 grid layout
-    col1, col2 = st.columns(2)
+    col1, col2  = st.columns(2)
     col1.plotly_chart(gender_chart)
     col2.plotly_chart(marital_status_chart)
 
     col3, col4 = st.columns(2)
     col3.plotly_chart(city_chart)
     col4.plotly_chart(children_count_chart)
+    st.plotly_chart(age_chart)
+
+def num_plots(data):
+    # Create a box plot for 'RECENCY' against 'CHURNED'
+    recency_chart=px.box(data_frame=data, x="CHURNED", y="RECENCY", color='CHURNED',color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
+    # Create a box plot for 'FREQUENCY' against 'CHURNED'
+    frequency_chart=px.box(data_frame=data, x="CHURNED", y="FREQUENCY", color='CHURNED',color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
+    # Create a box plot for 'MONETARY' against 'CHURNED'
+    monetary_chart=px.box(data_frame=data, x="CHURNED", y="MONETARY", color='CHURNED',color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
+    # Create a box plot for 'LENGTH_OF_RELATIONSHIP' against 'CHURNED'
+    lor_chart=px.box(data_frame=data, x="CHURNED", y="LENGTH_OF_RELATIONSHIP", color='CHURNED',color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
+    # Create a box plot for 'FNUM_OF_LOCATIONS_VISITED' against 'CHURNED'
+    nov_chart=px.box(data_frame=data, x="CHURNED", y="NUM_OF_LOCATIONS_VISITED", color='CHURNED',color_discrete_map={
+                "1": "crimson",
+                "0": "cornflowerblue"})
+
+    # Render the charts using Streamlit in a 2 by 2 grid layout
+    col1, col2  = st.columns(2)
+    col1.plotly_chart(recency_chart)
+    col2.plotly_chart(frequency_chart)
+
+    col3, col4 = st.columns(2)
+    col3.plotly_chart(monetary_chart)
+    col4.plotly_chart(lor_chart)
+    
+    st.plotly_chart(nov_chart)
 
 def main() -> None:
     # Page title
@@ -104,7 +151,9 @@ def main() -> None:
     ## Removing Customer ID column
     customer_id = df.pop("CUSTOMER_ID")
     #Get categoorical columns
-    cat_df=df.select_dtypes(include='object')
+    demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
+
     df=pipeline(df)
 
     with st.expander("Cleaned and Transformed Data"):
@@ -115,15 +164,20 @@ def main() -> None:
     ## Setup: Model loading, predictions and data
     model = load_model("assets/churn-prediction-model.jbl")
     predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
-    cat_df = pd.concat([cat_df, predictions], axis=1)
+    demo_df = pd.concat([demo_df, predictions], axis=1)
+    beha_df = pd.concat([beha_df, predictions], axis=1)
     data=pd.concat([customer_id, predictions], axis=1)
 
     ## Visualization 1: Churn by demographics
-    st.markdown("## Churn by Demographics")
-    cat_plots(cat_df)
+    st.markdown("## Churn by Member Demographics")
+    demo_plots(demo_df)
 
-    ## Visualization 2: Churn by segmentation
+    ## Visualization 2: Churn by behavior
+    st.markdown("## Churn by Member Behavior")
+    num_plots(beha_df)
 
+    ## Visualization 3: Churn by segmentation
+    st.markdown("## Churn by Member Segmentation")
 
 
     #st.dataframe(data.value_counts('CHURNED'))
