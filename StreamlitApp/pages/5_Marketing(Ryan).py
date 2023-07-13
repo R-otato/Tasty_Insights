@@ -121,7 +121,7 @@ def main() -> None:
     # How to use this page
     with st.expander("How to Use This Page"):
         #Going to add some stuff here 
-        st.write('Hello! I see you are still browsing my stuff. What you trying do huh?')
+        st.write('How to Use This Page')
 
     # Input data
     ## File Upload section
