@@ -92,14 +92,4 @@ data=pd.concat([customer_id, predictions], axis=1)
 # filter data for only those who churn
 data = data[data['CHURNED'] == 1]
 
-# VISUALISATION 1: NUMBER OF PURCHASES MADE BY CHURNED CUSTOMERS BY MENU ITEM
-
-# VISUALISATION 2: 
-
-# VISUALISATION 3: 
-
-# VISUALISATION 4:
-
-# VISUALISATION 5:
-
 st.write(data)
