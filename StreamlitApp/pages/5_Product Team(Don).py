@@ -85,6 +85,21 @@ model = joblib.load("assets/churn-prediction-model.jbl")
 predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
 demo_df = pd.concat([demo_df, predictions], axis=1)
 beha_df = pd.concat([beha_df, predictions], axis=1)
-data=pd.concat([customer_id, predictions], axis=1)
+
+# ***table with custid and whether churn or not***
+data=pd.concat([customer_id, predictions], axis=1) 
+
+# filter data for only those who churn
+data = data[data['CHURNED'] == 1]
+
+# VISUALISATION 1: NUMBER OF PURCHASES MADE BY CHURNED CUSTOMERS BY MENU ITEM
+
+# VISUALISATION 2: 
+
+# VISUALISATION 3: 
+
+# VISUALISATION 4:
+
+# VISUALISATION 5:
 
 st.write(data)
