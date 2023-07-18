@@ -17,6 +17,30 @@ from cachetools import cached
 
 import snowflake.connector
 
+def pipeline(data):
+    # Load the necessary transformations
+    windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
+    windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
+    yjt = joblib.load("assets/yjt.jbl")
+    ohe_enc = joblib.load("assets/ohe_enc.jbl")
+    minMaxScaler = joblib.load("assets/minMaxScaler.jbl")
+
+    # Apply the transformations to the data
+    data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
+    data = windsorizer_gau.transform(data)  # Apply Gaussian Windsorization
+    data = yjt.transform(data)  # Apply Yeo-Johnson Transformation
+    data = ohe_enc.transform(data)  # Apply One-Hot Encoding
+    data.columns = data.columns.str.upper()
+    data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
+    
+    return data
+
+@cached(cache={})
+#Load model
+def load_model(model_path: str) -> object:
+    model = joblib.load(model_path)
+    return model   
+
 # hide this using secrets
 my_cnx = snowflake.connector.connect(
     user = "RLIAM",
@@ -37,7 +61,8 @@ df = pd.DataFrame(churn_to_sales, columns=["YEAR", "MONTH", "CHURN RATE", "SALES
 
 df = df.sort_values(by=["YEAR", "MONTH"])
 
-st.set_page_config(page_title="CFO-Sales Prediction")
+st.set_page_config(page_title="CFO-Sales Prediction",
+                   page_icon="🍌")
 
 st.markdown("# Sales Prediction")
 tab1, tab2 = st.tabs(['Churn to Sales Relation', 'Prediction'])
@@ -78,6 +103,7 @@ with tab2:
                  to assist in visualising and showing areas of churn. This information will help to predict the effct
                  of churn on sales in different regions.""")
     
+    # copied from @ryan
     # Input data
     ## File Upload section
     st.markdown("## Input Data")
@@ -98,3 +124,47 @@ with tab2:
         st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
         #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
         df=pd.read_csv('assets/without_transformation.csv')
+
+    with st.expander("Raw Dataframe"):
+        st.write("This is the data set prior to any transformations")
+        st.write(df)
+
+    ## Removing Customer ID column
+    customer_id = df.pop("CUSTOMER_ID")
+    # Get categoorical columns
+    demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
+
+    df=pipeline(df)
+
+    with st.expander("Cleaned and Transformed Data"):
+        st.write("This is the data set after cleaning and transformation")
+        st.write(df)
+
+    model = load_model("assets/churn-prediction-model.jbl")
+    predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
+    demo_df = pd.concat([demo_df, predictions], axis=1)
+    beha_df = pd.concat([beha_df, predictions], axis=1)
+    data=pd.concat([customer_id, predictions], axis=1)
+
+    # st.write(demo_df)
+    # st.write(beha_df)
+    # st.write(data)
+
+    # data points to present
+    ## Churn - generate churn rate
+    ## Customer Location - Identify places of lower profitability and places of higher profitability (in relation to churn)
+    ## Order Timing - Time of day where operations are more busy
+    
+    output_data = pd.concat([data, demo_df[["GENDER", "CITY", "AGE"]]], axis=1)
+    
+    churn_rate = predictions[['CHURNED']].sum()/predictions.count()
+    
+    # compared value/month
+    
+
+    # Presenting Churn Rate
+    value = round(churn_rate.iloc[0] * 100, 2)
+    st.metric('Churn Rate', f"{value}%")
+
+    

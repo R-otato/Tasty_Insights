@@ -37,6 +37,12 @@ st.write("""  Tasty bytes goals over the next 5 years are to improve its sales, 
   it is when a customer stops buying products with tasty bytes trucks. It is more expensive to gain
   new customers than it is to retain existing customers and for a company that is looking to grow its profits
   customer retention is important in ensuring a sustainable growth in sales.
+         
+  Churn in our context is also a twin to customer recursion. We calculate churn by identify the customers days to next order and
+  taking a threshold value to identify if a customer churns or not. Customer recursion is closely related
+  to the profits and sales of an company and so we think it is a good indicator of certain KPI's. Our models do not 
+  take into account other factors when providing a value in terms of profit increses etc as it is outside of scope but
+  other factors do affect the outcome and change in sales other than churn rate.
 
   This product aims to serve the understanding of churn rate and its affect on company KPI's relative to the stakeholders view
   so as to provide an actionable insight for the user to understand what they can do to reduce churn and the link their action has
