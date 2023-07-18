@@ -64,3 +64,37 @@ with tab1:
         df,
         hide_index=True
     )
+
+with tab2:
+    # page title
+    st.markdown("## CFO")
+
+    # page guide
+    with st.expander("Guide to Using Page"):
+        st.write("""This page provides data to be used in the PowerBI visualiser.
+                 By inputing data regarding our customers based on their latest transactions we are able to make a
+                 prediction of the churn of customers (churn is a twin of customer recursion).
+                 The output data will contain the churn of each customer as well as some categorising information
+                 to assist in visualising and showing areas of churn. This information will help to predict the effct
+                 of churn on sales in different regions.""")
+    
+    # Input data
+    ## File Upload section
+    st.markdown("## Input Data")
+    uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
+    df=''
+
+    if uploaded_files:
+        data_list = []
+        #Append all uploaded files into the list
+        for f in uploaded_files:
+            st.write(f)
+            temp_data = pd.read_csv(f)
+            data_list.append(temp_data)
+        st.success("Uploaded your file!")
+        #concat the files together if there are more than one file uploaded
+        df = pd.concat(data_list)
+    else:
+        st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
+        #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
+        df=pd.read_csv('assets/without_transformation.csv')
