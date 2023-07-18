@@ -14,6 +14,12 @@ from cachetools import cached
 import plotly.express as px
 
 def pipeline(data):
+    ## Make a copy first
+    data=data.copy()
+
+    ## Removing Customer ID column
+    customer_id = data.pop("CUSTOMER_ID")
+
     # Load the necessary transformations
     windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
     windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
@@ -29,6 +35,9 @@ def pipeline(data):
     data.columns = data.columns.str.upper()
     data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
     
+    #Concat Customer ID back
+    data=pd.concat([customer_id, data], axis=1)
+
     return data
 
 @cached(cache={})
@@ -69,30 +78,30 @@ def main() -> None:
 
     ## Display uploaded or defaul file
     with st.expander("Raw Dataframe"):
-        st.write(df)
+        st.write(df.head(10))
 
-    ## Removing Customer ID column
-    customer_id = df.pop("CUSTOMER_ID")
-    #Get categoorical columns
-    demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
-    beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
+    # #Get categoorical columns
+    # demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    # beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
 
-    df=pipeline(df)
+    clean_df=pipeline(df)
 
     with st.expander("Cleaned and Transformed Data"):
-        st.write(df)
+        st.write(clean_df.head(10))
 
-
-    # Visualizations using the model
-    ## Setup: Model loading, predictions and data
+    # Setup: Model loading, predictions and combining the data
     model = load_model("assets/churn-prediction-model.jbl")
-    predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
-    demo_df = pd.concat([demo_df, predictions], axis=1)
-    beha_df = pd.concat([beha_df, predictions], axis=1)
-    data=pd.concat([customer_id, predictions], axis=1)
+    predictions= pd.DataFrame(model.predict(clean_df.drop('CUSTOMER_ID',axis=1)),columns=['CHURNED'])
+    # demo_df = pd.concat([demo_df, predictions], axis=1)
+    # beha_df = pd.concat([beha_df, predictions], axis=1)
+    data=pd.concat([df, predictions], axis=1)
 
+    # Display predictions
+    st.markdown("## Churn Prediction Output")
+    st.dataframe(data.value_counts('CHURNED'))
+    st.write(data)
 
-    #st.dataframe(data.value_counts('CHURNED'))
+ 
 
 if __name__ == "__main__":
     # Setting page configuration
