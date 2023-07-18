@@ -41,6 +41,9 @@ def load_model(model_path: str) -> object:
     model = joblib.load(model_path)
     return model   
 
+def convert_df(df):
+    return df.to_csv(index=False).encode('utf-8')
+
 # hide this using secrets
 my_cnx = snowflake.connector.connect(
     user = "RLIAM",
@@ -59,7 +62,7 @@ churn_to_sales = my_cur.fetchall()
 # not really efficient figure out a way to extract snowflake dataframe instead of tuple
 df = pd.DataFrame(churn_to_sales, columns=["YEAR", "MONTH", "CHURN RATE", "SALES"])
 
-df = df.sort_values(by=["YEAR", "MONTH"])
+df_cts = df.sort_values(by=["YEAR", "MONTH"])
 
 st.set_page_config(page_title="CFO-Sales Prediction",
                    page_icon="🍌")
@@ -86,7 +89,7 @@ with tab1:
 
     # showing historical data linking the churn rate to the changes in sales
     st.dataframe(
-        df,
+        df_cts,
         hide_index=True
     )
 
@@ -167,4 +170,7 @@ with tab2:
     value = round(churn_rate.iloc[0] * 100, 2)
     st.metric('Churn Rate', f"{value}%")
 
+    # temporary test
+    output = convert_df(data)
+    st.download_button("Download Data", output, "file.csv", "text/csv", key='download-csv')
     
