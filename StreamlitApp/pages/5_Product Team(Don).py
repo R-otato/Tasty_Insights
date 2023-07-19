@@ -111,6 +111,6 @@ my_cur = my_cnx.cursor()
 my_cur.execute("select * from order_details_usa_matched")
 order_details = my_cur.fetchall()
 order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'CUSTOMER_ID'])
-st.write("Hello")
+
 st.dataframe(order_details_df, hide_index = True)
 st.write(order_details_df)
