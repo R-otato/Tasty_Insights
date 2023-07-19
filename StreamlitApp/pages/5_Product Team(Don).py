@@ -93,8 +93,9 @@ data=pd.concat([customer_id, predictions], axis=1)
 # filter data for only those who churn
 data = data[data['CHURNED'] == 1]
 
-# # show model result for churned customers only
-st.write(data)
+# show model result for churned customers only
+st.dataframe(data, hide_index = True)
+
 
 #hide this using secrets
 my_cnx = snowflake.connector.connect(
@@ -109,12 +110,47 @@ my_cnx = snowflake.connector.connect(
 
 my_cur = my_cnx.cursor()
 
-# convert SQL code to break down based on input
-my_cur.execute("select * from order_details_usa_matched")
-order_details = my_cur.fetchall()
 
-st.dataframe(order_details)
-# order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'CUSTOMER_ID'])
+# Retrieve the list of customer IDs from the 'data' table
+customer_ids = data['CUSTOMER_ID'].tolist()
 
+# Split the list into smaller chunks of 1,000 customer IDs
+chunk_size = 1000
+customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
+
+# Execute queries for each customer ID chunk
+order_details = []
+for chunk in customer_id_chunks:
+    # Create a comma-separated string of the customer IDs in the current chunk
+    customer_ids_str = ','.join(map(str, chunk))
+
+    # Construct the SQL query for the current chunk
+    query = f"SELECT MENU_ITEM_ID, CUSTOMER_ID, FAVOURITE_BRAND, UNIT_PRICE, ORDER_AMOUNT FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
+
+    # Execute the SQL query for the current chunk
+    my_cur.execute(query)
+
+    # Fetch the result for the current chunk
+    chunk_result = my_cur.fetchall()
+
+    # Append the chunk result to the overall result
+    order_details.extend(chunk_result)
+
+# Create a DataFrame from the fetched result
+order_details_df = pd.DataFrame(order_details, columns=['MENU_ITEM_ID', 'CUSTOMER_ID', 'FAVOURITE_BRAND', 'UNIT_PRICE', 'ORDER_AMOUNT'])
+
+st.write(order_details_df)
+
+
+
+
+# # convert SQL code to break down based on input
+# my_cur.execute(f"SELECT * FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})")
+# order_details = my_cur.fetchall()
+
+# st.dataframe(order_details)
+# order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'MENU_ITEM_ID', 
+#                                                           'CUSTOMER_ID', 'FAVOURITE_BRAND', 
+#                                                           'UNIT PRICE', 'ORDER_AMOUNT'])
 # st.dataframe(order_details_df, hide_index = True)
 # st.write(order_details_df)
