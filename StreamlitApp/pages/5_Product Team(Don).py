@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import joblib 
+import snowflake.connector
 
 #--Functions--
 
@@ -92,4 +93,24 @@ data=pd.concat([customer_id, predictions], axis=1)
 # filter data for only those who churn
 data = data[data['CHURNED'] == 1]
 
+# # show model result for churned customers only
 st.write(data)
+
+#hide this using secrets
+my_cnx = snowflake.connector.connect(
+    user = "RLIAM",
+    password = "Cats2004",
+    account = "LGHJQKA-DJ92750",
+    role = "TASTY_BI",
+    warehouse = "TASTY_BI_WH",
+    database = "frostbyte_tasty_bytes",
+    schema = "analytics"
+)
+
+my_cur = my_cnx.cursor()
+my_cur.execute("select * from order_details_usa_matched")
+order_details = my_cur.fetchall()
+order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'CUSTOMER_ID'])
+st.write("Hello")
+st.dataframe(order_details_df, hide_index = True)
+st.write(order_details_df)
