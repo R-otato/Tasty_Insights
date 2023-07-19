@@ -125,7 +125,7 @@ for chunk in customer_id_chunks:
     customer_ids_str = ','.join(map(str, chunk))
 
     # Construct the SQL query for the current chunk
-    query = f"SELECT MENU_ITEM_ID, CUSTOMER_ID, FAVOURITE_BRAND, UNIT_PRICE, ORDER_AMOUNT FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
+    query = f"SELECT MENU_ITEM_ID, CUSTOMER_ID, UNIT_PRICE, ORDER_AMOUNT FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
 
     # Execute the SQL query for the current chunk
     my_cur.execute(query)
@@ -137,7 +137,7 @@ for chunk in customer_id_chunks:
     order_details.extend(chunk_result)
 
 # Create a DataFrame from the fetched result
-order_details_df = pd.DataFrame(order_details, columns=['MENU_ITEM_ID', 'CUSTOMER_ID', 'FAVOURITE_BRAND', 'UNIT_PRICE', 'ORDER_AMOUNT'])
+order_details_df = pd.DataFrame(order_details, columns=['MENU_ITEM_ID', 'CUSTOMER_ID', 'UNIT_PRICE', 'ORDER_AMOUNT'])
 
 st.write(order_details_df)
 
