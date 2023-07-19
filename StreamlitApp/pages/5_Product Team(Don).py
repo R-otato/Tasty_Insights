@@ -139,18 +139,8 @@ for chunk in customer_id_chunks:
 # Create a DataFrame from the fetched result
 order_details_df = pd.DataFrame(order_details, columns=['MENU_ITEM_ID', 'CUSTOMER_ID', 'UNIT_PRICE', 'ORDER_AMOUNT'])
 
-st.write(order_details_df)
+# Format UNIT_PRICE and ORDER_AMOUNT columns to 2 decimal places
+order_details_df['UNIT_PRICE'] = order_details_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
+order_details_df['ORDER_AMOUNT'] = order_details_df['ORDER_AMOUNT'].apply(lambda x: '{:.2f}'.format(x))
 
-
-
-
-# # convert SQL code to break down based on input
-# my_cur.execute(f"SELECT * FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})")
-# order_details = my_cur.fetchall()
-
-# st.dataframe(order_details)
-# order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'MENU_ITEM_ID', 
-#                                                           'CUSTOMER_ID', 'FAVOURITE_BRAND', 
-#                                                           'UNIT PRICE', 'ORDER_AMOUNT'])
-# st.dataframe(order_details_df, hide_index = True)
-# st.write(order_details_df)
+st.dataframe(order_details_df, hide_index = True)
