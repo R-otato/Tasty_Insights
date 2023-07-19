@@ -171,6 +171,6 @@ with tab2:
     st.metric('Churn Rate', f"{value}%")
 
     # temporary test
-    output = convert_df(data)
+    output = convert_df(output_data)
     st.download_button("Download Data", output, "file.csv", "text/csv", key='download-csv')
     
