@@ -6,12 +6,17 @@ import requests
 import numpy as np
 import joblib 
 import time
-# from snowflake.snowpark import Session
 import json
-# from snowflake.snowpark.functions import call_udf, col
-# import snowflake.snowpark.types as T
 from cachetools import cached
 import plotly.express as px
+
+
+#################
+### Functions ### 
+#################
+
+#Note to teammates: Copy the functions below if you want to transform the data to perform Kmeans clustering and Churn prediction
+#Else if you want to perform Churn prediction just edit the code by removing data_kmeans.
 
 def pipeline(data):
     ## Make a copy first
@@ -26,25 +31,39 @@ def pipeline(data):
     yjt = joblib.load("assets/yjt.jbl")
     ohe_enc = joblib.load("assets/ohe_enc.jbl")
     minMaxScaler = joblib.load("assets/minMaxScaler.jbl")
+    kmeansMinMaxScaler=joblib.load("assets/kmeans_scaling.jbl")
 
     # Apply the transformations to the data
+    #Both models table transformation
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
     data = windsorizer_gau.transform(data)  # Apply Gaussian Windsorization
+
+    #KMeans table tranformation
+    cols_to_scale=['RECENCY','FREQUENCY','MONETARY','AGE','AVG_DAYS_BETWEEN_PURCHASE', 'LENGTH_OF_RELATIONSHIP']
+    data_kmeans=data[cols_to_scale].copy() # For our Kmeans model, it does not include any yeo johnson transformation
+    data_kmeans[cols_to_scale] = kmeansMinMaxScaler.transform(data_kmeans[cols_to_scale])  # Apply Min-Max Scaling for Kmeans
+
+    #Churn prediction table transformation
     data = yjt.transform(data)  # Apply Yeo-Johnson Transformation
     data = ohe_enc.transform(data)  # Apply One-Hot Encoding
-    data.columns = data.columns.str.upper()
+    data.columns = data.columns.str.upper() #Normalize naming convention
     data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
     
     #Concat Customer ID back
     data=pd.concat([customer_id, data], axis=1)
+    data_kmeans=pd.concat([customer_id, data_kmeans], axis=1)
 
-    return data
+    return data,data_kmeans
 
-@cached(cache={})
-#Load model
+#Load model - To teammates: you can just copy this entirely
 def load_model(model_path: str) -> object:
     model = joblib.load(model_path)
     return model    
+
+#################
+### MAIN CODE ### 
+#################
+#To teammates: Try not to copy my format entirely 
 
 def main() -> None:
     # Page title
@@ -61,7 +80,7 @@ def main() -> None:
     uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
     df=''
     ### If uploaded file is not empty
-    if uploaded_files!=[]:
+    if uploaded_files:
         data_list = []
         #Append all uploaded files into the list
         for f in uploaded_files:
@@ -84,25 +103,36 @@ def main() -> None:
     # demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
     # beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
 
-    clean_df=pipeline(df)
+    clean_df,kmeans_df=pipeline(df)
 
     with st.expander("Cleaned and Transformed Data"):
         st.write(clean_df.head(10))
 
     # Setup: Model loading, predictions and combining the data
-    model = load_model("assets/churn-prediction-model.jbl")
-    predictions= pd.DataFrame(model.predict(clean_df.drop('CUSTOMER_ID',axis=1)),columns=['CHURNED'])
+    churn_model = load_model("assets/churn-prediction-model.jbl")
+    seg_model = load_model("assets/kmeans.jbl")
+    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop('CUSTOMER_ID',axis=1)),columns=['CLUSTER'])
+    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop('CUSTOMER_ID',axis=1)),columns=['CHURNED'])
     # demo_df = pd.concat([demo_df, predictions], axis=1)
     # beha_df = pd.concat([beha_df, predictions], axis=1)
-    data=pd.concat([df, predictions], axis=1)
+
+    data=pd.concat([df,kmeans_pred],axis=1)
+    data=pd.concat([data, churn_pred], axis=1)
 
     # Display predictions
-    st.markdown("## Churn Prediction Output")
+    st.markdown("## Customer Segmentation")
+    st.dataframe(data.value_counts('CLUSTER'))
+
+    st.markdown("## Churn Prediction")
     st.dataframe(data.value_counts('CHURNED'))
+    
+    st.markdown("## Complete Table with model output")
     st.write(data)
 
  
-
+###########################
+### Page Configurations ### 
+###########################
 if __name__ == "__main__":
     # Setting page configuration
     st.set_page_config(
