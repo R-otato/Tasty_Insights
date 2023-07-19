@@ -108,9 +108,13 @@ my_cnx = snowflake.connector.connect(
 )
 
 my_cur = my_cnx.cursor()
+
+# convert SQL code to break down based on input
 my_cur.execute("select * from order_details_usa_matched")
 order_details = my_cur.fetchall()
-order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'CUSTOMER_ID'])
 
-st.dataframe(order_details_df, hide_index = True)
-st.write(order_details_df)
+st.dataframe(order_details)
+# order_details_df = pd.DataFrame(order_details, columns = ['MENU_ID', 'CUSTOMER_ID'])
+
+# st.dataframe(order_details_df, hide_index = True)
+# st.write(order_details_df)
