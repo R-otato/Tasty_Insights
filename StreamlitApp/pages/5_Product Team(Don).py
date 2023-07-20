@@ -101,13 +101,15 @@ data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
 pd.set_option('colheader_justify', 'right')
 pd.set_option('display.max_colwidth', None)
 
-# Get user input for customer ID to search
-customer_search = st.text_input("Search by Customer ID:")
+# Get all unique customer IDs
+all_customer_ids = data['CUSTOMER_ID'].unique()
 
-# Filter the DataFrame based on user input
-if customer_search:
-    customer_search = int(customer_search)  # Convert the input to integer (assuming customer IDs are integers)
-    filtered_data = data[data['CUSTOMER_ID'] == customer_search]
+# Create a multiselect dropdown with checkboxes for customer IDs
+selected_customer_ids = st.multiselect("Select Customer IDs:", all_customer_ids)
+
+# Filter the DataFrame based on selected customer IDs
+if selected_customer_ids:
+    filtered_data = data[data['CUSTOMER_ID'].isin(selected_customer_ids)]
     st.dataframe(filtered_data, hide_index=True)
 else:
     ## show model result for churned customers only
