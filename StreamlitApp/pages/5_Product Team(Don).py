@@ -26,7 +26,34 @@ def pipeline(data):
     
     return data
 
+# Function: multi_select_custid_individual
+# the purpose of this function is to allow the user to multi-select individual customers to check the model's prediction on each customer (churned or not churned)
+def multi_select_custid_individual(data):
+    
+    # Individual customer's churned status 
+    st.markdown("## Model Output: Customer's Churned Status")
+    
+    # Create a multiselect dropdown with checkboxes for customer IDs
+    selected_customer_ids = st.multiselect("Select Customer IDs:", all_customer_ids)
 
+    # Filter the DataFrame based on selected customer IDs
+    if selected_customer_ids:
+        filtered_data = data[data['CUSTOMER_ID'].isin(selected_customer_ids)]
+        st.dataframe(filtered_data, hide_index=True)
+        
+        # Update churn counts based on the filtered data
+        churn_counts = filtered_data['CHURNED'].value_counts().reset_index()
+        churn_counts = churn_counts.rename(columns={'count': 'Number of Customers'})
+        st.dataframe(churn_counts, hide_index=True)
+    
+    else:
+        ## show model result for churned customers only
+        st.dataframe(data, hide_index = True)
+        
+        # Number of customers by churn group
+        churn_counts = data['CHURNED'].value_counts().reset_index()
+        churn_counts = churn_counts.rename(columns={'count': 'Number of Customers'})
+        st.dataframe(churn_counts, hide_index=True)
 
 
 
@@ -87,10 +114,6 @@ predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
 demo_df = pd.concat([demo_df, predictions], axis=1)
 beha_df = pd.concat([beha_df, predictions], axis=1)
 
-
-# Individual customer's churned status 
-st.markdown("## Customer's Churned Status")
-
 ## ***table with custid and whether churn or not***
 data=pd.concat([customer_id, predictions], axis=1) 
 
@@ -101,29 +124,11 @@ data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
 pd.set_option('colheader_justify', 'right')
 pd.set_option('display.max_colwidth', None)
 
+# MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE
 # Get all unique customer IDs
 all_customer_ids = data['CUSTOMER_ID'].unique()
 
-# Create a multiselect dropdown with checkboxes for customer IDs
-selected_customer_ids = st.multiselect("Select Customer IDs:", all_customer_ids)
-
-# Filter the DataFrame based on selected customer IDs
-if selected_customer_ids:
-    filtered_data = data[data['CUSTOMER_ID'].isin(selected_customer_ids)]
-    st.dataframe(filtered_data, hide_index=True)
-else:
-    ## show model result for churned customers only
-    st.dataframe(data, hide_index = True)
-
-
-# Number of customers by churn group
-st.markdown("## Number of churned and not churned members")
-churn_counts = data.value_counts('CHURNED').reset_index()
-churn_counts = churn_counts.rename(columns={'count': 'Number of Customers'})
-
-st.dataframe(churn_counts, hide_index=True)
-
-
+multi_select_custid_individual(data)
 
 
 #hide this using secrets
