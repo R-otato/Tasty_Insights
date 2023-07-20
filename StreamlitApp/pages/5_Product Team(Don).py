@@ -87,14 +87,41 @@ predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
 demo_df = pd.concat([demo_df, predictions], axis=1)
 beha_df = pd.concat([beha_df, predictions], axis=1)
 
-# ***table with custid and whether churn or not***
+
+# Individual customer's churned status 
+st.markdown("## Customer's Churned Status")
+
+## ***table with custid and whether churn or not***
 data=pd.concat([customer_id, predictions], axis=1) 
 
-# filter data for only those who churn
-data = data[data['CHURNED'] == 1]
+# replace '0' and '1' to 'not churned' and 'churned' respectively
+data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
 
-# show model result for churned customers only
-st.dataframe(data, hide_index = True)
+# Set the display options to right-align the columns and adjust column width
+pd.set_option('colheader_justify', 'right')
+pd.set_option('display.max_colwidth', None)
+
+# Get user input for customer ID to search
+customer_search = st.text_input("Search by Customer ID:")
+
+# Filter the DataFrame based on user input
+if customer_search:
+    customer_search = int(customer_search)  # Convert the input to integer (assuming customer IDs are integers)
+    filtered_data = data[data['CUSTOMER_ID'] == customer_search]
+    st.dataframe(filtered_data, hide_index=True)
+else:
+    ## show model result for churned customers only
+    st.dataframe(data, hide_index = True)
+
+
+# Number of customers by churn group
+st.markdown("## Number of churned and not churned members")
+churn_counts = data.value_counts('CHURNED').reset_index()
+churn_counts = churn_counts.rename(columns={'count': 'Number of Customers'})
+
+st.dataframe(churn_counts, hide_index=True)
+
+
 
 
 #hide this using secrets
