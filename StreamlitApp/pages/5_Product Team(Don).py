@@ -30,6 +30,9 @@ def pipeline(data):
 # the purpose of this function is to allow the user to multi-select individual customers to check the model's prediction on each customer (churned or not churned)
 def multi_select_custid_individual(data):
     
+    # Get all unique customer IDs
+    all_customer_ids = data['CUSTOMER_ID'].unique()
+    
     # Individual customer's churned status 
     st.markdown("## Model Output: Customer's Churned Status")
     
@@ -124,10 +127,7 @@ data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
 pd.set_option('colheader_justify', 'right')
 pd.set_option('display.max_colwidth', None)
 
-# MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE
-# Get all unique customer IDs
-all_customer_ids = data['CUSTOMER_ID'].unique()
-
+# MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE (Model Output tables)
 multi_select_custid_individual(data)
 
 
