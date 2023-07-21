@@ -58,10 +58,36 @@ def multi_select_custid_individual(data):
         churn_counts = churn_counts.rename(columns={'count': 'Number of Customers'})
         st.dataframe(churn_counts, hide_index=True)
 
+# Function: retrive_menu_table
+# the purpose of this function is to retrieve the menu table from snowflake containing all the details of the menu items which will then be merged with the transactions info to help the product team gain insight
+def retrieve_menu_table():
+    # RETRIEVE MENU TABLE FROM SNOWFLAKE
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
+
+    ## retrieve menu table from snowflake
+    my_cur = my_cnx.cursor()
+    my_cur.execute("select MENU_ID, MENU_TYPE_ID, MENU_TYPE, TRUCK_BRAND_NAME, MENU_ITEM_ID, MENU_ITEM_NAME, ITEM_CATEGORY, ITEM_SUBCATEGORY, SALE_PRICE_USD, MENU_ITEM_HEALTH_METRICS_OBJ from menu")
+    menu_table = my_cur.fetchall()
+
+    ## create a DataFrame from the fetched result
+    ## remove cost of goods column due to irrelevance
+    menu_table_df = pd.DataFrame(menu_table, columns=['MENU_ID', 'MENU_TYPE_ID', 'MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
+                                                    'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS'])
+
+    return menu_table_df
 
 
 #################
-### MAIN CODE ### 
+### MAIN CODE ###
 #################
 
 # Page Title
@@ -129,6 +155,18 @@ pd.set_option('display.max_colwidth', None)
 
 # MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE (Model Output tables)
 multi_select_custid_individual(data)
+
+
+
+## display menu table on streamlit
+menu_table_df = retrieve_menu_table()
+st.dataframe(menu_table_df, hide_index = True)
+    
+
+
+
+
+
 
 
 #hide this using secrets
