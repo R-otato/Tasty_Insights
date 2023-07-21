@@ -86,13 +86,15 @@ with tab1:
 
     ## Display uploaded or default file
     with st.expander("Raw Dataframe"):
-        st.write(df.head(10))
+        st.write("This is the data set prior to any transformations")
+        st.write(df)
     
     # Display clean data
-    clean_df,kmeans_df=pipeline(df)
+    df=pipeline(df)
 
     with st.expander("Cleaned and Transformed Data"):
-        st.write(clean_df.head(10))
+        st.write("This is the data set after cleaning and transformation")
+        st.write(df)
     
 with tab2:
     st.markdown("## Cluster")
