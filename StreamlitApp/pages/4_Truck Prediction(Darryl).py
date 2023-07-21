@@ -96,6 +96,23 @@ with tab1:
     #     st.write("This is the data set after cleaning and transformation")
     #     st.write(df)
     
+    ## Removing Customer ID column
+    customer_id = df.pop("CUSTOMER_ID")
+    # Get categoorical columns
+    demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
+    
+    # Setup: Model loading, predictions and combining the data
+    model = load_model("assets/churn-prediction-model.jbl")
+    predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
+    demo_df = pd.concat([demo_df, predictions], axis=1)
+    beha_df = pd.concat([beha_df, predictions], axis=1)
+    data=pd.concat([customer_id, predictions], axis=1)
+    
+    # Display predictions
+    st.markdown("## Customer Segmentation")
+    st.dataframe(data.value_counts('TRUCK'))
+    
 with tab2:
     st.markdown("## Cluster")
     st.markdown("What is clustering? <br> Clustering is the task of dividing the population \
