@@ -111,7 +111,7 @@ with tab1:
     
     # Display predictions
     st.markdown("## Customer Segmentation")
-    st.dataframe(data.value_counts('TRUCK'))
+    st.dataframe(data.value_counts('CHURNED'))
     
 with tab2:
     st.markdown("## Cluster")
