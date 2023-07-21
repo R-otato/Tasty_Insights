@@ -88,7 +88,7 @@ def retrieve_menu_table():
 
 # Function: get_health_metrics_menu_table
 # the purpose of this function is to manipulate the data in the 'MENU_ITEM_HEALTH_METRICS_OBJ' to get only the health metrics info with its corresponding column values bring Yes or No
-def get_health_metrics_menu_table():
+def get_health_metrics_menu_table(menu_table_df):
     # Convert the string JSON data to a nested dictionary
     menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'] = menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'].apply(ast.literal_eval)
 
@@ -189,7 +189,7 @@ multi_select_custid_individual(data)
 
 ## display menu table on streamlit
 menu_table_df = retrieve_menu_table()
-menu_table_df = get_health_metrics_menu_table()
+menu_table_df = get_health_metrics_menu_table(menu_table_df)
 
 st.dataframe(menu_table_df, hide_index = True)
     
