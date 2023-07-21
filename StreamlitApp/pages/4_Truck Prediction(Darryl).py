@@ -84,9 +84,15 @@ with tab1:
         #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
         df=pd.read_csv('assets/without_transformation.csv')
 
-    ## Display uploaded or defaul file
+    ## Display uploaded or default file
     with st.expander("Raw Dataframe"):
         st.write(df.head(10))
+    
+    # Display clean data
+    clean_df,kmeans_df=pipeline(df)
+
+    with st.expander("Cleaned and Transformed Data"):
+        st.write(clean_df.head(10))
     
 with tab2:
     st.markdown("## Cluster")
