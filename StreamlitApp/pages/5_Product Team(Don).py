@@ -3,8 +3,9 @@ import streamlit as st
 import pandas as pd
 import joblib 
 import snowflake.connector
+import ast
 
-#--Functions--
+#--Functions--#
 
 # Function: pipline
 # the purpose of this function is to carry out the necessary transformations on the data provided by the user so that it can be fed into the machine learning model for prediction
@@ -81,8 +82,36 @@ def retrieve_menu_table():
     ## create a DataFrame from the fetched result
     ## remove cost of goods column due to irrelevance
     menu_table_df = pd.DataFrame(menu_table, columns=['MENU_ID', 'MENU_TYPE_ID', 'MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
-                                                    'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS'])
+                                                    'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
 
+    return menu_table_df
+
+# Function: get_health_metrics_menu_table
+# the purpose of this function is to manipulate the data in the 'MENU_ITEM_HEALTH_METRICS_OBJ' to get only the health metrics info with its corresponding column values bring Yes or No
+def get_health_metrics_menu_table():
+    # Convert the string JSON data to a nested dictionary
+    menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'] = menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'].apply(ast.literal_eval)
+
+    # Use json_normalize to flatten the nested JSON data
+    menu_item_metrics = pd.json_normalize(menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'], record_path='menu_item_health_metrics')
+
+    # Rename the columns
+    menu_item_metrics = menu_item_metrics.rename(columns={
+        'is_dairy_free_flag': 'IS_DAIRY_FREE',
+        'is_gluten_free_flag': 'IS_GLUTEN_FREE',
+        'is_healthy_flag': 'IS_HEALTHY',
+        'is_nut_free_flag': 'IS_NUT_FREE'
+    })
+
+    # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+    menu_item_metrics = menu_item_metrics.replace({'Y': 'Yes', 'N': 'No'})
+
+    # Concatenate the flattened DataFrame with the original DataFrame
+    menu_table_df = pd.concat([menu_table_df, menu_item_metrics], axis=1)
+
+    # Drop the original 'MENU_ITEM_HEALTH_METRICS_OBJ' and 'ingredients' column 
+    menu_table_df = menu_table_df.drop(columns=['MENU_ITEM_HEALTH_METRICS_OBJ', 'ingredients'])
+    
     return menu_table_df
 
 
@@ -160,6 +189,8 @@ multi_select_custid_individual(data)
 
 ## display menu table on streamlit
 menu_table_df = retrieve_menu_table()
+menu_table_df = get_health_metrics_menu_table()
+
 st.dataframe(menu_table_df, hide_index = True)
     
 
