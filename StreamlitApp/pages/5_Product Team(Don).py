@@ -76,14 +76,17 @@ def retrieve_menu_table():
 
     ## retrieve menu table from snowflake
     my_cur = my_cnx.cursor()
-    my_cur.execute("select MENU_ID, MENU_TYPE_ID, MENU_TYPE, TRUCK_BRAND_NAME, MENU_ITEM_ID, MENU_ITEM_NAME, ITEM_CATEGORY, ITEM_SUBCATEGORY, SALE_PRICE_USD, MENU_ITEM_HEALTH_METRICS_OBJ from menu")
+    my_cur.execute("select MENU_TYPE, TRUCK_BRAND_NAME, MENU_ITEM_ID, MENU_ITEM_NAME, ITEM_CATEGORY, ITEM_SUBCATEGORY, SALE_PRICE_USD, MENU_ITEM_HEALTH_METRICS_OBJ from menu")
     menu_table = my_cur.fetchall()
 
     ## create a DataFrame from the fetched result
     ## remove cost of goods column due to irrelevance
-    menu_table_df = pd.DataFrame(menu_table, columns=['MENU_ID', 'MENU_TYPE_ID', 'MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
+    menu_table_df = pd.DataFrame(menu_table, columns=['MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
                                                     'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
 
+    # round off sale price to 2dp
+    menu_table_df['SALE_PRICE_USD'] = menu_table_df['SALE_PRICE_USD'].apply(lambda x: '{:.2f}'.format(x))
+    
     return menu_table_df
 
 # Function: get_health_metrics_menu_table
@@ -114,6 +117,59 @@ def get_health_metrics_menu_table(menu_table_df):
     
     return menu_table_df
 
+# Function: retrieve_order_details
+# the purpose of this function is to retrieve order info from Snowflake that is to be merged with the menu table to allow the product team to gain further insight about products and orders
+def retrieve_order_details():
+    #hide this using secrets
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "analytics"
+    )
+
+    my_cur = my_cnx.cursor()
+
+    # Retrieve the list of customer IDs from the 'data' table
+    customer_ids = data['CUSTOMER_ID'].tolist()
+
+    # Split the list into smaller chunks of 1,000 customer IDs
+    chunk_size = 1000
+    customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
+
+    # Execute queries for each customer ID chunk
+    order_details = []
+    for chunk in customer_id_chunks:
+        # Create a comma-separated string of the customer IDs in the current chunk
+        customer_ids_str = ','.join(map(str, chunk))
+
+        # Construct the SQL query for the current chunk
+        query = f"SELECT ORDER_ID, CUSTOMER_ID, MENU_ITEM_ID, QUANTITY, PRICE, ORDER_TOTAL FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
+
+        # Execute the SQL query for the current chunk
+        my_cur.execute(query)
+
+        # Fetch the result for the current chunk
+        chunk_result = my_cur.fetchall()
+
+        # Append the chunk result to the overall result
+        order_details.extend(chunk_result)
+
+    # Create a DataFrame from the fetched result
+    order_details_df = pd.DataFrame(order_details, columns=['ORDER_ID', 'CUSTOMER_ID', 'MENU_ITEM_ID', 'QUANTITY', 'PRODUCT_TOTAL_PRICE', 'ORDER_TOTAL'])
+
+    # Convert ORDER_ID to string and then remove commas
+    order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
+
+    # Format UNIT_PRICE and ORDER_AMOUNT columns to 2 decimal places
+    order_details_df['ORDER_TOTAL'] = order_details_df['ORDER_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
+
+    order_details_df = order_details_df.sort_values(by='CUSTOMER_ID')
+    
+    return order_details_df
 
 #################
 ### MAIN CODE ###
@@ -185,65 +241,12 @@ pd.set_option('display.max_colwidth', None)
 # MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE (Model Output tables)
 multi_select_custid_individual(data)
 
-
-
-## display menu table on streamlit
+## display menu table in streamlit
 menu_table_df = retrieve_menu_table()
 menu_table_df = get_health_metrics_menu_table(menu_table_df)
 
 st.dataframe(menu_table_df, hide_index = True)
-    
 
-
-
-
-
-
-
-#hide this using secrets
-my_cnx = snowflake.connector.connect(
-    user = "RLIAM",
-    password = "Cats2004",
-    account = "LGHJQKA-DJ92750",
-    role = "TASTY_BI",
-    warehouse = "TASTY_BI_WH",
-    database = "frostbyte_tasty_bytes",
-    schema = "analytics"
-)
-
-my_cur = my_cnx.cursor()
-
-
-# Retrieve the list of customer IDs from the 'data' table
-customer_ids = data['CUSTOMER_ID'].tolist()
-
-# Split the list into smaller chunks of 1,000 customer IDs
-chunk_size = 1000
-customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
-
-# Execute queries for each customer ID chunk
-order_details = []
-for chunk in customer_id_chunks:
-    # Create a comma-separated string of the customer IDs in the current chunk
-    customer_ids_str = ','.join(map(str, chunk))
-
-    # Construct the SQL query for the current chunk
-    query = f"SELECT MENU_ITEM_ID, CUSTOMER_ID, UNIT_PRICE, ORDER_AMOUNT FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
-
-    # Execute the SQL query for the current chunk
-    my_cur.execute(query)
-
-    # Fetch the result for the current chunk
-    chunk_result = my_cur.fetchall()
-
-    # Append the chunk result to the overall result
-    order_details.extend(chunk_result)
-
-# Create a DataFrame from the fetched result
-order_details_df = pd.DataFrame(order_details, columns=['MENU_ITEM_ID', 'CUSTOMER_ID', 'UNIT_PRICE', 'ORDER_AMOUNT'])
-
-# Format UNIT_PRICE and ORDER_AMOUNT columns to 2 decimal places
-order_details_df['UNIT_PRICE'] = order_details_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
-order_details_df['ORDER_AMOUNT'] = order_details_df['ORDER_AMOUNT'].apply(lambda x: '{:.2f}'.format(x))
-
+# display order detail info table in streamlit
+order_details_df = retrieve_order_details()
 st.dataframe(order_details_df, hide_index = True)
