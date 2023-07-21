@@ -89,12 +89,12 @@ with tab1:
         st.write("This is the data set prior to any transformations")
         st.write(df)
     
-    # Display clean data
-    df=pipeline(df)
+    # # Display clean data
+    # df=pipeline(df)
 
-    with st.expander("Cleaned and Transformed Data"):
-        st.write("This is the data set after cleaning and transformation")
-        st.write(df)
+    # with st.expander("Cleaned and Transformed Data"):
+    #     st.write("This is the data set after cleaning and transformation")
+    #     st.write(df)
     
 with tab2:
     st.markdown("## Cluster")
