@@ -175,7 +175,10 @@ def retrieve_order_details():
     
     return order_details_df
 
-
+# Function: convert_df_to_csv
+# the purpose of this feature is to convert the pandas dataframe to csv so that the user can export the data for further visualisation, exploration, or analysis
+def convert_df_to_csv(df):
+   return df.to_csv(index=False).encode('utf-8')
 
 #####################
 ##### MAIN CODE #####
@@ -279,3 +282,15 @@ st.markdown("## Overall Table")
 
 ## Display the merged DataFrame
 st.dataframe(merged_df, hide_index=True)
+
+# EXPORT DATA OPTION
+st.header('Export data to .csv')
+st.write("Click the button below to export the overall table to csv format")
+csv = convert_df_to_csv(merged_df)
+st.download_button(
+"Download",
+csv,
+"Tasty Insights - Product Team.csv",
+"text/csv",
+key='download-csv'
+)
