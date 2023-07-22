@@ -84,8 +84,11 @@ def retrieve_menu_table():
     menu_table_df = pd.DataFrame(menu_table, columns=['MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
                                                     'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
 
+    # Rename the 'SALE_PRICE_USD' column to 'UNIT_PRICE'
+    menu_table_df = menu_table_df.rename(columns={'SALE_PRICE_USD': 'UNIT_PRICE'})
+
     # round off sale price to 2dp
-    menu_table_df['SALE_PRICE_USD'] = menu_table_df['SALE_PRICE_USD'].apply(lambda x: '{:.2f}'.format(x))
+    menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
     
     return menu_table_df
 
@@ -159,21 +162,24 @@ def retrieve_order_details():
         order_details.extend(chunk_result)
 
     # Create a DataFrame from the fetched result
-    order_details_df = pd.DataFrame(order_details, columns=['ORDER_ID', 'CUSTOMER_ID', 'MENU_ITEM_ID', 'QUANTITY', 'PRODUCT_TOTAL_PRICE', 'ORDER_TOTAL'])
+    order_details_df = pd.DataFrame(order_details, columns=['ORDER_ID', 'CUSTOMER_ID', 'MENU_ITEM_ID', 'QUANTITY', 'PRODUCT_TOTAL', 'ORDER_TOTAL'])
 
     # Convert ORDER_ID to string and then remove commas
     order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
 
-    # Format UNIT_PRICE and ORDER_AMOUNT columns to 2 decimal places
+    # Format ORDER_TOTAL and PRODUCT_TOTAL_PRICE columns to 2 decimal places
     order_details_df['ORDER_TOTAL'] = order_details_df['ORDER_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
+    order_details_df['PRODUCT_TOTAL'] = order_details_df['PRODUCT_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
 
     order_details_df = order_details_df.sort_values(by='CUSTOMER_ID')
     
     return order_details_df
 
-#################
-### MAIN CODE ###
-#################
+
+
+#####################
+##### MAIN CODE #####
+#####################
 
 # Page Title
 st.markdown("# Product")
@@ -238,15 +244,38 @@ data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
 pd.set_option('colheader_justify', 'right')
 pd.set_option('display.max_colwidth', None)
 
-# MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE (Model Output tables)
+
+
+# Display individual customer churned status and number of customers by churned status
+# Multi-select feature also enabled for these 2 tables
 multi_select_custid_individual(data)
 
-## display menu table in streamlit
+# retrieve menu table
+# manipulation to retrieve health metrics for each product
+# display menu table in streamlit
 menu_table_df = retrieve_menu_table()
 menu_table_df = get_health_metrics_menu_table(menu_table_df)
-
-st.dataframe(menu_table_df, hide_index = True)
+#st.dataframe(menu_table_df, hide_index = True)
 
 # display order detail info table in streamlit
 order_details_df = retrieve_order_details()
-st.dataframe(order_details_df, hide_index = True)
+#st.dataframe(order_details_df, hide_index = True)
+
+
+# OVERALL TABLE
+
+## Merge the DataFrames based on 'MENU_ITEM_ID'
+merged_df = pd.merge(order_details_df, menu_table_df, on='MENU_ITEM_ID', how='left')
+
+## Define the desired column order
+desired_columns = ['ORDER_ID', 'CUSTOMER_ID', 'MENU_TYPE','TRUCK_BRAND_NAME',  'MENU_ITEM_ID', 'MENU_ITEM_NAME', 'ITEM_CATEGORY', 'ITEM_SUBCATEGORY',
+                   'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'QUANTITY', 'UNIT_PRICE', 'PRODUCT_TOTAL', 'ORDER_TOTAL']
+
+## Re-arrange the columns in the merged DataFrame
+merged_df = merged_df[desired_columns]
+
+## Display header
+st.markdown("## Overall Table")
+
+## Display the merged DataFrame
+st.dataframe(merged_df, hide_index=True)
