@@ -176,9 +176,28 @@ def retrieve_order_details():
     return order_details_df
 
 # Function: convert_df_to_csv
-# the purpose of this feature is to convert the pandas dataframe to csv so that the user can export the data for further visualisation, exploration, or analysis
+# the purpose of this function is to convert the pandas dataframe to csv so that the user can export the data for further visualisation, exploration, or analysis
 def convert_df_to_csv(df):
    return df.to_csv(index=False).encode('utf-8')
+
+# Function: get_overall_table
+# the purpose of this function is to merge the menu and order details table together to form an overall table
+def get_overall_table(order_details_df, menu_table_df):
+    ## Merge the DataFrames based on 'MENU_ITEM_ID'
+    merged_df = pd.merge(order_details_df, menu_table_df, on='MENU_ITEM_ID', how='left')
+
+    ## Define the desired column order
+    desired_columns = ['ORDER_ID', 'CUSTOMER_ID', 'MENU_TYPE','TRUCK_BRAND_NAME',  'MENU_ITEM_ID', 'MENU_ITEM_NAME', 'ITEM_CATEGORY', 'ITEM_SUBCATEGORY',
+                    'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'QUANTITY', 'UNIT_PRICE', 'PRODUCT_TOTAL', 'ORDER_TOTAL']
+
+    ## Re-arrange the columns in the merged DataFrame
+    merged_df = merged_df[desired_columns]
+    
+    return merged_df
+
+
+
+
 
 #####################
 ##### MAIN CODE #####
@@ -253,29 +272,26 @@ pd.set_option('display.max_colwidth', None)
 # Multi-select feature also enabled for these 2 tables
 multi_select_custid_individual(data)
 
-# retrieve menu table
-# manipulation to retrieve health metrics for each product
-# display menu table in streamlit
+
+# MENU TABLE #
+## retrieve menu table
+## manipulation to retrieve health metrics for each product
 menu_table_df = retrieve_menu_table()
 menu_table_df = get_health_metrics_menu_table(menu_table_df)
 #st.dataframe(menu_table_df, hide_index = True)
 
-# display order detail info table in streamlit
+
+# ORDER DETAILS TABLE #
+## retrieve order details table from Snowflake
+## manipulation to retrieve desired layout for table
 order_details_df = retrieve_order_details()
 #st.dataframe(order_details_df, hide_index = True)
 
 
-# OVERALL TABLE
-
-## Merge the DataFrames based on 'MENU_ITEM_ID'
-merged_df = pd.merge(order_details_df, menu_table_df, on='MENU_ITEM_ID', how='left')
-
-## Define the desired column order
-desired_columns = ['ORDER_ID', 'CUSTOMER_ID', 'MENU_TYPE','TRUCK_BRAND_NAME',  'MENU_ITEM_ID', 'MENU_ITEM_NAME', 'ITEM_CATEGORY', 'ITEM_SUBCATEGORY',
-                   'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'QUANTITY', 'UNIT_PRICE', 'PRODUCT_TOTAL', 'ORDER_TOTAL']
-
-## Re-arrange the columns in the merged DataFrame
-merged_df = merged_df[desired_columns]
+# OVERALL TABLE #
+## merge tables to get overall table
+## re-arrange columns to get desired table
+merged_df = get_overall_table(order_details_df, menu_table_df)
 
 ## Display header
 st.markdown("## Overall Table")
@@ -283,7 +299,11 @@ st.markdown("## Overall Table")
 ## Display the merged DataFrame
 st.dataframe(merged_df, hide_index=True)
 
-# EXPORT DATA OPTION
+
+
+
+
+# EXPORT DATA OPTION #
 st.header('Export data to .csv')
 st.write("Click the button below to export the overall table to csv format")
 csv = convert_df_to_csv(merged_df)
