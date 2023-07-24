@@ -16,6 +16,11 @@
 import streamlit as st
 from PIL import Image
 import os
+import pandas as pd
+
+# loading data
+df_CTS = pd.read_csv('assets/CTS.csv')
+df_CTS = df_CTS.sort_values(by=["YEAR", "MONTH"])
 
 # --Page 1--
 st.set_page_config(
@@ -59,4 +64,44 @@ Tabs:
 5) Food Truck - Do customers continue to use the service after I serve them?
 '''
 
-st.sidebar.success("Select a demo above.")
+st.write("## The value of Tasty Insights")
+
+st.write("""
+    ### How does Churn link to Sales?
+
+    According to prelimnary research during the pitch phase we have established a link between Days to Next Order (target variable)
+    which is what we derive our churn prediction from, there is a clear link between the average days to next order in a month with 
+    that months sales.
+
+    Through the prediction of churn rate we will imply the average days to next orders and in turn predict the potential sales of
+    following month allowing for projection in sales and allow for informed steps to be taken in terms of operations and strategy.
+
+    Churn is a twin to customer recurssion, for the sake of predictions and model building internally we refer to the term as churn,
+    in a business context the better term is recurssion or how often the customer will return. By identifying cause and effect,
+    and providing insight for different perspectives to manage and control recussion we create actionable statements and insights
+    tasty bytes to work towards their high-level goals.
+    """)
+
+st.dataframe(
+  df_CTS,
+  hide_index=True
+)
+
+"""
+### DISCLAIMER:
+A standard scenario for churns effect on the sales is the following...
+Churn rate goes down (-%), this means customer recurssion increases which in turn means sales increases (+%).
+
+However that may not always be the case where business is as usual (BAU). Scenarios occur where when churn goes down (-%)
+sales also go down (-%) there may be other causes where the customer base is has actually declined which derives from the total
+customers at the start sale period and churn calculation period being smaller.
+
+A myriad of other factors could lead to a change in the actual derived values in which business situation changes such as lowered
+average sale (the amount in each transaction) or the growth in customer base is not the same as previous months (new unique customers),
+leading to a smaller growth.
+
+Hence Churn is not the only variable in relation to the sales, other variables are at play and churn on its own will not be a complete
+representation of potential sales but can act as an indicator.
+"""
+
+# st.sidebar.success("Select a demo above.")
