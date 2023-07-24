@@ -300,39 +300,42 @@ st.markdown("## Overall Table")
 st.dataframe(merged_df, hide_index=True)
 
 
-# PRODUCT TABLE #
+# MENU ITEM TABLE #
 ## Group by 'MENU_ITEM_ID' and calculate the average 'QUANTITY'
 product = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].mean().reset_index()
 
 ## Rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
 product = product.rename(columns={'QUANTITY': 'AVERAGE QUANTITY'})
 
-# Remove commas and convert 'PRODUCT_TOTAL' column to numeric
+## Remove commas and convert 'PRODUCT_TOTAL' column to numeric
 merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].replace(',', '', regex=True).astype(float)
 
 
-# Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
+## Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
 product2 = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].mean().reset_index()
 
-# Rename the column for clarity
+## Rename the column for clarity
 product2.rename(columns={'PRODUCT_TOTAL': 'AVERAGE SPENDING'}, inplace=True)
 
 
-# Get the count of each menu_item_id in merged_df
+## Get the count of each menu_item_id in merged_df
 menu_item_counts = merged_df['MENU_ITEM_ID'].value_counts().reset_index()
 
-# Rename the columns for clarity
+## Rename the columns for clarity
 menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL NO. OF TRANSACTIONS']
 
-# Sort the results by menu_item_id (optional)
+## Sort the results by menu_item_id (optional)
 menu_item_counts = menu_item_counts.sort_values(by='MENU_ITEM_ID')
 
 
 
-# Merge 'product' and 'product2' DataFrames based on 'MENU_ITEM_ID'
+## Merge 'product' and 'product2' DataFrames based on 'MENU_ITEM_ID'
 final_product_df = pd.merge(product, product2, on='MENU_ITEM_ID')
 
 final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
+
+## round off sale price to 2dp
+final_product_df['AVERAGE SPENDING'] = final_product_df['AVERAGE SPENDING'].apply(lambda x: '{:.2f}'.format(x))
 
 ## Display header
 st.markdown("## Menu Item Table")
@@ -341,10 +344,9 @@ st.markdown("## Menu Item Table")
 st.dataframe(final_product_df, hide_index=True)
 
 
-
-
-
-
+# MENU ITEM CATEGORY TABLE #
+## Display header
+st.markdown("## Menu Item Category Table")
 
 
 # EXPORT DATA OPTION #
