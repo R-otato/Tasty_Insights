@@ -13,6 +13,9 @@ from cachetools import cached
 
 import snowflake.connector
 
+# Function: pipeline
+# the purpose of this function is to carry out the necessary transformations on the data provided by the
+# user so that it can be fed into the machine learning model for prediction
 def pipeline(data):
     # Load the necessary transformations
     windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
@@ -55,6 +58,12 @@ my_cur = my_cnx.cursor()
 my_cur.execute("select * from churn_to_sales")
 churn_to_sales = my_cur.fetchall()
 
+
+#####################
+##### MAIN CODE #####
+#####################
+
+# Page Title
 st.set_page_config(page_title="Truck Prediction", page_icon="📈")
 
 st.markdown("# Truck Prediction")
