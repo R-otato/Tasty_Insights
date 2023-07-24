@@ -3,8 +3,9 @@ import streamlit as st
 import pandas as pd
 import joblib 
 import snowflake.connector
+import ast
 
-#--Functions--
+#--Functions--#
 
 # Function: pipline
 # the purpose of this function is to carry out the necessary transformations on the data provided by the user so that it can be fed into the machine learning model for prediction
@@ -58,11 +59,149 @@ def multi_select_custid_individual(data):
         churn_counts = churn_counts.rename(columns={'count': 'Number of Customers'})
         st.dataframe(churn_counts, hide_index=True)
 
+# Function: retrive_menu_table
+# the purpose of this function is to retrieve the menu table from snowflake containing all the details of the menu items which will then be merged with the transactions info to help the product team gain insight
+def retrieve_menu_table():
+    # RETRIEVE MENU TABLE FROM SNOWFLAKE
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
+
+    ## retrieve menu table from snowflake
+    my_cur = my_cnx.cursor()
+    my_cur.execute("select MENU_TYPE, TRUCK_BRAND_NAME, MENU_ITEM_ID, MENU_ITEM_NAME, ITEM_CATEGORY, ITEM_SUBCATEGORY, SALE_PRICE_USD, MENU_ITEM_HEALTH_METRICS_OBJ from menu")
+    menu_table = my_cur.fetchall()
+
+    ## create a DataFrame from the fetched result
+    ## remove cost of goods column due to irrelevance
+    menu_table_df = pd.DataFrame(menu_table, columns=['MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
+                                                    'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
+
+    # Rename the 'SALE_PRICE_USD' column to 'UNIT_PRICE'
+    menu_table_df = menu_table_df.rename(columns={'SALE_PRICE_USD': 'UNIT_PRICE'})
+
+    # round off sale price to 2dp
+    menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
+    
+    return menu_table_df
+
+# Function: get_health_metrics_menu_table
+# the purpose of this function is to manipulate the data in the 'MENU_ITEM_HEALTH_METRICS_OBJ' to get only the health metrics info with its corresponding column values bring Yes or No
+def get_health_metrics_menu_table(menu_table_df):
+    # Convert the string JSON data to a nested dictionary
+    menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'] = menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'].apply(ast.literal_eval)
+
+    # Use json_normalize to flatten the nested JSON data
+    menu_item_metrics = pd.json_normalize(menu_table_df['MENU_ITEM_HEALTH_METRICS_OBJ'], record_path='menu_item_health_metrics')
+
+    # Rename the columns
+    menu_item_metrics = menu_item_metrics.rename(columns={
+        'is_dairy_free_flag': 'IS_DAIRY_FREE',
+        'is_gluten_free_flag': 'IS_GLUTEN_FREE',
+        'is_healthy_flag': 'IS_HEALTHY',
+        'is_nut_free_flag': 'IS_NUT_FREE'
+    })
+
+    # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+    menu_item_metrics = menu_item_metrics.replace({'Y': 'Yes', 'N': 'No'})
+
+    # Concatenate the flattened DataFrame with the original DataFrame
+    menu_table_df = pd.concat([menu_table_df, menu_item_metrics], axis=1)
+
+    # Drop the original 'MENU_ITEM_HEALTH_METRICS_OBJ' and 'ingredients' column 
+    menu_table_df = menu_table_df.drop(columns=['MENU_ITEM_HEALTH_METRICS_OBJ', 'ingredients'])
+    
+    return menu_table_df
+
+# Function: retrieve_order_details
+# the purpose of this function is to retrieve order info from Snowflake that is to be merged with the menu table to allow the product team to gain further insight about products and orders
+def retrieve_order_details():
+    #hide this using secrets
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "analytics"
+    )
+
+    my_cur = my_cnx.cursor()
+
+    # Retrieve the list of customer IDs from the 'data' table
+    customer_ids = data['CUSTOMER_ID'].tolist()
+
+    # Split the list into smaller chunks of 1,000 customer IDs
+    chunk_size = 1000
+    customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
+
+    # Execute queries for each customer ID chunk
+    order_details = []
+    for chunk in customer_id_chunks:
+        # Create a comma-separated string of the customer IDs in the current chunk
+        customer_ids_str = ','.join(map(str, chunk))
+
+        # Construct the SQL query for the current chunk
+        query = f"SELECT ORDER_ID, CUSTOMER_ID, MENU_ITEM_ID, QUANTITY, PRICE, ORDER_TOTAL FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
+
+        # Execute the SQL query for the current chunk
+        my_cur.execute(query)
+
+        # Fetch the result for the current chunk
+        chunk_result = my_cur.fetchall()
+
+        # Append the chunk result to the overall result
+        order_details.extend(chunk_result)
+
+    # Create a DataFrame from the fetched result
+    order_details_df = pd.DataFrame(order_details, columns=['ORDER_ID', 'CUSTOMER_ID', 'MENU_ITEM_ID', 'QUANTITY', 'PRODUCT_TOTAL', 'ORDER_TOTAL'])
+
+    # Convert ORDER_ID to string and then remove commas
+    order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
+
+    # Format ORDER_TOTAL and PRODUCT_TOTAL_PRICE columns to 2 decimal places
+    order_details_df['ORDER_TOTAL'] = order_details_df['ORDER_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
+    order_details_df['PRODUCT_TOTAL'] = order_details_df['PRODUCT_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
+
+    order_details_df = order_details_df.sort_values(by='CUSTOMER_ID')
+    
+    return order_details_df
+
+# Function: convert_df_to_csv
+# the purpose of this function is to convert the pandas dataframe to csv so that the user can export the data for further visualisation, exploration, or analysis
+def convert_df_to_csv(df):
+   return df.to_csv(index=False).encode('utf-8')
+
+# Function: get_overall_table
+# the purpose of this function is to merge the menu and order details table together to form an overall table
+def get_overall_table(order_details_df, menu_table_df):
+    ## Merge the DataFrames based on 'MENU_ITEM_ID'
+    merged_df = pd.merge(order_details_df, menu_table_df, on='MENU_ITEM_ID', how='left')
+
+    ## Define the desired column order
+    desired_columns = ['ORDER_ID', 'CUSTOMER_ID', 'MENU_TYPE','TRUCK_BRAND_NAME',  'MENU_ITEM_ID', 'MENU_ITEM_NAME', 'ITEM_CATEGORY', 'ITEM_SUBCATEGORY',
+                    'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'QUANTITY', 'UNIT_PRICE', 'PRODUCT_TOTAL', 'ORDER_TOTAL']
+
+    ## Re-arrange the columns in the merged DataFrame
+    merged_df = merged_df[desired_columns]
+    
+    return merged_df
 
 
-#################
-### MAIN CODE ### 
-#################
+
+
+
+#####################
+##### MAIN CODE #####
+#####################
 
 # Page Title
 st.markdown("# Product")
@@ -127,54 +266,95 @@ data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
 pd.set_option('colheader_justify', 'right')
 pd.set_option('display.max_colwidth', None)
 
-# MULTI-SELECT CUSTOMER_ID WITH UPDATES TO TABLE (Model Output tables)
+
+
+# Display individual customer churned status and number of customers by churned status
+# Multi-select feature also enabled for these 2 tables
 multi_select_custid_individual(data)
 
 
-#hide this using secrets
-my_cnx = snowflake.connector.connect(
-    user = "RLIAM",
-    password = "Cats2004",
-    account = "LGHJQKA-DJ92750",
-    role = "TASTY_BI",
-    warehouse = "TASTY_BI_WH",
-    database = "frostbyte_tasty_bytes",
-    schema = "analytics"
+# MENU TABLE #
+## retrieve menu table
+## manipulation to retrieve health metrics for each product
+menu_table_df = retrieve_menu_table()
+menu_table_df = get_health_metrics_menu_table(menu_table_df)
+#st.dataframe(menu_table_df, hide_index = True)
+
+
+# ORDER DETAILS TABLE #
+## retrieve order details table from Snowflake
+## manipulation to retrieve desired layout for table
+order_details_df = retrieve_order_details()
+#st.dataframe(order_details_df, hide_index = True)
+
+
+# OVERALL TABLE #
+## merge tables to get overall table
+## re-arrange columns to get desired table
+merged_df = get_overall_table(order_details_df, menu_table_df)
+
+## Display header
+st.markdown("## Overall Table")
+
+## Display the merged DataFrame
+st.dataframe(merged_df, hide_index=True)
+
+
+# PRODUCT TABLE #
+## Group by 'MENU_ITEM_ID' and calculate the average 'QUANTITY'
+product = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].mean().reset_index()
+
+## Rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
+product = product.rename(columns={'QUANTITY': 'AVERAGE QUANTITY'})
+
+# Remove commas and convert 'PRODUCT_TOTAL' column to numeric
+merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].replace(',', '', regex=True).astype(float)
+
+
+# Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
+product2 = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].mean().reset_index()
+
+# Rename the column for clarity
+product2.rename(columns={'PRODUCT_TOTAL': 'AVERAGE SPENDING'}, inplace=True)
+
+
+# Get the count of each menu_item_id in merged_df
+menu_item_counts = merged_df['MENU_ITEM_ID'].value_counts().reset_index()
+
+# Rename the columns for clarity
+menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL NO. OF TRANSACTIONS']
+
+# Sort the results by menu_item_id (optional)
+menu_item_counts = menu_item_counts.sort_values(by='MENU_ITEM_ID')
+
+
+
+# Merge 'product' and 'product2' DataFrames based on 'MENU_ITEM_ID'
+final_product_df = pd.merge(product, product2, on='MENU_ITEM_ID')
+
+final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
+
+## Display header
+st.markdown("## Menu Item Table")
+
+## Display the merged DataFrame
+st.dataframe(final_product_df, hide_index=True)
+
+
+
+
+
+
+
+
+# EXPORT DATA OPTION #
+st.header('Export data to .csv')
+st.write("Click the button below to export the overall table to csv format")
+csv = convert_df_to_csv(merged_df)
+st.download_button(
+"Download",
+csv,
+"Tasty Insights - Product Team.csv",
+"text/csv",
+key='download-csv'
 )
-
-my_cur = my_cnx.cursor()
-
-
-# Retrieve the list of customer IDs from the 'data' table
-customer_ids = data['CUSTOMER_ID'].tolist()
-
-# Split the list into smaller chunks of 1,000 customer IDs
-chunk_size = 1000
-customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
-
-# Execute queries for each customer ID chunk
-order_details = []
-for chunk in customer_id_chunks:
-    # Create a comma-separated string of the customer IDs in the current chunk
-    customer_ids_str = ','.join(map(str, chunk))
-
-    # Construct the SQL query for the current chunk
-    query = f"SELECT MENU_ITEM_ID, CUSTOMER_ID, UNIT_PRICE, ORDER_AMOUNT FROM order_details_usa_matched WHERE CUSTOMER_ID IN ({customer_ids_str})"
-
-    # Execute the SQL query for the current chunk
-    my_cur.execute(query)
-
-    # Fetch the result for the current chunk
-    chunk_result = my_cur.fetchall()
-
-    # Append the chunk result to the overall result
-    order_details.extend(chunk_result)
-
-# Create a DataFrame from the fetched result
-order_details_df = pd.DataFrame(order_details, columns=['MENU_ITEM_ID', 'CUSTOMER_ID', 'UNIT_PRICE', 'ORDER_AMOUNT'])
-
-# Format UNIT_PRICE and ORDER_AMOUNT columns to 2 decimal places
-order_details_df['UNIT_PRICE'] = order_details_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
-order_details_df['ORDER_AMOUNT'] = order_details_df['ORDER_AMOUNT'].apply(lambda x: '{:.2f}'.format(x))
-
-st.dataframe(order_details_df, hide_index = True)

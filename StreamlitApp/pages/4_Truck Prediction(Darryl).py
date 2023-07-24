@@ -13,6 +13,9 @@ from cachetools import cached
 
 import snowflake.connector
 
+# Function: pipeline
+# the purpose of this function is to carry out the necessary transformations on the data provided by the
+# user so that it can be fed into the machine learning model for prediction
 def pipeline(data):
     # Load the necessary transformations
     windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
@@ -55,6 +58,12 @@ my_cur = my_cnx.cursor()
 my_cur.execute("select * from churn_to_sales")
 churn_to_sales = my_cur.fetchall()
 
+
+#####################
+##### MAIN CODE #####
+#####################
+
+# Page Title
 st.set_page_config(page_title="Truck Prediction", page_icon="📈")
 
 st.markdown("# Truck Prediction")
@@ -84,9 +93,34 @@ with tab1:
         #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
         df=pd.read_csv('assets/without_transformation.csv')
 
-    ## Display uploaded or defaul file
+    ## Display uploaded or default file
     with st.expander("Raw Dataframe"):
-        st.write(df.head(10))
+        st.write("This is the data set prior to any transformations")
+        st.write(df)
+    
+    # # Display clean data
+    # df=pipeline(df)
+
+    # with st.expander("Cleaned and Transformed Data"):
+    #     st.write("This is the data set after cleaning and transformation")
+    #     st.write(df)
+    
+    # ## Removing Customer ID column
+    # customer_id = df.pop("CUSTOMER_ID")
+    # # Get categoorical columns
+    # demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    # beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
+    
+    # # Setup: Model loading, predictions and combining the data
+    # model = load_model("assets/churn-prediction-model.jbl")
+    # predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
+    # demo_df = pd.concat([demo_df, predictions], axis=1)
+    # beha_df = pd.concat([beha_df, predictions], axis=1)
+    # data=pd.concat([customer_id, predictions], axis=1)
+    
+    # # Display predictions
+    # st.markdown("## Customer Segmentation")
+    # st.dataframe(data.value_counts('CHURNED'))
     
 with tab2:
     st.markdown("## Cluster")
