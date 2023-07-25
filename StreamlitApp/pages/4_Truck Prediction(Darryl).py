@@ -43,21 +43,30 @@ def load_model(model_path: str) -> object:
 def convert_df(df):
     return df.to_csv(index=False).encode('utf-8')
 
-# hide this using secrets
-my_cnx = snowflake.connector.connect(
-    user = "RLIAM",
-    password = "Cats2004",
-    account = "LGHJQKA-DJ92750",
-    role = "TASTY_BI",
-    warehouse = "TASTY_BI_WH",
-    database = "frostbyte_tasty_bytes",
-    schema = "analytics"
-)
+# Function: retrive truck table
+# the purpose of this function is to retrieve the truck table from snowflake containing all the details of the truck items
+def retrieve_truck_table():
+    # RETRIEVE TRUCK TABLE FROM SNOWFLAKE
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
 
-my_cur = my_cnx.cursor()
-my_cur.execute("select * from churn_to_sales")
-churn_to_sales = my_cur.fetchall()
+    ## retrieve truck table from snowflake
+    my_cur = my_cnx.cursor()
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck")
+    truck_table = my_cur.fetchall()
 
+    ## create a DataFrame from the fetched result
+    truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID'])
+    
+    return truck_table_df
 
 #####################
 ##### MAIN CODE #####
@@ -98,29 +107,17 @@ with tab1:
         st.write("This is the data set prior to any transformations")
         st.write(df)
     
-    # # Display clean data
-    # df=pipeline(df)
 
-    # with st.expander("Cleaned and Transformed Data"):
-    #     st.write("This is the data set after cleaning and transformation")
-    #     st.write(df)
-    
-    # ## Removing Customer ID column
-    # customer_id = df.pop("CUSTOMER_ID")
-    # # Get categoorical columns
-    # demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
-    # beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
-    
-    # # Setup: Model loading, predictions and combining the data
-    # model = load_model("assets/churn-prediction-model.jbl")
-    # predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
-    # demo_df = pd.concat([demo_df, predictions], axis=1)
-    # beha_df = pd.concat([beha_df, predictions], axis=1)
-    # data=pd.concat([customer_id, predictions], axis=1)
-    
-    # # Display predictions
-    # st.markdown("## Customer Segmentation")
-    # st.dataframe(data.value_counts('CHURNED'))
+# TRUCK TABLE #
+## retrieve truck table
+truck_table_df = retrieve_truck_table()
+#st.dataframe(menu_table_df, hide_index = True) 
+
+## Display header
+st.markdown("## Truck Table")
+
+## Display the merged DataFrame
+st.dataframe(truck_table_df, width=0, hide_index=True)  
     
 with tab2:
     st.markdown("## Cluster")
