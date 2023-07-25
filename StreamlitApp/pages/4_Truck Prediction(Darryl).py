@@ -62,12 +62,13 @@ def retrieve_truck_table():
     my_cur = my_cnx.cursor()
     my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck")
     truck_table = my_cur.fetchall()
-
+    truck_table = truck_table.filter(truck_table["COUNTRY"] == "United States")
+    
     ## create a DataFrame from the fetched result
     truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID'])
     
-    # Filter the DataFrame to only select rows with the country "United States"
-    truck_table_df = truck_table_df.filter(truck_table_df["COUNTRY"] == "United States")
+    # # Filter the DataFrame to only select rows with the country "United States"
+    # truck_table_df = truck_table_df.filter(truck_table_df["COUNTRY"] == "United States")
 
     return truck_table_df
 
