@@ -43,21 +43,31 @@ def load_model(model_path: str) -> object:
 def convert_df(df):
     return df.to_csv(index=False).encode('utf-8')
 
-# hide this using secrets
-my_cnx = snowflake.connector.connect(
-    user = "RLIAM",
-    password = "Cats2004",
-    account = "LGHJQKA-DJ92750",
-    role = "TASTY_BI",
-    warehouse = "TASTY_BI_WH",
-    database = "frostbyte_tasty_bytes",
-    schema = "analytics"
-)
+# Function: retrive truck table
+# the purpose of this function is to retrieve the truck table from snowflake containing all the details of the truck items
+def retrieve_menu_table():
+    # RETRIEVE MENU TABLE FROM SNOWFLAKE
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
 
-my_cur = my_cnx.cursor()
-my_cur.execute("select * from churn_to_sales")
-churn_to_sales = my_cur.fetchall()
+    ## retrieve menu table from snowflake
+    my_cur = my_cnx.cursor()
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck")
+    truck_table = my_cur.fetchall()
 
+    ## create a DataFrame from the fetched result
+    ## remove cost of goods column due to irrelevance
+    truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID'])
+    
+    return truck_table_df
 
 #####################
 ##### MAIN CODE #####
