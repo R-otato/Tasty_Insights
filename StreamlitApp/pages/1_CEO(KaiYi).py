@@ -199,6 +199,7 @@
 #--Import statements--
 import streamlit as st
 import pandas as pd
+import numpy as np
 from xgboost import XGBClassifier
 
 import plotly.express as px
@@ -229,11 +230,12 @@ model = joblib.load(path + 'churn-prediction-model.jbl')
 customer_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
 
 # Show basic statistics about the customer data
+# TODO - connect to Snowflake with SQL to get transaction data
 st.header("Customer Data Overview")
-st.write("Total number of Transactions:", len(customer_data))
-st.write("Total number of Transactions by Members:", len(customer_data))
+st.write("Total number of Transactions:", "673M")
+st.write("Total number of Transactions by Members:", "37M")
 st.write('')
-st.write("Number of Members:", len(customer_data))
+st.write("Number of Members:", "222K")
 st.write("Number of Unique Data on Members:", len(customer_data.columns))
 
 # Display a sample of the customer data
@@ -259,3 +261,123 @@ if search_term:
 # Show insights on customer churn
 st.header("Customer Churn Predictor")
 
+customer_data['SIGN_UP_DATE'] = pd.to_datetime(customer_data['SIGN_UP_DATE'])
+customer_data['BIRTHDAY_DATE'] = pd.to_datetime(customer_data['BIRTHDAY_DATE'])
+
+# User Input for Dropdowns
+city = st.selectbox("Select City", np.sort(customer_data['CITY'].unique()))
+gender = st.selectbox("Select Gender", np.sort(customer_data['GENDER'].unique()))
+marital_status = st.selectbox("Select Marital Status", np.sort(customer_data['MARITAL_STATUS'].unique()))
+children_count = st.selectbox("Select Children Count", np.sort(customer_data['CHILDREN_COUNT'].unique()))
+
+
+sign_up_date = st.date_input("Select Sign Up Date", 
+                             min_value = customer_data['SIGN_UP_DATE'].min(), 
+                             max_value = customer_data['SIGN_UP_DATE'].max(),
+                             value = customer_data['SIGN_UP_DATE'].min())
+birthday_date = st.date_input("Select Birthday Date", 
+                             min_value = customer_data['BIRTHDAY_DATE'].min(), 
+                             max_value = customer_data['BIRTHDAY_DATE'].max(),
+                             value = customer_data['BIRTHDAY_DATE'].min())
+
+# Sliders for days since last order, number of orders, and amount spent per order
+days_since_last_order = st.slider("Days Since Last Order:", 1, 40, 1)
+num_of_orders = st.slider("Number of Orders:", 1, 60, 1)
+amount_spent_per_order = st.slider("Amount Spent per Order ($):", 2, 30, 2)
+
+# DataFrame based on user input
+df_user_input = pd.DataFrame({
+    'CITY': [city],
+    'GENDER': [gender],
+    'MARITAL_STATUS': [marital_status],
+    'CHILDREN_COUNT': [children_count],
+    'SIGN_UP_DATE': [sign_up_date],
+    'BIRTHDAY_DATE': [birthday_date],
+    'Days_Since_Last_Order': [days_since_last_order],
+    'Number_of_Orders': [num_of_orders],
+    'Amount_Spent_Per_Order': [amount_spent_per_order]
+})
+
+df_user_input['BIRTHDAY_DATE'] = pd.to_datetime(df_user_input['BIRTHDAY_DATE'])
+df_user_input['SIGN_UP_DATE'] = pd.to_datetime(df_user_input['SIGN_UP_DATE'])
+
+
+# Display the filtered data
+st.subheader("Customer to Predict Data")
+st.dataframe(df_user_input)
+
+if st.button('Transform Input'):
+    # RFM
+    df_user_input['RECENCY'] = df_user_input['Days_Since_Last_Order']
+    df_user_input['FREQUENCY'] = df_user_input['Number_of_Orders']
+    df_user_input['MONETARY'] = df_user_input['Amount_Spent_Per_Order']*df_user_input['Number_of_Orders']
+    
+    # Average Time Difference, Max and Min Days without Purchase
+    # TODO - ryan suggests Or maybe take the mean or median of the 3 columnsAnd say the values are set to this Because...
+    df_before_scaling_sample = pd.read_csv(path + 'datasets/before_scaling_dataset.csv')
+    df_user_input['AVG_DAYS_BETWEEN_PURCHASE'] = df_before_scaling_sample['AVG_DAYS_BETWEEN_PURCHASE'].mean()
+    df_user_input['MAX_DAYS_WITHOUT_PURCHASE'] = df_before_scaling_sample['MAX_DAYS_WITHOUT_PURCHASE'].mean()
+    df_user_input['MIN_DAYS_WITHOUT_PURCHASE'] = df_before_scaling_sample['MIN_DAYS_WITHOUT_PURCHASE'].mean()
+    
+    # Age
+    latest_date = pd.to_datetime('2022-10-31')
+    df_user_input['AGE'] = (latest_date - df_user_input['BIRTHDAY_DATE']).dt.days/365
+    # Number of locations visited
+    df_user_input['NUM_OF_LOCATIONS_VISITED'] = df_user_input['Number_of_Orders'] \
+                                                - round(df_user_input['Number_of_Orders']*0.05)
+    # Length of relationship
+    df_user_input['LENGTH_OF_RELATIONSHIP'] = (latest_date - df_user_input['SIGN_UP_DATE']).dt.days
+    # Relative Purchase Frequency and Monetary
+    df_user_input['RELATIVE_PURCHASE_FREQUENCY'] = df_user_input['FREQUENCY'] / df_user_input['LENGTH_OF_RELATIONSHIP']
+    df_user_input['RELATIVE_PURCHASE_MONETARY'] = df_user_input['MONETARY'] / df_user_input['LENGTH_OF_RELATIONSHIP']
+
+    # drop unnecessary columns
+    df_user_input = df_user_input.drop(columns=['Days_Since_Last_Order', 'Number_of_Orders','Amount_Spent_Per_Order'])
+    
+    # add dummy columns needed for numerical transformation
+    df_user_input = df_user_input.assign(
+        CUSTOMER_ID=1,
+        COUNTRY='United States',
+        MAX_ORDER_TS=latest_date,
+        ORDER_TS=latest_date,
+        DAYS_TO_NEXT_ORDER=999,
+    )
+    
+    # perform numerical transformation
+    yeojohnsontransformer = joblib.load(path + '/models/yeojohnsontransformer.jbl')
+    df_user_input = yeojohnsontransformer.transform(df_user_input)
+    
+    df_user_input = df_user_input.drop(columns=['CUSTOMER_ID','DAYS_TO_NEXT_ORDER',
+                                'MAX_ORDER_TS','ORDER_TS',
+                                'COUNTRY','BIRTHDAY_DATE','SIGN_UP_DATE'])
+    
+    st.markdown(df_user_input.columns)
+    
+    # add dummy columns needed for the one hot encoding
+    df_user_input = df_user_input.assign(
+        CHURNED = 0,
+    )
+    
+    # perform one hot encoding
+    onehotencoder = joblib.load(path + '/models/onehotencoder.jbl')
+    df_user_input = onehotencoder.transform(df_user_input)
+    df_user_input.rename({'MARITAL_STATUS_Divorced/Seperated':'MARITAL_STATUS_Divorced_Or_Seperated'}, axis=1,inplace=True)
+    df_user_input.columns = map(str.upper, df_user_input.columns)
+
+    # perform scaling
+    df_user_input = df_user_input.drop(columns=['CHURNED'])
+    minmaxscaler = joblib.load(path + 'models/minmaxscaler.jbl')
+    df_userinput = minmaxscaler.transform(df_user_input)
+    
+    st.dataframe(df_user_input)
+    
+    model = joblib.load(path + 'models/xgb_churn_model.jbl')
+    prediction = model.predict(df_user_input)
+    st.write(prediction)
+    
+    
+    # TODO - add customer segmentation, where does this customer belong?
+    # TODO - add customer churn, what is the probability of this customer churning?
+    # TODO - add chloropleth of sales by country
+    
+    
