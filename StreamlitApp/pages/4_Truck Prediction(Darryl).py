@@ -111,7 +111,13 @@ with tab1:
 # TRUCK TABLE #
 ## retrieve truck table
 truck_table_df = retrieve_truck_table()
-#st.dataframe(menu_table_df, hide_index = True)   
+#st.dataframe(menu_table_df, hide_index = True) 
+
+## Display header
+st.markdown("## Truck Table")
+
+## Display the merged DataFrame
+st.dataframe(truck_table_df, width=0, hide_index=True)  
     
 with tab2:
     st.markdown("## Cluster")
