@@ -60,14 +60,14 @@ def retrieve_truck_table():
 
     ## retrieve truck table from snowflake
     my_cur = my_cnx.cursor()
-    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck")
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck where COUNTRY = 'United States'")
     truck_table = my_cur.fetchall()
     
     ## create a DataFrame from the fetched result
     truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID'])
     
     # # Filter the DataFrame to only select rows with the country "United States"
-    # truck_table_df = truck_table_df.filter(truck_table_df["COUNTRY"] == "United States")
+    # truck_table_df = truck_table.filter(truck_table["COUNTRY"] == "United States")
 
     return truck_table_df
 
@@ -111,16 +111,16 @@ with tab1:
         st.write(df)
     
 
-# TRUCK TABLE #
-## retrieve truck table
-truck_table_df = retrieve_truck_table()
-#st.dataframe(menu_table_df, hide_index = True) 
+    # TRUCK TABLE #
+    ## retrieve truck table
+    truck_table_df = retrieve_truck_table()
+    #st.dataframe(menu_table_df, hide_index = True) 
 
-## Display header
-st.markdown("## Truck Table")
+    ## Display header
+    st.markdown("## Truck Table")
 
-## Display the merged DataFrame
-st.dataframe(truck_table_df, width=0, hide_index=True)  
+    ## Display the merged DataFrame
+    st.dataframe(truck_table_df, width=0, hide_index=True)  
     
 with tab2:
     st.markdown("## Cluster")
