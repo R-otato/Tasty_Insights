@@ -43,7 +43,7 @@ def load_model(model_path: str) -> object:
 def convert_df(df):
     return df.to_csv(index=False).encode('utf-8')
 
-# Function: retrive truck table
+# Function: retrieve truck table
 # the purpose of this function is to retrieve the truck table from snowflake containing all the details of the truck items
 def retrieve_truck_table():
     # RETRIEVE TRUCK TABLE FROM SNOWFLAKE
@@ -62,10 +62,13 @@ def retrieve_truck_table():
     my_cur = my_cnx.cursor()
     my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck")
     truck_table = my_cur.fetchall()
-
+    
     ## create a DataFrame from the fetched result
     truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID'])
     
+    # # Filter the DataFrame to only select rows with the country "United States"
+    # truck_table_df = truck_table_df.filter(truck_table_df["COUNTRY"] == "United States")
+
     return truck_table_df
 
 #####################
