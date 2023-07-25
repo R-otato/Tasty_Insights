@@ -305,17 +305,17 @@ st.dataframe(merged_df, width=0, hide_index=True)
 product = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].mean().reset_index()
 
 ## Rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
-product = product.rename(columns={'QUANTITY': 'AVERAGE QUANTITY'})
+product = product.rename(columns={'QUANTITY': 'AVG_QTY_SOLD'})
 
-## Remove commas and convert 'PRODUCT_TOTAL' column to numeric
-merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].replace(',', '', regex=True).astype(float)
+## Convert 'PRODUCT_TOTAL' column to numeric
+merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].astype(float)
 
 
 ## Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
 product2 = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].mean().reset_index()
 
 ## Rename the column for clarity
-product2.rename(columns={'PRODUCT_TOTAL': 'AVERAGE SPENDING'}, inplace=True)
+product2.rename(columns={'PRODUCT_TOTAL': 'AVG_SPENDING'}, inplace=True)
 
 
 ## Get the count of each menu_item_id in merged_df
@@ -335,7 +335,7 @@ final_product_df = pd.merge(product, product2, on='MENU_ITEM_ID')
 final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
 
 ## round off sale price to 2dp
-final_product_df['AVERAGE SPENDING'] = final_product_df['AVERAGE SPENDING'].apply(lambda x: '{:.2f}'.format(x))
+final_product_df['AVG_SPENDING'] = final_product_df['AVG_SPENDING'].apply(lambda x: '{:.2f}'.format(x))
 
 ## Display header
 st.markdown("## Menu Item Table")
@@ -345,7 +345,10 @@ st.dataframe(final_product_df, width=0, hide_index=True)
 
 
 
+
+
 # MENU ITEM CATEGORY TABLE #
+
 ## Display header
 st.markdown("## Menu Item Category Table")
 
@@ -366,11 +369,70 @@ no_of_subcategory_within_category_df.reset_index(inplace=True)
 ## Rename the columns for clarity
 no_of_subcategory_within_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_COLD_OPTIONS', 'NO_OF_HOT_OPTIONS', 'NO_OF_WARM_OPTIONS']
 
+
+
+##  Convert 'UNIT_PRICE' column to a numeric type
+menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].astype(float)
+    
+## Group by ITEM_CATEGORY to get the average unit price for each category
+avg_unit_price_per_category = menu_table_df.groupby('ITEM_CATEGORY')['UNIT_PRICE'].mean().reset_index()
+
+## Rename the column for clarity
+avg_unit_price_per_category.rename(columns={'UNIT_PRICE': 'AVG_UNIT_PRICE'}, inplace=True)
+
+# round off sale price to 2dp
+avg_unit_price_per_category['AVG_UNIT_PRICE'] = avg_unit_price_per_category['AVG_UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
+
+
+
+## Group by ITEM_CATEGORY to get the average quantity sold for each category
+avg_qty_sold_per_category = merged_df.groupby('ITEM_CATEGORY')['QUANTITY'].mean().reset_index()
+
+## Rename the column for clarity
+avg_qty_sold_per_category.rename(columns={'QUANTITY': 'AVG_QTY_SOLD'}, inplace=True)
+
+
+
+## Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
+avg_spending_per_category = merged_df.groupby('ITEM_CATEGORY')['PRODUCT_TOTAL'].mean().reset_index()
+
+## Rename the column for clarity
+avg_spending_per_category.rename(columns={'PRODUCT_TOTAL': 'AVG_SPENDING'}, inplace=True)
+
+
+
+## Get the count of each menu_item_id in merged_df
+menu_item_category_counts = merged_df['ITEM_CATEGORY'].value_counts().reset_index()
+
+## Rename the columns for clarity
+menu_item_category_counts.columns = ['ITEM_CATEGORY', 'TOTAL NO. OF TRANSACTIONS']
+
+
+
+
+
 ## Merge the two DataFrames on 'ITEM_CATEGORY'
 menu_item_cat_merged_df = pd.merge(unique_products_per_category_df, no_of_subcategory_within_category_df, on='ITEM_CATEGORY', how='outer')
 
+## Merge avg_unit_price_per_category with menu_item_cat_merged_df
+menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, avg_unit_price_per_category, on='ITEM_CATEGORY', how='outer')
+
+## Merge avg_qty_sold_per_category with menu_item_cat_merged_df
+menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, avg_qty_sold_per_category, on='ITEM_CATEGORY', how='outer')
+
+## Merge avg_spending_per_category with menu_item_cat_merged_df
+menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, avg_spending_per_category, on='ITEM_CATEGORY', how='outer')
+
+## Merge menu_item_category_counts with menu_item_cat_merged_df
+menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, menu_item_category_counts, on='ITEM_CATEGORY', how='outer')
+
+## round off sale price to 2dp
+menu_item_cat_merged_df['AVG_SPENDING'] = menu_item_cat_merged_df['AVG_SPENDING'].apply(lambda x: '{:.2f}'.format(x))
+
 ## Display the merged DataFrame
 st.dataframe(menu_item_cat_merged_df, width=0, hide_index=True)
+
+
 
 
 
