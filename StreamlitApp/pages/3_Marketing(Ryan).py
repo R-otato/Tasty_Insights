@@ -110,7 +110,7 @@ def main() -> None:
     else:
         st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
         #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-        df=pd.read_csv('assets/Marketing.csv')
+        df=pd.read_csv('assets/marketing.csv')
 
     ## Display uploaded or defaul file
     with st.expander("Raw Dataframe"):
