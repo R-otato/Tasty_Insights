@@ -2,11 +2,11 @@
 # Tutorial Group: 	T01 Group 4 
 
 #--Import statements--
-import streamlit as st
-import pandas as pd
-from xgboost import XGBClassifier
+# import streamlit as st
+# import pandas as pd
+# from xgboost import XGBClassifier
 
-import plotly.express as px
+# import plotly.express as px
 # from snowflake.snowpark.functions import call_udf, col
 # import snowflake.snowpark.types as T
 # from snowflake.snowpark import Session
@@ -85,137 +85,148 @@ import plotly.express as px
 
 
 #--Introduction--
-st.set_page_config(page_title="Churn Prediction", page_icon="💀")
+# st.set_page_config(page_title="Churn Prediction", page_icon="💀")
 
-st.markdown("# Churn Prediction")
-tab1, tab2 = st.tabs(['Explore', 'Predict'])
+# st.markdown("# Churn Prediction")
+# tab1, tab2 = st.tabs(['Explore', 'Predict'])
 
-with tab1:
+# with tab1:
 
-    df = pd.read_csv('assets/testcoord.csv')
-    df.columns = ['lat', 'lon', 'name', 'sum']
+#     df = pd.read_csv('assets/testcoord.csv')
+#     df.columns = ['lat', 'lon', 'name', 'sum']
 
-    st.write("""
-    ## What is this?
+#     st.write("""
+#     ## What is this?
 
-    This is a map that represents the distribution of the churn based on the level at which the data is analysed. i.e. Country/City/Truck
-    """)
+#     This is a map that represents the distribution of the churn based on the level at which the data is analysed. i.e. Country/City/Truck
+#     """)
 
-    fig = px.scatter_mapbox(df, lat="lat", lon="lon", size = df['sum'])
+#     fig = px.scatter_mapbox(df, lat="lat", lon="lon", size = df['sum'])
 
-    fig.update_layout(mapbox_style="open-street-map")
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    st.plotly_chart(fig)
+#     fig.update_layout(mapbox_style="open-street-map")
+#     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+#     st.plotly_chart(fig)
 
-with tab2:
-    st.sidebar.header("Churn Prediction Demo")
+# with tab2:
+# st.sidebar.header("Churn Prediction Demo")
 
-    st.write("""
-    ## How to use this tool?
+# st.write("""
+# ## How to use this tool?
 
-    You only need to provide the parameters to the machine learning model at the sidebar on the left side of this page. And the predictions made by the model will be outputted right below.
-    """)
+# You only need to provide the parameters to the machine learning model at the sidebar on the left side of this page. And the predictions made by the model will be outputted right below.
+# """)
 
-    st.write("""
-    ## Parameters Imputed:
+# st.write("""
+# ## Parameters Imputed:
 
-    - Down below are the parameters setted up to the model by the inputs of the sidebar.
-    """)
-    test_data=pd.read_csv('assets/testdata.csv').drop(['CHURNED'],axis=1,errors='ignore')
+# - Down below are the parameters setted up to the model by the inputs of the sidebar.
+# """)
+# test_data=pd.read_csv('assets/testdata.csv').drop(['CHURNED'],axis=1,errors='ignore')
 
-    st.write(test_data)
-    type='Example'
-    customer_id = test_data.pop("CUSTOMER_ID")
+# st.write(test_data)
+# type='Example'
+# customer_id = test_data.pop("CUSTOMER_ID")
 
-    #--File Upload--
-    st.markdown("## Multiple File Upload")
-    uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
+# #--File Upload--
+# st.markdown("## Multiple File Upload")
+# uploaded_files = st.file_uploader('Upload your file', accept_multiple_files=True)
 
 
-    if uploaded_files!=[]:
-        type='Your'
-        for f in uploaded_files:
-            st.write(f)
-        data_list = []
-        for f in uploaded_files:
-            temp_data = pd.read_csv(f)
-            data_list.append(temp_data)
+# if uploaded_files!=[]:
+#     type='Your'
+#     for f in uploaded_files:
+#         st.write(f)
+#     data_list = []
+#     for f in uploaded_files:
+#         temp_data = pd.read_csv(f)
+#         data_list.append(temp_data)
 
-        data = pd.concat(data_list)
+#     data = pd.concat(data_list)
 
-        st.dataframe(data)
+#     st.dataframe(data)
 
-        # #-- Prediction Result --
-        # st.write('## Prediction Results:')
+#     # #-- Prediction Result --
+#     # st.write('## Prediction Results:')
 
-        # prediction = get_prediction(data)
-        # predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
-        # predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
+#     # prediction = get_prediction(data)
+#     # predictionMsg = '***Not Churn***' if float(prediction['Churn'][0][:-1]) <= 50 else '***Churn***'
+#     # predictionPercent = prediction['Not Churn'][0] if float(prediction['Churn'][0][:-1]) <= 50 else prediction['Churn'][0]
 
-        # st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
-        # st.write(prediction)
-    else:
-        data=test_data.copy()
-    #--Get Prediction--
+#     # st.write(f'The model predicted a percentage of **{predictionPercent}** that the custumer will {predictionMsg}!')
+#     # st.write(prediction)
+# else:
+#     data=test_data.copy()
+# #--Get Prediction--
 
-    # get feature columns
-    feature_cols = test_data.columns
+# # get feature columns
+# feature_cols = test_data.columns
+
+# with st.spinner('Wait for it...'):
+#     # udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_proba_xgboost_model_vec_cached, 
+#     #                                                                 name="udf_score_xgboost_model", 
+#     #                                                                 stage_location='@MODEL_STAGE',
+#     #                                                                 input_types=[T.FloatType()]*len(feature_cols),
+#     #                                                                 return_type = T.FloatType(),
+#     #                                                                 replace=True, 
+#     #                                                                 is_permanent=True, 
+#     #                                                                 imports=['@MODEL_STAGE/xgboost_model.sav'],
+#     #                                                                 packages=[f'xgboost==1.7.3'
+#     #                                                                             ,f'joblib==1.1.1'
+#     #                                                                             ,f'cachetools==4.2.2'], 
+#     #                                                                 session=session)
+#     # data = pd.concat([customer_id, data], axis=1)
+#     # data=session.create_dataframe(data)
+#     # proba_data=udf_score_xgboost_model_vec_cached(*feature_cols)
+#     # pred=data.with_column('CHURN_PROBABILITY', proba_data)
+#     # st.markdown("# "+type+" Results")
+#     # st.write('*Tips: Click on column name to sort!')
+#     # st.dataframe(pred[['CUSTOMER_ID','CHURN_PROBABILITY']])  
+#     # st.success('Done!')  
+#     model = XGBClassifier()
+#     model.load_model("assets/model.json")
+#     predictions= pd.DataFrame(model.predict_proba(data),columns=['NotChurn','Churned'])
     
-    with st.spinner('Wait for it...'):
-        # udf_score_xgboost_model_vec_cached  = session.udf.register(func=udf_proba_xgboost_model_vec_cached, 
-        #                                                                 name="udf_score_xgboost_model", 
-        #                                                                 stage_location='@MODEL_STAGE',
-        #                                                                 input_types=[T.FloatType()]*len(feature_cols),
-        #                                                                 return_type = T.FloatType(),
-        #                                                                 replace=True, 
-        #                                                                 is_permanent=True, 
-        #                                                                 imports=['@MODEL_STAGE/xgboost_model.sav'],
-        #                                                                 packages=[f'xgboost==1.7.3'
-        #                                                                             ,f'joblib==1.1.1'
-        #                                                                             ,f'cachetools==4.2.2'], 
-        #                                                                 session=session)
-        # data = pd.concat([customer_id, data], axis=1)
-        # data=session.create_dataframe(data)
-        # proba_data=udf_score_xgboost_model_vec_cached(*feature_cols)
-        # pred=data.with_column('CHURN_PROBABILITY', proba_data)
-        # st.markdown("# "+type+" Results")
-        # st.write('*Tips: Click on column name to sort!')
-        # st.dataframe(pred[['CUSTOMER_ID','CHURN_PROBABILITY']])  
-        # st.success('Done!')  
-        model = XGBClassifier()
-        model.load_model("assets/model.json")
-        predictions= pd.DataFrame(model.predict_proba(data),columns=['NotChurn','Churned'])
-        
-        st.dataframe(predictions)
-        data=pd.concat([customer_id, predictions], axis=1)
-        
-        st.dataframe(data)
+#     st.dataframe(predictions)
+#     data=pd.concat([customer_id, predictions], axis=1)
+    
+#     st.dataframe(data)
 
-    st.button("Re-run")
+# st.button("Re-run")
 
+#--Team--
+# Tutorial Group: 	T01 Group 4 
 
+#--Import statements--
 import streamlit as st
 import pandas as pd
+from xgboost import XGBClassifier
+
+import plotly.express as px
 import joblib 
 
-# Load the pre-trained machine learning model
-model = joblib.load('assets/churn-prediction-model.jbl')
+# path to assets
+path = 'assets/'
 
-# Load the customer data from a CSV file
-customer_data = pd.read_csv('assets/testdata.csv')
+st.set_page_config(page_title="Churn Prediction", page_icon="💀")
 
 # Page Title
 st.title("Churn Prediction")
 
 # Display a brief overview of the company
+st.subheader("What is Churn?")
 st.markdown("""
-            ### What is Churn? 
             Churn is the percentage of customers that stopped using our service during a certain time frame. 
             
             For Tasty Bytes, that consititudes as customers who have not made a purchase in the last 7 days.
             
             We can calculate churn rate by dividing the number of customers we lost during 7 days by the number of customers we had at the beginning of that time period.
             """)
+
+# Load the pre-trained machine learning model
+model = joblib.load(path + 'churn-prediction-model.jbl')
+
+# Load the customer data from a CSV file
+customer_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
 
 # Show basic statistics about the customer data
 st.header("Customer Data Overview")
@@ -227,38 +238,24 @@ st.write("Number of Unique Data on Members:", len(customer_data.columns))
 
 # Display a sample of the customer data
 st.subheader("Customer Data")
-st.dataframe(customer_data.head())
+st.dataframe(customer_data)
 
-# Allow the CEO to select a specific customer ID to get more details
-selected_customer_id = st.selectbox("Select a customer ID to view more details:", customer_data['CUSTOMER_ID'])
+# to search for a specific customer by first name, last name, or combination
+search_term = st.text_input("Search for a customer by First Name, Last Name, or combination:")
 
-if selected_customer_id:
-    selected_customer = customer_data[customer_data['CUSTOMER_ID'] == selected_customer_id]
-    st.subheader("Selected Customer Details")
-    st.dataframe(selected_customer)
+if search_term:
+    # Filter the customer data based on the search term using partial matching (LIKE)
+    selected_customer = customer_data[customer_data['FIRST_NAME'].str.contains(search_term, case=False, na=False) |
+                                      customer_data['LAST_NAME'].str.contains(search_term, case=False, na=False) |
+                                      customer_data.apply(lambda row: search_term in f"{row['FIRST_NAME']} {row['LAST_NAME']}".lower(), axis=1)]
 
-    # Predict churn probability for the selected customer
-    features = selected_customer.drop(['CUSTOMER_ID', 'Churn'], axis=1)
-    churn_probability = model.predict_proba(features)[0][1]
-    st.write(f"Churn Probability for Customer {selected_customer_id}: {churn_probability:.2f}")
+    
+    if not selected_customer.empty:
+        st.subheader("Selected Customer Details")
+        st.dataframe(selected_customer)
+    else:
+        st.write("No matching customer found.")
 
 # Show insights on customer churn
-st.header("Customer Churn Analysis")
+st.header("Customer Churn Predictor")
 
-# Calculate and display the percentage of churned customers
-total_churned = customer_data['Churn'].sum()
-total_customers = len(customer_data)
-churn_percentage = (total_churned / total_customers) * 100
-st.write(f"Percentage of Churned Customers: {churn_percentage:.2f}%")
-
-# Display a bar chart to visualize churn distribution
-churn_distribution = customer_data['Churn'].value_counts()
-st.bar_chart(churn_distribution)
-
-# Provide recommendations and next steps based on the churn analysis
-st.header("Recommendations")
-st.markdown("""
-- **Retention Strategies:** Implement customer retention strategies based on churn prediction.
-- **Feedback Collection:** Gather feedback from churned customers to identify pain points.
-- **Targeted Marketing:** Design targeted marketing campaigns to retain at-risk customers.
-""")
