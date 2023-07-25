@@ -1,31 +1,21 @@
 #--Team--
 # Tutorial Group: 	T01 Group 4 
 
-# Student Name 1:	Ryan Liam Poon Yang
-# Student Number: 	S10222131E 
-# Student Name 2:	Teh Zhi Xian
-# Student Number: 	S10221851J
-# Student Name 3:	Chuah Kai Yi
-# Student Number: 	S10219179E
-# Student Name 4:	Don Sukkram
-# Student Number: 	S10223354J
-# Student Name 5:	Darryl Koh
-# Student Number: 	S10221893J
-
 #--Import statements--
 import streamlit as st
 import pandas as pd
 from xgboost import XGBClassifier
-import requests
-import numpy as np
-import joblib 
-import time
-# from snowflake.snowpark import Session
-import json
+
+import plotly.express as px
 # from snowflake.snowpark.functions import call_udf, col
 # import snowflake.snowpark.types as T
-from cachetools import cached
-
+# from snowflake.snowpark import Session
+# import requests
+# import numpy as np
+# import joblib 
+# import time
+# import json
+# from cachetools import cached
 #----------------------Snowflake---------------------------------#
 # # Get account credentials from a json file
 # with open("data_scientist_auth.json") as f:
@@ -95,7 +85,7 @@ from cachetools import cached
 
 
 #--Introduction--
-st.set_page_config(page_title="Churn Prediction", page_icon="📈")
+st.set_page_config(page_title="Churn Prediction", page_icon="💀")
 
 st.markdown("# Churn Prediction")
 tab1, tab2 = st.tabs(['Explore', 'Predict'])
@@ -110,8 +100,6 @@ with tab1:
 
     This is a map that represents the distribution of the churn based on the level at which the data is analysed. i.e. Country/City/Truck
     """)
-
-    import plotly.express as px
 
     fig = px.scatter_mapbox(df, lat="lat", lon="lon", size = df['sum'])
 
@@ -204,3 +192,73 @@ with tab2:
         st.dataframe(data)
 
     st.button("Re-run")
+
+
+import streamlit as st
+import pandas as pd
+import joblib 
+
+# Load the pre-trained machine learning model
+model = joblib.load('assets/churn-prediction-model.jbl')
+
+# Load the customer data from a CSV file
+customer_data = pd.read_csv('assets/testdata.csv')
+
+# Page Title
+st.title("Churn Prediction")
+
+# Display a brief overview of the company
+st.markdown("""
+            ### What is Churn? 
+            Churn is the percentage of customers that stopped using our service during a certain time frame. 
+            
+            For Tasty Bytes, that consititudes as customers who have not made a purchase in the last 7 days.
+            
+            We can calculate churn rate by dividing the number of customers we lost during 7 days by the number of customers we had at the beginning of that time period.
+            """)
+
+# Show basic statistics about the customer data
+st.header("Customer Data Overview")
+st.write("Total number of Transactions:", len(customer_data))
+st.write("Total number of Transactions by Members:", len(customer_data))
+st.write('')
+st.write("Number of Members:", len(customer_data))
+st.write("Number of Unique Data on Members:", len(customer_data.columns))
+
+# Display a sample of the customer data
+st.subheader("Customer Data")
+st.dataframe(customer_data.head())
+
+# Allow the CEO to select a specific customer ID to get more details
+selected_customer_id = st.selectbox("Select a customer ID to view more details:", customer_data['CUSTOMER_ID'])
+
+if selected_customer_id:
+    selected_customer = customer_data[customer_data['CUSTOMER_ID'] == selected_customer_id]
+    st.subheader("Selected Customer Details")
+    st.dataframe(selected_customer)
+
+    # Predict churn probability for the selected customer
+    features = selected_customer.drop(['CUSTOMER_ID', 'Churn'], axis=1)
+    churn_probability = model.predict_proba(features)[0][1]
+    st.write(f"Churn Probability for Customer {selected_customer_id}: {churn_probability:.2f}")
+
+# Show insights on customer churn
+st.header("Customer Churn Analysis")
+
+# Calculate and display the percentage of churned customers
+total_churned = customer_data['Churn'].sum()
+total_customers = len(customer_data)
+churn_percentage = (total_churned / total_customers) * 100
+st.write(f"Percentage of Churned Customers: {churn_percentage:.2f}%")
+
+# Display a bar chart to visualize churn distribution
+churn_distribution = customer_data['Churn'].value_counts()
+st.bar_chart(churn_distribution)
+
+# Provide recommendations and next steps based on the churn analysis
+st.header("Recommendations")
+st.markdown("""
+- **Retention Strategies:** Implement customer retention strategies based on churn prediction.
+- **Feedback Collection:** Gather feedback from churned customers to identify pain points.
+- **Targeted Marketing:** Design targeted marketing campaigns to retain at-risk customers.
+""")
