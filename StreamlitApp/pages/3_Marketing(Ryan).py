@@ -3,8 +3,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib 
-import seaborn as sns
-import matplotlib.pyplot as plt
 from cachetools import cached
 import plotly.express as px
 from pandas.api.types import (
