@@ -62,7 +62,6 @@ def retrieve_truck_table():
     my_cur = my_cnx.cursor()
     my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID from truck")
     truck_table = my_cur.fetchall()
-    truck_table = truck_table.filter(truck_table["COUNTRY"] == "United States")
     
     ## create a DataFrame from the fetched result
     truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID'])
