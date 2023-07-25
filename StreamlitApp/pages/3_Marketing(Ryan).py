@@ -3,6 +3,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib 
+import seaborn as sns
+import matplotlib.pyplot as plt
 from cachetools import cached
 import plotly.express as px
 from pandas.api.types import (
@@ -24,8 +26,10 @@ def pipeline(data):
     ## Make a copy first
     data=data.copy()
 
-    ## Removing Customer ID column
-    customer_id = data.pop("CUSTOMER_ID")
+    ## Removing columns not used in transformation
+    cols_Not_Involved=["CUSTOMER_ID",'FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID']
+    not_Involved=data[cols_Not_Involved]
+    data.drop(cols_Not_Involved,axis=1,inplace=True)
 
     # Load the necessary transformations
     windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
@@ -41,7 +45,7 @@ def pipeline(data):
     data = windsorizer_gau.transform(data)  # Apply Gaussian Windsorization
 
     #KMeans table tranformation
-    cols_to_scale=['RECENCY','FREQUENCY','MONETARY','AGE','AVG_DAYS_BETWEEN_PURCHASE', 'LENGTH_OF_RELATIONSHIP']
+    cols_to_scale=['RECENCY','FREQUENCY','MONETARY']
     data_kmeans=data[cols_to_scale].copy() # For our Kmeans model, it does not include any yeo johnson transformation
     data_kmeans[cols_to_scale] = kmeansMinMaxScaler.transform(data_kmeans[cols_to_scale])  # Apply Min-Max Scaling for Kmeans
 
@@ -52,8 +56,8 @@ def pipeline(data):
     data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
     
     #Concat Customer ID back
-    data=pd.concat([customer_id, data], axis=1)
-    data_kmeans=pd.concat([customer_id, data_kmeans], axis=1)
+    data=pd.concat([not_Involved, data], axis=1)
+    data_kmeans=pd.concat([not_Involved, data_kmeans], axis=1)
 
     return data,data_kmeans
 
@@ -66,80 +70,14 @@ def load_model(model_path: str) -> object:
 def convert_df(df):
    return df.to_csv(index=False).encode('utf-8')
 
-def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Adds a UI on top of a dataframe to let viewers filter columns
-
-    Args:
-        df (pd.DataFrame): Original dataframe
-
-    Returns:
-        pd.DataFrame: Filtered dataframe
-    """
-    modify = st.checkbox("Add filters")
-
-    if not modify:
-        return df
-
-    df = df.copy()
-
-    # Try to convert datetimes into a standard format (datetime, no timezone)
-    for col in df.columns:
-        if is_object_dtype(df[col]):
-            try:
-                df[col] = pd.to_datetime(df[col])
-            except Exception:
-                pass
-
-        if is_datetime64_any_dtype(df[col]):
-            df[col] = df[col].dt.tz_localize(None)
-
-    modification_container = st.container()
-
-    with modification_container:
-        to_filter_columns = st.multiselect("Filter dataframe on", df.columns)
-        for column in to_filter_columns:
-            left, right = st.columns((1, 20))
-            # Treat columns with < 10 unique values as categorical
-            if is_categorical_dtype(df[column]) or df[column].nunique() < 10:
-                user_cat_input = right.multiselect(
-                    f"Values for {column}",
-                    df[column].unique(),
-                    default=list(df[column].unique()),
-                )
-                df = df[df[column].isin(user_cat_input)]
-            elif is_numeric_dtype(df[column]):
-                _min = float(df[column].min())
-                _max = float(df[column].max())
-                step = (_max - _min) / 100
-                user_num_input = right.slider(
-                    f"Values for {column}",
-                    min_value=_min,
-                    max_value=_max,
-                    value=(_min, _max),
-                    step=step,
-                )
-                df = df[df[column].between(*user_num_input)]
-            elif is_datetime64_any_dtype(df[column]):
-                user_date_input = right.date_input(
-                    f"Values for {column}",
-                    value=(
-                        df[column].min(),
-                        df[column].max(),
-                    ),
-                )
-                if len(user_date_input) == 2:
-                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                    start_date, end_date = user_date_input
-                    df = df.loc[df[column].between(start_date, end_date)]
-            else:
-                user_text_input = right.text_input(
-                    f"Substring or regex in {column}",
-                )
-                if user_text_input:
-                    df = df[df[column].astype(str).str.contains(user_text_input)]
-
-    return df
+#Filter dataframe
+def filter(selected_options,column,data):
+    # Filter the data based on selected clusters
+    if 'All' in selected_options:
+        filtered_data = data  # If 'All' is selected, show all data
+    else:
+        filtered_data = data[data[column].isin(selected_options)]
+    return filtered_data
 
 #################
 ### MAIN CODE ### 
@@ -174,42 +112,74 @@ def main() -> None:
     else:
         st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
         #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-        df=pd.read_csv('assets/without_transformation.csv')
+        df=pd.read_csv('assets/Marketing.csv')
 
     ## Display uploaded or defaul file
     with st.expander("Raw Dataframe"):
         st.write(df.head(10))
 
-    # #Get categoorical columns
-    # demo_df=df[['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
-    # beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE'])]
 
     clean_df,kmeans_df=pipeline(df)
 
     with st.expander("Cleaned and Transformed Data"):
         st.write(clean_df.head(10))
 
-    # Setup: Model loading, predictions and combining the data
+    # Setup: Model loading
     churn_model = load_model("assets/churn-prediction-model.jbl")
-    seg_model = load_model("assets/kmeans.jbl")
-    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop('CUSTOMER_ID',axis=1)),columns=['CLUSTER'])
-    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop('CUSTOMER_ID',axis=1)),columns=['CHURNED'])
-    # demo_df = pd.concat([demo_df, predictions], axis=1)
-    # beha_df = pd.concat([beha_df, predictions], axis=1)
+    seg_model = load_model("assets/rfm_kmeans.jbl")
 
+    # Setup: Get predictions
+    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(["CUSTOMER_ID",'FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID'],axis=1)),columns=['CHURNED'])
+    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(["CUSTOMER_ID",'FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID'],axis=1)),columns=['CLUSTER'])
+    
+    # Setup: Map predictions to understandable insights
+    churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
+    kmeans_pred['CLUSTER'] = kmeans_pred['CLUSTER'].map({
+    0: "Active Moderate-Value Members",
+    1: "Inactive Low-Spending Members",
+    2: "High-Value Loyal Members",
+    3: "Engaged Moderate-Value Members",
+    4: "Active Low-Spending Members"})
+
+    # Setup:Combine tables with predictions
     data=pd.concat([df,kmeans_pred],axis=1)
     data=pd.concat([data, churn_pred], axis=1)
 
     # Display predictions
-    st.markdown("## Customer Segmentation")
-    st.dataframe(data.value_counts('CLUSTER'))
+    st.markdown("## Member Segmentation and Churn Prediction Results")
 
-    st.markdown("## Churn Prediction")
-    st.dataframe(data.value_counts('CHURNED'))
+    # Display a filter for selecting clusters
+    cluster_Options = ['All'] + data['CLUSTER'].unique().tolist()
+    selected_Cluster = st.multiselect("Filter by Member's Segment:", cluster_Options, default=['All'])
+    filtered_data=filter(selected_Cluster,'CLUSTER',data)
 
-    st.markdown("## Overall Table")
-    filtered_data=filter_dataframe(data)
-    st.dataframe(filtered_data)
+    churn_Options = ['All'] + data['CHURNED'].unique().tolist()
+    selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
+    filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
+    
+    #Summary
+    st.markdown("### Summary")
+    # Number of members of each cluster
+    cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
+    st.dataframe(cluster_counts, hide_index=True)
+
+    # Number of members who churned and not churned
+    churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
+    st.dataframe(churn_counts, hide_index=True)
+
+    # Demographic table
+    st.markdown("### Member's Demographic")
+    demo_df=filtered_data[['CUSTOMER_ID','GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    st.dataframe(demo_df, hide_index=True)
+
+    # Behavioral table
+    st.markdown("### Member's Behaviour")
+    beha_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID','LENGTH_OF_RELATIONSHIP']]
+    st.dataframe(beha_df, hide_index=True)
+
+    # Overall Table
+    st.markdown("### Overall Table")
+    st.dataframe(filtered_data, hide_index=True)
 
     #Allow user to download dataframe for further analysis
     st.header('**Export results ✨**')
@@ -218,7 +188,7 @@ def main() -> None:
     st.download_button(
     "Press to Download",
     csv,
-    "file.csv",
+    "marketing.csv",
     "text/csv",
     key='download-csv'
     )
