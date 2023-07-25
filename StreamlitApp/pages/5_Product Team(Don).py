@@ -297,7 +297,7 @@ merged_df = get_overall_table(order_details_df, menu_table_df)
 st.markdown("## Overall Table")
 
 ## Display the merged DataFrame
-st.dataframe(merged_df, hide_index=True)
+st.dataframe(merged_df, width=0, hide_index=True)
 
 
 # MENU ITEM TABLE #
@@ -341,12 +341,42 @@ final_product_df['AVERAGE SPENDING'] = final_product_df['AVERAGE SPENDING'].appl
 st.markdown("## Menu Item Table")
 
 ## Display the merged DataFrame
-st.dataframe(final_product_df, hide_index=True)
+st.dataframe(final_product_df, width=0, hide_index=True)
+
 
 
 # MENU ITEM CATEGORY TABLE #
 ## Display header
 st.markdown("## Menu Item Category Table")
+
+## Group by ITEM_CATEGORY and calculate the number of unique MENU_ITEM_ID
+unique_products_per_category_df = menu_table_df.groupby('ITEM_CATEGORY')['MENU_ITEM_ID'].nunique().reset_index()
+
+## Rename the columns for clarity
+unique_products_per_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_MENU_ITEMS']
+
+
+
+## Pivot the DataFrame to get the count of each unique ITEM_SUBCATEGORY within each ITEM_CATEGORY
+no_of_subcategory_within_category_df = pd.pivot_table(menu_table_df, index='ITEM_CATEGORY', columns='ITEM_SUBCATEGORY', values='MENU_ITEM_ID', aggfunc='count', fill_value=0)
+
+## Reset the index to make 'ITEM_CATEGORY' a regular column
+no_of_subcategory_within_category_df.reset_index(inplace=True)
+
+## Rename the columns for clarity
+no_of_subcategory_within_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_COLD_OPTIONS', 'NO_OF_HOT_OPTIONS', 'NO_OF_WARM_OPTIONS']
+
+## Merge the two DataFrames on 'ITEM_CATEGORY'
+menu_item_cat_merged_df = pd.merge(unique_products_per_category_df, no_of_subcategory_within_category_df, on='ITEM_CATEGORY', how='outer')
+
+## Display the merged DataFrame
+st.dataframe(menu_item_cat_merged_df, width=0, hide_index=True)
+
+
+
+
+
+
 
 
 # EXPORT DATA OPTION #
