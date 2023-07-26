@@ -667,9 +667,10 @@ with zipfile.ZipFile(zip_file, 'w') as zipf:
     zipf.writestr("menu_item_category_table.csv", menu_item_cat_final_df_csv)
 
 # Provide the download link for the ZIP archive
-st.markdown("## Click the button below to download all CSV files")
+st.markdown("## Export Tables to CSV")
+st.write("Click the button below to download a zip file with all the tables above")
 st.download_button(
-    "Download All CSVs",
+    "Download",
     zip_file.getvalue(),
     "Tasty_Insights_Product_Team_Datasets.zip",
     "application/zip",
