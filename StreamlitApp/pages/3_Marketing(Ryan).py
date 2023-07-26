@@ -25,7 +25,7 @@ def pipeline(data):
     data=data.copy()
 
     ## Removing columns not used in transformation
-    cols_Not_Involved=["CUSTOMER_ID",'FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID']
+    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY']
     not_Involved=data[cols_Not_Involved]
     data.drop(cols_Not_Involved,axis=1,inplace=True)
 
@@ -127,8 +127,9 @@ def main() -> None:
     seg_model = load_model("assets/rfm_kmeans.jbl")
 
     # Setup: Get predictions
-    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(["CUSTOMER_ID",'FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID'],axis=1)),columns=['CHURNED'])
-    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(["CUSTOMER_ID",'FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID'],axis=1)),columns=['CLUSTER'])
+    cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY']
+    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop([cols_to_ignore],axis=1)),columns=['CHURNED'])
+    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop([cols_to_ignore],axis=1)),columns=['CLUSTER'])
     
     # Setup: Map predictions to understandable insights
     churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
@@ -172,7 +173,7 @@ def main() -> None:
 
     # Behavioral table
     st.markdown("### Member's Behaviour")
-    beha_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','FREQ_MENU_ITEM','FREQ_MENU_TYPE','FREQ_TRUCK_ID','LENGTH_OF_RELATIONSHIP']]
+    beha_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY','LENGTH_OF_RELATIONSHIP']]
     st.dataframe(beha_df, hide_index=True)
 
     # Overall Table
