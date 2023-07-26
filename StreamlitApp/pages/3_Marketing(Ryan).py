@@ -116,7 +116,7 @@ def main() -> None:
     with st.expander("Raw Dataframe"):
         st.write(df.head(10))
 
-
+    # Run pipeline
     clean_df,kmeans_df=pipeline(df)
 
     with st.expander("Cleaned and Transformed Data"):
@@ -168,12 +168,32 @@ def main() -> None:
 
     # Demographic table
     st.markdown("### Member's Demographic")
-    demo_df=filtered_data[['CUSTOMER_ID','GENDER','MARITAL_STATUS','CITY','CHILDREN_COUNT','AGE']]
+    ## Clean up columns
+    filtered_data['CHILDREN_COUNT'] = filtered_data['CHILDREN_COUNT'].map({
+    '0': "No",
+    '1': "Yes",
+    '2': "Yes",
+    '3': "Yes",
+    '4': "Yes",
+    '5+': "Yes",
+    'Undisclosed':'Undisclosed'})
+    filtered_data.rename({'CHILDREN_COUNT':'HAVE_CHILDREN'},inplace=True,errors='ignore',axis=1)
+    ## Display table
+    demo_df=filtered_data[['CUSTOMER_ID','GENDER','MARITAL_STATUS','CITY','HAVE_CHILDREN','AGE']]
     st.dataframe(demo_df, hide_index=True)
 
     # Behavioral table
     st.markdown("### Member's Behaviour")
-    beha_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY','LENGTH_OF_RELATIONSHIP']]
+    
+    ## Clean up columns
+    # # Convert 'LENGTH_OF_RELATIONSHIP' from days to years (with decimal point)
+    # filtered_data['LENGTH_OF_RELATIONSHIP_YEARS'] = filtered_data['LENGTH_OF_RELATIONSHIP'] / 365.25
+
+    # # Rename the new column to indicate it represents relationship duration in decimal years
+    # filtered_data.rename(columns={'LENGTH_OF_RELATIONSHIP': 'LENGTH_OF_RELATIONSHIP_DAYS'}, inplace=True)
+
+    ## Display table
+    beha_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','LENGTH_OF_RELATIONSHIP','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY']]
     st.dataframe(beha_df, hide_index=True)
 
     # Overall Table
