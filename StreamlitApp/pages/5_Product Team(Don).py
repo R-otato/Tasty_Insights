@@ -246,6 +246,94 @@ def menu_item_table():
 
     return final_product_df
 
+# Function: menu_item_cat_final_df
+# the purpose of this function is to carry out data manipulation to retrieve additional information for each menu item to form a separate table for the menu item categories
+def menu_item_cat_final_df():
+    # create initial final item category table
+    menu_item_cat_final_df = menu_table_df.sort_values(by='ITEM_CATEGORY')
+    menu_item_cat_final_df = menu_item_cat_final_df['ITEM_CATEGORY'].drop_duplicates().reset_index(drop=True)
+
+
+    # Get the number of menu items for each item category
+    ## group by ITEM_CATEGORY and calculate the number of unique MENU_ITEM_ID
+    unique_products_per_category_df = menu_table_df.groupby('ITEM_CATEGORY')['MENU_ITEM_ID'].nunique().reset_index()
+
+    ## rename the columns for clarity
+    unique_products_per_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_MENU_ITEMS']
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, unique_products_per_category_df, on='ITEM_CATEGORY', how='outer')
+
+
+    # Get the number of menu items for each subcategory grouped by item category
+    ## Pivot the DataFrame to get the count of each unique ITEM_SUBCATEGORY within each ITEM_CATEGORY
+    no_of_subcategory_within_category_df = pd.pivot_table(menu_table_df, index='ITEM_CATEGORY', columns='ITEM_SUBCATEGORY', values='MENU_ITEM_ID', aggfunc='count', fill_value=0)
+
+    ## Reset the index to make 'ITEM_CATEGORY' a regular column
+    no_of_subcategory_within_category_df.reset_index(inplace=True)
+
+    ## Rename the columns for clarity
+    no_of_subcategory_within_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_COLD_OPTIONS', 'NO_OF_HOT_OPTIONS', 'NO_OF_WARM_OPTIONS']
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, no_of_subcategory_within_category_df, on='ITEM_CATEGORY', how='outer')
+
+
+    # Get the average unit price for each item category
+    ##  Convert 'UNIT_PRICE' column to a numeric type
+    menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].astype(float)
+        
+    ## Group by ITEM_CATEGORY to get the average unit price for each category
+    avg_unit_price_per_category = menu_table_df.groupby('ITEM_CATEGORY')['UNIT_PRICE'].mean().reset_index()
+
+    ## Rename the column for clarity
+    avg_unit_price_per_category.rename(columns={'UNIT_PRICE': 'AVG_UNIT_PRICE'}, inplace=True)
+
+    ## round off sale price to 2dp
+    avg_unit_price_per_category['AVG_UNIT_PRICE'] = avg_unit_price_per_category['AVG_UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_unit_price_per_category, on='ITEM_CATEGORY', how='outer')
+
+
+    # Get the total quantity sold for each item category
+    ## Group by ITEM_CATEGORY to get the total quantity sold for each category
+    avg_qty_sold_per_category = merged_df.groupby('ITEM_CATEGORY')['QUANTITY'].sum().reset_index()
+
+    ## Rename the column for clarity
+    avg_qty_sold_per_category.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD'}, inplace=True)
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_qty_sold_per_category, on='ITEM_CATEGORY', how='outer')
+
+
+    # Get the total sales for each item category
+    ## Group by 'MENU_ITEM_ID' and calculate the total sales
+    avg_spending_per_category = merged_df.groupby('ITEM_CATEGORY')['PRODUCT_TOTAL'].sum().reset_index()
+
+    ## Rename the column for clarity
+    avg_spending_per_category.rename(columns={'PRODUCT_TOTAL': 'TOTAL_SALES'}, inplace=True)
+
+    ## round off sale price to 2dp
+    avg_spending_per_category['TOTAL_SALES'] = avg_spending_per_category['TOTAL_SALES'].apply(lambda x: '{:.2f}'.format(x))
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_spending_per_category, on='ITEM_CATEGORY', how='outer')
+
+
+    # Get the total number of transactions for each item category
+    ## Get the count of each menu_item_id in merged_df
+    menu_item_category_counts = merged_df['ITEM_CATEGORY'].value_counts().reset_index()
+
+    ## Rename the columns for clarity
+    menu_item_category_counts.columns = ['ITEM_CATEGORY', 'TOTAL NO. OF TRANSACTIONS']
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, menu_item_category_counts, on='ITEM_CATEGORY', how='outer')
+
+    return menu_item_cat_final_df
+
+
 
 #####################
 ##### MAIN CODE #####
@@ -330,11 +418,13 @@ menu_table_df = get_health_metrics_menu_table(menu_table_df)
 st.dataframe(menu_table_df, hide_index = True)
 
 
+
 # ORDER DETAILS TABLE #
 ## retrieve order details table from Snowflake
 ## manipulation to retrieve desired layout for table
 order_details_df = retrieve_order_details()
 st.dataframe(order_details_df, hide_index = True)
+
 
 
 # OVERALL TABLE #
@@ -349,8 +439,9 @@ st.markdown("## Overall Table")
 st.dataframe(merged_df, width=0, hide_index=True)
 
 
-# MENU ITEM TABLE #
 
+# MENU ITEM TABLE #
+## retrieve menu item table after manipulation
 final_product_df = menu_item_table()
 
 ## Display header
@@ -361,92 +452,15 @@ st.dataframe(final_product_df, hide_index=True)
 
 
 
-
-
 # MENU ITEM CATEGORY TABLE #
+## retrieve menu item cat table
+menu_item_cat_final_df = menu_item_cat_final_df()
 
 ## Display header
 st.markdown("## Menu Item Category Table")
 
-## Group by ITEM_CATEGORY and calculate the number of unique MENU_ITEM_ID
-unique_products_per_category_df = menu_table_df.groupby('ITEM_CATEGORY')['MENU_ITEM_ID'].nunique().reset_index()
-
-## Rename the columns for clarity
-unique_products_per_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_MENU_ITEMS']
-
-
-
-## Pivot the DataFrame to get the count of each unique ITEM_SUBCATEGORY within each ITEM_CATEGORY
-no_of_subcategory_within_category_df = pd.pivot_table(menu_table_df, index='ITEM_CATEGORY', columns='ITEM_SUBCATEGORY', values='MENU_ITEM_ID', aggfunc='count', fill_value=0)
-
-## Reset the index to make 'ITEM_CATEGORY' a regular column
-no_of_subcategory_within_category_df.reset_index(inplace=True)
-
-## Rename the columns for clarity
-no_of_subcategory_within_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_COLD_OPTIONS', 'NO_OF_HOT_OPTIONS', 'NO_OF_WARM_OPTIONS']
-
-
-
-##  Convert 'UNIT_PRICE' column to a numeric type
-menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].astype(float)
-    
-## Group by ITEM_CATEGORY to get the average unit price for each category
-avg_unit_price_per_category = menu_table_df.groupby('ITEM_CATEGORY')['UNIT_PRICE'].mean().reset_index()
-
-## Rename the column for clarity
-avg_unit_price_per_category.rename(columns={'UNIT_PRICE': 'AVG_UNIT_PRICE'}, inplace=True)
-
-# round off sale price to 2dp
-avg_unit_price_per_category['AVG_UNIT_PRICE'] = avg_unit_price_per_category['AVG_UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
-
-
-
-## Group by ITEM_CATEGORY to get the average quantity sold for each category
-avg_qty_sold_per_category = merged_df.groupby('ITEM_CATEGORY')['QUANTITY'].mean().reset_index()
-
-## Rename the column for clarity
-avg_qty_sold_per_category.rename(columns={'QUANTITY': 'AVG_QTY_SOLD'}, inplace=True)
-
-
-
-## Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
-avg_spending_per_category = merged_df.groupby('ITEM_CATEGORY')['PRODUCT_TOTAL'].mean().reset_index()
-
-## Rename the column for clarity
-avg_spending_per_category.rename(columns={'PRODUCT_TOTAL': 'AVG_SPENDING'}, inplace=True)
-
-
-
-## Get the count of each menu_item_id in merged_df
-menu_item_category_counts = merged_df['ITEM_CATEGORY'].value_counts().reset_index()
-
-## Rename the columns for clarity
-menu_item_category_counts.columns = ['ITEM_CATEGORY', 'TOTAL NO. OF TRANSACTIONS']
-
-
-
-
-
-## Merge the two DataFrames on 'ITEM_CATEGORY'
-menu_item_cat_merged_df = pd.merge(unique_products_per_category_df, no_of_subcategory_within_category_df, on='ITEM_CATEGORY', how='outer')
-
-## Merge avg_unit_price_per_category with menu_item_cat_merged_df
-menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, avg_unit_price_per_category, on='ITEM_CATEGORY', how='outer')
-
-## Merge avg_qty_sold_per_category with menu_item_cat_merged_df
-menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, avg_qty_sold_per_category, on='ITEM_CATEGORY', how='outer')
-
-## Merge avg_spending_per_category with menu_item_cat_merged_df
-menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, avg_spending_per_category, on='ITEM_CATEGORY', how='outer')
-
-## Merge menu_item_category_counts with menu_item_cat_merged_df
-menu_item_cat_merged_df = pd.merge(menu_item_cat_merged_df, menu_item_category_counts, on='ITEM_CATEGORY', how='outer')
-
-## round off sale price to 2dp
-menu_item_cat_merged_df['AVG_SPENDING'] = menu_item_cat_merged_df['AVG_SPENDING'].apply(lambda x: '{:.2f}'.format(x))
-
 ## Display the merged DataFrame
-st.dataframe(menu_item_cat_merged_df, width=0, hide_index=True)
+st.dataframe(menu_item_cat_final_df, width=0, hide_index=True)
 
 
 
