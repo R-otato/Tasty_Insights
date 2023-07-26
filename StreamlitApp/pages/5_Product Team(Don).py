@@ -152,10 +152,10 @@ def get_health_metrics_menu_table(menu_table_df):
 
     # Rename the columns
     menu_item_metrics = menu_item_metrics.rename(columns={
-        'is_dairy_free_flag': 'IS_DAIRY_FREE',
-        'is_gluten_free_flag': 'IS_GLUTEN_FREE',
-        'is_healthy_flag': 'IS_HEALTHY',
-        'is_nut_free_flag': 'IS_NUT_FREE'
+        'is_dairy_free_flag': 'DAIRY_FREE',
+        'is_gluten_free_flag': 'GLUTEN_FREE',
+        'is_healthy_flag': 'HEALTHY',
+        'is_nut_free_flag': 'NUT_FREE'
     })
 
     # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
@@ -237,7 +237,7 @@ def get_overall_table(order_details_df, menu_table_df):
 
     ## Define the desired column order
     desired_columns = ['ORDER_ID', 'CUSTOMER_ID', 'MENU_TYPE','TRUCK_BRAND_NAME',  'MENU_ITEM_ID', 'MENU_ITEM_NAME', 'ITEM_CATEGORY', 'ITEM_SUBCATEGORY',
-                    'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'UNIT_PRICE', 'QUANTITY', 'PRODUCT_TOTAL', 'COST_OF_GOODS', 'ORDER_TOTAL']
+                    'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE', 'UNIT_PRICE', 'QUANTITY', 'PRODUCT_TOTAL', 'COST_OF_GOODS', 'ORDER_TOTAL']
 
     ## Re-arrange the columns in the merged DataFrame
     merged_df = merged_df[desired_columns]
@@ -296,13 +296,17 @@ def get_overall_table(order_details_df, menu_table_df):
 def menu_item_table():
 
     # create initial final product table
-    final_product_df = menu_table_df[['MENU_ITEM_ID', 'MENU_ITEM_NAME', 'UNIT_PRICE']].sort_values(by='MENU_ITEM_ID')
+    final_product_df = menu_table_df[['MENU_ITEM_ID', 'MENU_ITEM_NAME', 'DAIRY_FREE', 'GLUTEN_FREE', 'NUT_FREE', 'HEALTHY', 
+                                      'UNIT_PRICE', 'UNIT_GROSS_PROFIT_MARGIN (%)', 'UNIT_NET_PROFIT_MARGIN (%)']].sort_values(by='MENU_ITEM_ID')
 
+    # create table with truck brand name and menu item id
+    item_id_truck_brand_name = menu_table_df[['MENU_ITEM_ID', 'TRUCK_BRAND_NAME']]
+    
     # Get the total quantity sold for each menu item 
     ## group by 'MENU_ITEM_ID' and calculate the total quantity sold
     total_qty_sold_per_item = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].sum().reset_index()
 
-    ## rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
+    ## rename the 'QUANTITY' column to 'TOTAL_QTY_SOLD'
     total_qty_sold_per_item = total_qty_sold_per_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD'})
 
     ## merge total_qty_sold_per_item with final_product_df
@@ -323,12 +327,26 @@ def menu_item_table():
     final_product_df = pd.merge(final_product_df, total_sales_per_item, on='MENU_ITEM_ID')
 
 
+    # Get the total profit for each menu item
+    ## convert 'PRODUCT_PROFIT' column to numeric
+    merged_df['PRODUCT_PROFIT'] = merged_df['PRODUCT_PROFIT'].astype(float)
+
+    ## group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
+    total_profit_per_item = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_PROFIT'].sum().reset_index()
+
+    ## rename the column for clarity
+    total_profit_per_item.rename(columns={'PRODUCT_PROFIT': 'TOTAL_PROFIT'}, inplace=True)
+
+    ## merge total_qty_sold_per_item with final_product_df
+    final_product_df = pd.merge(final_product_df, total_profit_per_item, on='MENU_ITEM_ID')
+
+
     # Get the total number of transactions for each menu item
     ## get the count of each menu_item_id in merged_df
     menu_item_counts = merged_df['MENU_ITEM_ID'].value_counts().reset_index()
 
     ## rename the columns for clarity
-    menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL NO. OF TRANSACTIONS']
+    menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL_TRANSACTIONS']
 
     ## sort the results by menu_item_id (optional)
     menu_item_counts = menu_item_counts.sort_values(by='MENU_ITEM_ID')
@@ -336,6 +354,15 @@ def menu_item_table():
     ## merge menu_item_counts with final_product_df
     final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
 
+
+    # Merge total_qty_sold_per_item with final_product_df
+    final_product_df = pd.merge(final_product_df, item_id_truck_brand_name, on='MENU_ITEM_ID')
+
+    # rename certain columns for more simplistic view
+    final_product_df = final_product_df.rename(columns={'MENU_ITEM_ID': 'ID'})
+    final_product_df = final_product_df.rename(columns={'MENU_ITEM_NAME': 'NAME'})
+    final_product_df = final_product_df.rename(columns={'UNIT_GROSS_PROFIT_MARGIN (%)': 'GROSS_PROFIT_MARGIN (%)'})
+    final_product_df = final_product_df.rename(columns={'UNIT_NET_PROFIT_MARGIN (%)': 'NET_PROFIT_MARGIN (%)'})
 
     # round off sale price to 2dp
     final_product_df['TOTAL_SALES'] = final_product_df['TOTAL_SALES'].apply(lambda x: '{:.2f}'.format(x))
@@ -422,7 +449,7 @@ def menu_item_cat_final_df():
     menu_item_category_counts = merged_df['ITEM_CATEGORY'].value_counts().reset_index()
 
     ## Rename the columns for clarity
-    menu_item_category_counts.columns = ['ITEM_CATEGORY', 'TOTAL NO. OF TRANSACTIONS']
+    menu_item_category_counts.columns = ['ITEM_CATEGORY', 'TOTAL_TRANSACTIONS']
 
     ## merge unique_products_per_category_df with menu_item_cat_final_df
     menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, menu_item_category_counts, on='ITEM_CATEGORY', how='outer')
