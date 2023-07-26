@@ -128,8 +128,8 @@ def main() -> None:
 
     # Setup: Get predictions
     cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY']
-    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop([cols_to_ignore],axis=1)),columns=['CHURNED'])
-    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop([cols_to_ignore],axis=1)),columns=['CLUSTER'])
+    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
+    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
     
     # Setup: Map predictions to understandable insights
     churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
