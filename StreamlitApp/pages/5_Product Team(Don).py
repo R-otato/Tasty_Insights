@@ -4,6 +4,8 @@ import pandas as pd
 import joblib 
 import snowflake.connector
 import ast
+import io
+import zipfile
 
 #--Functions--#
 
@@ -227,7 +229,7 @@ def retrieve_order_details():
 # Function: convert_df_to_csv
 # the purpose of this function is to convert the pandas dataframe to csv so that the user can export the data for further visualisation, exploration, or analysis
 def convert_df_to_csv(df):
-   return df.to_csv(index=False).encode('utf-8')
+   return df.to_csv(index=False).encode()
 
 # Function: get_overall_table
 # the purpose of this function is to merge the menu and order details table together to form an overall table
@@ -600,7 +602,7 @@ multi_select_custid_individual(data)
 ## manipulation to retrieve health metrics for each product
 menu_table_df = retrieve_menu_table()
 menu_table_df = get_health_metrics_menu_table(menu_table_df)
-st.dataframe(menu_table_df, hide_index = True)
+#st.dataframe(menu_table_df, hide_index = True)
 
 
 
@@ -608,7 +610,7 @@ st.dataframe(menu_table_df, hide_index = True)
 ## retrieve order details table from Snowflake
 ## manipulation to retrieve desired layout for table
 order_details_df = retrieve_order_details()
-st.dataframe(order_details_df, hide_index = True)
+#st.dataframe(order_details_df, hide_index = True)
 
 
 
@@ -649,21 +651,27 @@ st.dataframe(menu_item_cat_final_df, width=0, hide_index=True)
 
 
 
+# EXPORT DATA TO CSV BUTTON #
 
+# Assuming you have three DataFrames: df1, df2, and df3
+# Convert each DataFrame to CSV bytes
+merged_df_csv = convert_df_to_csv(merged_df)
+final_product_df_csv = convert_df_to_csv(final_product_df)
+menu_item_cat_final_df_csv = convert_df_to_csv(menu_item_cat_final_df)
 
+# Create a ZIP archive containing all the CSV files
+zip_file = io.BytesIO()
+with zipfile.ZipFile(zip_file, 'w') as zipf:
+    zipf.writestr("overall_table.csv", merged_df_csv)
+    zipf.writestr("menu_item_table.csv", final_product_df_csv)
+    zipf.writestr("menu_item_category_table.csv", menu_item_cat_final_df_csv)
 
-
-
-
-
-# EXPORT DATA OPTION #
-st.header('Export data to .csv')
-st.write("Click the button below to export the overall table to csv format")
-csv = convert_df_to_csv(merged_df)
+# Provide the download link for the ZIP archive
+st.markdown("## Click the button below to download all CSV files")
 st.download_button(
-"Download",
-csv,
-"Tasty Insights - Product Team.csv",
-"text/csv",
-key='download-csv'
+    "Download All CSVs",
+    zip_file.getvalue(),
+    "Tasty_Insights_Product_Team_Datasets.zip",
+    "application/zip",
+    key='download-csv'
 )
