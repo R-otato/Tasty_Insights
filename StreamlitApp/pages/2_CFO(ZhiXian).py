@@ -171,11 +171,13 @@ data=pd.concat([customer_id, predictions], axis=1)
 output_data = pd.concat([data, demo_df[["GENDER", "CITY", "AGE"]]], axis=1)
     
 churn_rate = predictions[['CHURNED']].sum()/predictions.count()
-    
 
     # Presenting Churn Rate
 value = round(churn_rate.iloc[0] * 100, 2)
 st.metric('Churn Rate', f"{value}%")
+
+with st.expander("Output Data"):
+      st.write(output_data)
 
     # temporary test
 output = convert_df(output_data)

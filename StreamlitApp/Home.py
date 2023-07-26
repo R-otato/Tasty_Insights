@@ -75,6 +75,9 @@ st.write("""
 
     Through the prediction of churn rate we will imply the average days to next orders and in turn predict the potential sales of
     following month allowing for projection in sales and allow for informed steps to be taken in terms of operations and strategy.
+         
+    Customer recurssion is important for a businesses growth where when the return rate or the days to next orders is low the sales is
+    likely to increase as well.
 
     Churn is a twin to customer recurssion, for the sake of predictions and model building internally we refer to the term as churn,
     in a business context the better term is recurssion or how often the customer will return. By identifying cause and effect,
@@ -86,6 +89,16 @@ st.dataframe(
   df_CTS,
   hide_index=True
 )
+"""
+### Column Explainer
+1) Churn Rate: The percentage of customers or transactions that lead to a day to next order greater than 9 days
+2) Sales: The amount of sales in the month period
+3) Year: The year in which the data is from
+4) Month: The month in which the data is from
+5) Unique Customers: The number of unique customers in that month period where the data is from
+6) Change in CR: The change in churn rate from previous month
+7) Change in Sales: The change in sales from previous month
+"""
 
 """
 ### DISCLAIMER:
