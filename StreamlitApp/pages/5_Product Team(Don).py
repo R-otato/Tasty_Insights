@@ -62,7 +62,6 @@ def multi_select_custid_individual(data):
 # Function: retrive_menu_table
 # the purpose of this function is to retrieve the menu table from snowflake containing all the details of the menu items which will then be merged with the transactions info to help the product team gain insight
 def retrieve_menu_table():
-    # RETRIEVE MENU TABLE FROM SNOWFLAKE
     ## get connection to snowflake
     my_cnx = snowflake.connector.connect(
         user = "RLIAM",
@@ -74,21 +73,40 @@ def retrieve_menu_table():
         schema = "raw_pos"
     )
 
-    ## retrieve menu table from snowflake
+    # retrieve menu table from snowflake
     my_cur = my_cnx.cursor()
-    my_cur.execute("select MENU_TYPE, TRUCK_BRAND_NAME, MENU_ITEM_ID, MENU_ITEM_NAME, ITEM_CATEGORY, ITEM_SUBCATEGORY, SALE_PRICE_USD, MENU_ITEM_HEALTH_METRICS_OBJ from menu")
+    my_cur.execute("select MENU_TYPE, TRUCK_BRAND_NAME, MENU_ITEM_ID, MENU_ITEM_NAME, ITEM_CATEGORY, ITEM_SUBCATEGORY, SALE_PRICE_USD, COST_OF_GOODS_USD, MENU_ITEM_HEALTH_METRICS_OBJ from menu")
     menu_table = my_cur.fetchall()
 
-    ## create a DataFrame from the fetched result
-    ## remove cost of goods column due to irrelevance
+    # create a DataFrame from the fetched result
+    # remove cost of goods column due to irrelevance
     menu_table_df = pd.DataFrame(menu_table, columns=['MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
-                                                    'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
+                                                    'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'COST_OF_GOODS_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
 
-    # Rename the 'SALE_PRICE_USD' column to 'UNIT_PRICE'
+    # rename the 'SALE_PRICE_USD' column to 'UNIT_PRICE'
     menu_table_df = menu_table_df.rename(columns={'SALE_PRICE_USD': 'UNIT_PRICE'})
 
+    # rename the 'COST_OF_GOODS_USED' to 'COST_OF_GOODS'
+    menu_table_df = menu_table_df.rename(columns={'COST_OF_GOODS_USD': 'COST_OF_GOODS'})
+    
+    # Add profit column
+    ## calculate the profit column
+    profit_column = menu_table_df['UNIT_PRICE'] - menu_table_df['COST_OF_GOODS']
+
+    ## get the index of the 'COST_OF_GOODS' column
+    cost_of_goods_index = menu_table_df.columns.get_loc('COST_OF_GOODS')
+
+    ## insert the 'profit' column to the right of the 'COST_OF_GOODS' column
+    menu_table_df.insert(cost_of_goods_index + 1, 'UNIT_PROFIT', profit_column)
+    
     # round off sale price to 2dp
     menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
+    
+    # round off cost of goods price to 2dp
+    menu_table_df['COST_OF_GOODS'] = menu_table_df['COST_OF_GOODS'].apply(lambda x: '{:.2f}'.format(x))
+    
+    # round off profit amount to 2dp
+    menu_table_df['UNIT_PROFIT'] = menu_table_df['UNIT_PROFIT'].apply(lambda x: '{:.2f}'.format(x))
     
     return menu_table_df
 
