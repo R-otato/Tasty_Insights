@@ -226,6 +226,10 @@ def get_overall_table(order_details_df, menu_table_df):
     ## insert the 'profit' column to the right of the 'COST_OF_GOODS' column
     merged_df.insert(cost_of_goods_index + 1, 'PRODUCT_PROFIT', profit_column)
     
+    # reformat PRODUCT_COSTS and PRODUCT_PROFIT to be displayed in 2dp format
+    merged_df['PRODUCT_COSTS'] = merged_df['PRODUCT_COSTS'].apply(lambda x: '{:.2f}'.format(x))
+    merged_df['PRODUCT_PROFIT'] = merged_df['PRODUCT_PROFIT'].apply(lambda x: '{:.2f}'.format(x))
+    
     return merged_df
 
 # Function: menu_item_table
