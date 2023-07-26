@@ -382,7 +382,7 @@ def menu_item_cat_final_df():
     unique_products_per_category_df = menu_table_df.groupby('ITEM_CATEGORY')['MENU_ITEM_ID'].nunique().reset_index()
 
     ## rename the columns for clarity
-    unique_products_per_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_MENU_ITEMS']
+    unique_products_per_category_df.columns = ['ITEM_CATEGORY', 'MENU_ITEMS']
 
     ## merge unique_products_per_category_df with menu_item_cat_final_df
     menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, unique_products_per_category_df, on='ITEM_CATEGORY', how='outer')
@@ -396,11 +396,18 @@ def menu_item_cat_final_df():
     no_of_subcategory_within_category_df.reset_index(inplace=True)
 
     ## Rename the columns for clarity
-    no_of_subcategory_within_category_df.columns = ['ITEM_CATEGORY', 'NO_OF_COLD_OPTIONS', 'NO_OF_HOT_OPTIONS', 'NO_OF_WARM_OPTIONS']
+    no_of_subcategory_within_category_df.columns = ['ITEM_CATEGORY', 'COLD_OPTIONS', 'HOT_OPTIONS', 'WARM_OPTIONS']
 
     ## merge unique_products_per_category_df with menu_item_cat_final_df
     menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, no_of_subcategory_within_category_df, on='ITEM_CATEGORY', how='outer')
 
+
+    # Group by 'ITEM_CATEGORY' and sum the 'Yes' values for each column
+    health_metrics_counts = menu_table_df.groupby('ITEM_CATEGORY')[['DAIRY_FREE', 'GLUTEN_FREE', 'NUT_FREE', 'HEALTHY']].apply(lambda x: (x == 'Yes').sum()).reset_index()
+
+    ## merge 4 columns containing number of items for each health metric with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, health_metrics_counts, on='ITEM_CATEGORY', how='outer')
+    
 
     # Get the average unit price for each item category
     ##  Convert 'UNIT_PRICE' column to a numeric type
