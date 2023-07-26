@@ -83,11 +83,13 @@ def retrieve_menu_table():
     menu_table_df = pd.DataFrame(menu_table, columns=['MENU_TYPE', 'TRUCK_BRAND_NAME', 'MENU_ITEM_ID', 'MENU_ITEM_NAME', 
                                                     'ITEM_CATEGORY', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'COST_OF_GOODS_USD', 'MENU_ITEM_HEALTH_METRICS_OBJ'])
 
+
     # rename the 'SALE_PRICE_USD' column to 'UNIT_PRICE'
     menu_table_df = menu_table_df.rename(columns={'SALE_PRICE_USD': 'UNIT_PRICE'})
 
     # rename the 'COST_OF_GOODS_USED' to 'COST_OF_GOODS'
     menu_table_df = menu_table_df.rename(columns={'COST_OF_GOODS_USD': 'COST_OF_GOODS'})
+    
     
     # Add profit column
     ## calculate the profit column
@@ -99,6 +101,29 @@ def retrieve_menu_table():
     ## insert the 'profit' column to the right of the 'COST_OF_GOODS' column
     menu_table_df.insert(cost_of_goods_index + 1, 'UNIT_PROFIT', profit_column)
     
+    
+    # Add gross profit margin column
+    ## calculate gross profit margin
+    gross_profit_margin = ((menu_table_df['UNIT_PRICE'] - menu_table_df['COST_OF_GOODS']) / menu_table_df['UNIT_PRICE']) * 100
+    
+    ## get the index of the 'UNIT_PROFIT' column
+    unit_profit_index = menu_table_df.columns.get_loc('UNIT_PROFIT')
+    
+    ## insert the 'UNIT_GROSS_PROFIT_MARGIN (%)' column to the right of the 'UNIT_PROFIT' column
+    menu_table_df.insert(unit_profit_index + 1, 'UNIT_GROSS_PROFIT_MARGIN (%)', gross_profit_margin)
+    
+    
+    # Add net profit margin column
+    ## calculate net profit margin
+    net_profit_margin = (menu_table_df['UNIT_PROFIT'] / menu_table_df['UNIT_PRICE']) * 100
+    
+    ## get the index of the 'UNIT_GROSS_PROFIT_MARGIN (%)' column
+    unit_gross_profit_margin_index = menu_table_df.columns.get_loc('UNIT_GROSS_PROFIT_MARGIN (%)')
+    
+    ## insert the 'UNIT_GROSS_PROFIT_MARGIN (%)' column to the right of the 'UNIT_PROFIT' column
+    menu_table_df.insert(unit_gross_profit_margin_index + 1, 'UNIT_NET_PROFIT_MARGIN (%)', net_profit_margin)
+    
+    
     # round off sale price to 2dp
     menu_table_df['UNIT_PRICE'] = menu_table_df['UNIT_PRICE'].apply(lambda x: '{:.2f}'.format(x))
     
@@ -107,6 +132,12 @@ def retrieve_menu_table():
     
     # round off profit amount to 2dp
     menu_table_df['UNIT_PROFIT'] = menu_table_df['UNIT_PROFIT'].apply(lambda x: '{:.2f}'.format(x))
+    
+    # round off gross profit margin to 2dp
+    menu_table_df['UNIT_GROSS_PROFIT_MARGIN (%)'] = menu_table_df['UNIT_GROSS_PROFIT_MARGIN (%)'].apply(lambda x: '{:.1f}'.format(x))
+    
+    # round off net profit margin to 2dp
+    menu_table_df['UNIT_NET_PROFIT_MARGIN (%)'] = menu_table_df['UNIT_NET_PROFIT_MARGIN (%)'].apply(lambda x: '{:.1f}'.format(x))
     
     return menu_table_df
 
