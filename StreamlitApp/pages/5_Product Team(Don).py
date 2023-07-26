@@ -302,55 +302,63 @@ st.dataframe(merged_df, width=0, hide_index=True)
 
 # MENU ITEM TABLE #
 
-final_product_df = menu_table_df[['MENU_ITEM_ID', 'MENU_ITEM_NAME', 'UNIT_PRICE']].sort_values(by='MENU_ITEM_ID')
+def menu_item_table():
 
-## Group by 'MENU_ITEM_ID' and calculate the total quantity sold
-total_qty_sold_per_item = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].sum().reset_index()
+    # create initial final product table
+    final_product_df = menu_table_df[['MENU_ITEM_ID', 'MENU_ITEM_NAME', 'UNIT_PRICE']].sort_values(by='MENU_ITEM_ID')
 
-## Rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
-total_qty_sold_per_item = total_qty_sold_per_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD'})
+    # Get the total quantity sold for each menu item 
+    ## group by 'MENU_ITEM_ID' and calculate the total quantity sold
+    total_qty_sold_per_item = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].sum().reset_index()
 
-## merge total_qty_sold_per_item with final_product_df
-final_product_df = pd.merge(final_product_df, total_qty_sold_per_item, on='MENU_ITEM_ID')
+    ## rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
+    total_qty_sold_per_item = total_qty_sold_per_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD'})
 
-
-
-## Convert 'PRODUCT_TOTAL' column to numeric
-merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].astype(float)
-
-## Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
-total_sales_per_item = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].sum().reset_index()
-
-## Rename the column for clarity
-total_sales_per_item.rename(columns={'PRODUCT_TOTAL': 'TOTAL_SALES'}, inplace=True)
-
-## merge total_qty_sold_per_item with final_product_df
-final_product_df = pd.merge(final_product_df, total_sales_per_item, on='MENU_ITEM_ID')
+    ## merge total_qty_sold_per_item with final_product_df
+    final_product_df = pd.merge(final_product_df, total_qty_sold_per_item, on='MENU_ITEM_ID')
 
 
+    # Get the total sales for each menu item
+    ## convert 'PRODUCT_TOTAL' column to numeric
+    merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].astype(float)
 
-## Get the count of each menu_item_id in merged_df
-menu_item_counts = merged_df['MENU_ITEM_ID'].value_counts().reset_index()
+    ## group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
+    total_sales_per_item = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].sum().reset_index()
 
-## Rename the columns for clarity
-menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL NO. OF TRANSACTIONS']
+    ## rename the column for clarity
+    total_sales_per_item.rename(columns={'PRODUCT_TOTAL': 'TOTAL_SALES'}, inplace=True)
 
-## Sort the results by menu_item_id (optional)
-menu_item_counts = menu_item_counts.sort_values(by='MENU_ITEM_ID')
-
-## Merge menu_item_counts with final_product_df
-final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
+    ## merge total_qty_sold_per_item with final_product_df
+    final_product_df = pd.merge(final_product_df, total_sales_per_item, on='MENU_ITEM_ID')
 
 
-## round off sale price to 2dp
-final_product_df['TOTAL_SALES'] = final_product_df['TOTAL_SALES'].apply(lambda x: '{:.2f}'.format(x))
+    # Get the total number of transactions for each menu item
+    ## get the count of each menu_item_id in merged_df
+    menu_item_counts = merged_df['MENU_ITEM_ID'].value_counts().reset_index()
 
+    ## rename the columns for clarity
+    menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL NO. OF TRANSACTIONS']
+
+    ## sort the results by menu_item_id (optional)
+    menu_item_counts = menu_item_counts.sort_values(by='MENU_ITEM_ID')
+
+    ## merge menu_item_counts with final_product_df
+    final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
+
+
+    # round off sale price to 2dp
+    final_product_df['TOTAL_SALES'] = final_product_df['TOTAL_SALES'].apply(lambda x: '{:.2f}'.format(x))
+
+    return final_product_df
+
+
+final_product_df = menu_item_table()
 
 ## Display header
 st.markdown("## Menu Item Table")
 
 ## Display the merged DataFrame
-st.dataframe(final_product_df, width=0, hide_index=True)
+st.dataframe(final_product_df, hide_index=True)
 
 
 
