@@ -278,14 +278,14 @@ multi_select_custid_individual(data)
 ## manipulation to retrieve health metrics for each product
 menu_table_df = retrieve_menu_table()
 menu_table_df = get_health_metrics_menu_table(menu_table_df)
-#st.dataframe(menu_table_df, hide_index = True)
+st.dataframe(menu_table_df, hide_index = True)
 
 
 # ORDER DETAILS TABLE #
 ## retrieve order details table from Snowflake
 ## manipulation to retrieve desired layout for table
 order_details_df = retrieve_order_details()
-#st.dataframe(order_details_df, hide_index = True)
+st.dataframe(order_details_df, hide_index = True)
 
 
 # OVERALL TABLE #
@@ -301,21 +301,32 @@ st.dataframe(merged_df, width=0, hide_index=True)
 
 
 # MENU ITEM TABLE #
-## Group by 'MENU_ITEM_ID' and calculate the average 'QUANTITY'
-product = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].mean().reset_index()
+
+final_product_df = menu_table_df[['MENU_ITEM_ID', 'MENU_ITEM_NAME', 'UNIT_PRICE']].sort_values(by='MENU_ITEM_ID')
+
+## Group by 'MENU_ITEM_ID' and calculate the total quantity sold
+total_qty_sold_per_item = merged_df.groupby('MENU_ITEM_ID')['QUANTITY'].sum().reset_index()
 
 ## Rename the 'QUANTITY' column to 'AVERAGE_QUANTITY'
-product = product.rename(columns={'QUANTITY': 'AVG_QTY_SOLD'})
+total_qty_sold_per_item = total_qty_sold_per_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD'})
+
+## merge total_qty_sold_per_item with final_product_df
+final_product_df = pd.merge(final_product_df, total_qty_sold_per_item, on='MENU_ITEM_ID')
+
+
 
 ## Convert 'PRODUCT_TOTAL' column to numeric
 merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].astype(float)
 
-
 ## Group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
-product2 = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].mean().reset_index()
+total_sales_per_item = merged_df.groupby('MENU_ITEM_ID')['PRODUCT_TOTAL'].sum().reset_index()
 
 ## Rename the column for clarity
-product2.rename(columns={'PRODUCT_TOTAL': 'AVG_SPENDING'}, inplace=True)
+total_sales_per_item.rename(columns={'PRODUCT_TOTAL': 'TOTAL_SALES'}, inplace=True)
+
+## merge total_qty_sold_per_item with final_product_df
+final_product_df = pd.merge(final_product_df, total_sales_per_item, on='MENU_ITEM_ID')
+
 
 
 ## Get the count of each menu_item_id in merged_df
@@ -327,15 +338,13 @@ menu_item_counts.columns = ['MENU_ITEM_ID', 'TOTAL NO. OF TRANSACTIONS']
 ## Sort the results by menu_item_id (optional)
 menu_item_counts = menu_item_counts.sort_values(by='MENU_ITEM_ID')
 
-
-
-## Merge 'product' and 'product2' DataFrames based on 'MENU_ITEM_ID'
-final_product_df = pd.merge(product, product2, on='MENU_ITEM_ID')
-
+## Merge menu_item_counts with final_product_df
 final_product_df = pd.merge(final_product_df, menu_item_counts, on='MENU_ITEM_ID')
 
+
 ## round off sale price to 2dp
-final_product_df['AVG_SPENDING'] = final_product_df['AVG_SPENDING'].apply(lambda x: '{:.2f}'.format(x))
+final_product_df['TOTAL_SALES'] = final_product_df['TOTAL_SALES'].apply(lambda x: '{:.2f}'.format(x))
+
 
 ## Display header
 st.markdown("## Menu Item Table")
