@@ -206,10 +206,25 @@ def get_overall_table(order_details_df, menu_table_df):
 
     ## Define the desired column order
     desired_columns = ['ORDER_ID', 'CUSTOMER_ID', 'MENU_TYPE','TRUCK_BRAND_NAME',  'MENU_ITEM_ID', 'MENU_ITEM_NAME', 'ITEM_CATEGORY', 'ITEM_SUBCATEGORY',
-                    'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'QUANTITY', 'UNIT_PRICE', 'PRODUCT_TOTAL', 'ORDER_TOTAL']
+                    'IS_DAIRY_FREE', 'IS_GLUTEN_FREE', 'IS_HEALTHY', 'IS_NUT_FREE', 'UNIT_PRICE', 'QUANTITY', 'PRODUCT_TOTAL', 'COST_OF_GOODS', 'ORDER_TOTAL']
 
     ## Re-arrange the columns in the merged DataFrame
     merged_df = merged_df[desired_columns]
+    
+    merged_df['COST_OF_GOODS'] = merged_df['COST_OF_GOODS'].astype(float) * merged_df['QUANTITY'].astype(int)
+    
+    # rename the 'COST_OF_GOODS_USED' to 'COST_OF_GOODS'
+    merged_df = merged_df.rename(columns={'COST_OF_GOODS': 'PRODUCT_COSTS'})
+        
+    # Add profit column
+    ## calculate the profit column
+    profit_column = merged_df['PRODUCT_TOTAL'].astype(float) - merged_df['PRODUCT_COSTS'].astype(float)
+
+    ## get the index of the 'COST_OF_GOODS' column
+    cost_of_goods_index = merged_df.columns.get_loc('PRODUCT_COSTS')
+
+    ## insert the 'profit' column to the right of the 'COST_OF_GOODS' column
+    merged_df.insert(cost_of_goods_index + 1, 'PRODUCT_PROFIT', profit_column)
     
     return merged_df
 
