@@ -133,10 +133,10 @@ def retrieve_menu_table():
     # round off profit amount to 2dp
     menu_table_df['UNIT_PROFIT'] = menu_table_df['UNIT_PROFIT'].apply(lambda x: '{:.2f}'.format(x))
     
-    # round off gross profit margin to 2dp
+    # round off gross profit margin to 1dp
     menu_table_df['UNIT_GROSS_PROFIT_MARGIN (%)'] = menu_table_df['UNIT_GROSS_PROFIT_MARGIN (%)'].apply(lambda x: '{:.1f}'.format(x))
     
-    # round off net profit margin to 2dp
+    # round off net profit margin to 1dp
     menu_table_df['UNIT_NET_PROFIT_MARGIN (%)'] = menu_table_df['UNIT_NET_PROFIT_MARGIN (%)'].apply(lambda x: '{:.1f}'.format(x))
     
     return menu_table_df
@@ -256,6 +256,34 @@ def get_overall_table(order_details_df, menu_table_df):
 
     ## insert the 'profit' column to the right of the 'COST_OF_GOODS' column
     merged_df.insert(cost_of_goods_index + 1, 'PRODUCT_PROFIT', profit_column)
+    
+    
+    # Add gross profit margin column
+    ## calculate gross profit margin
+    gross_profit_margin = ((merged_df['PRODUCT_TOTAL'].astype(float) - merged_df['PRODUCT_COSTS'].astype(float)) / merged_df['PRODUCT_TOTAL'].astype(float)) * 100
+    
+    ## get the index of the 'PRODUCT_PROFIT' column
+    unit_profit_index = merged_df.columns.get_loc('PRODUCT_PROFIT')
+    
+    ## insert the 'GROSS_PROFIT_MARGIN (%)' column to the right of the 'PRODUCT_PROFIT' column
+    merged_df.insert(unit_profit_index + 1, 'GROSS_PROFIT_MARGIN (%)', gross_profit_margin)
+    
+    ## display in 1dp
+    merged_df['GROSS_PROFIT_MARGIN (%)'] = merged_df['GROSS_PROFIT_MARGIN (%)'].apply(lambda x: '{:.1f}'.format(x))
+    
+    
+    # Add net profit margin column
+    ## calculate net profit margin
+    net_profit_margin = (merged_df['PRODUCT_PROFIT'].astype(float) / merged_df['PRODUCT_TOTAL'].astype(float)) * 100
+    
+    ## get the index of the 'GROSS_PROFIT_MARGIN (%)' column
+    unit_gross_profit_margin_index = merged_df.columns.get_loc('GROSS_PROFIT_MARGIN (%)')
+    
+    ## insert the 'NET_PROFIT_MARGIN (%)' column to the right of the 'GROSS_PROFIT_MARGIN (%)' column
+    merged_df.insert(unit_gross_profit_margin_index + 1, 'NET_PROFIT_MARGIN (%)', net_profit_margin)
+    
+    ## display in 1dp
+    merged_df['NET_PROFIT_MARGIN (%)'] = merged_df['NET_PROFIT_MARGIN (%)'].apply(lambda x: '{:.1f}'.format(x))
     
     # reformat PRODUCT_COSTS and PRODUCT_PROFIT to be displayed in 2dp format
     merged_df['PRODUCT_COSTS'] = merged_df['PRODUCT_COSTS'].apply(lambda x: '{:.2f}'.format(x))
