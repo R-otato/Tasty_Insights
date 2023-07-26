@@ -419,7 +419,42 @@ def menu_item_cat_final_df():
     menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_unit_price_per_category, on='ITEM_CATEGORY', how='outer')
 
 
+    # Get the average gross profit margin for each item category
+    merged_df['GROSS_PROFIT_MARGIN (%)'] = merged_df['GROSS_PROFIT_MARGIN (%)'].astype(float)
+    
+    ## Group by ITEM_CATEGORY to get the total quantity sold for each category
+    avg_gross_profit_margin_per_category = merged_df.groupby('ITEM_CATEGORY')['GROSS_PROFIT_MARGIN (%)'].mean().reset_index()
+
+    ## Rename the column for clarity
+    avg_gross_profit_margin_per_category.rename(columns={'GROSS_PROFIT_MARGIN (%)': 'AVG_GROSS_PROFIT_MARGIN (%)'}, inplace=True)
+
+    ## round off gross profit margin to 2dp
+    avg_gross_profit_margin_per_category['AVG_GROSS_PROFIT_MARGIN (%)'] = avg_gross_profit_margin_per_category['AVG_GROSS_PROFIT_MARGIN (%)'].apply(lambda x: '{:.2f}'.format(x))
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_gross_profit_margin_per_category, on='ITEM_CATEGORY', how='outer')
+    
+
+    # Get the average net profit margin for each item category
+    merged_df['NET_PROFIT_MARGIN (%)'] = merged_df['NET_PROFIT_MARGIN (%)'].astype(float)
+    
+    ## Group by ITEM_CATEGORY to get the total quantity sold for each category
+    avg_net_profit_margin_per_category = merged_df.groupby('ITEM_CATEGORY')['NET_PROFIT_MARGIN (%)'].mean().reset_index()
+
+    ## Rename the column for clarity
+    avg_net_profit_margin_per_category.rename(columns={'NET_PROFIT_MARGIN (%)': 'AVG_NET_PROFIT_MARGIN (%)'}, inplace=True)
+
+    ## round off gross profit margin to 2dp
+    avg_net_profit_margin_per_category['AVG_NET_PROFIT_MARGIN (%)'] = avg_net_profit_margin_per_category['AVG_NET_PROFIT_MARGIN (%)'].apply(lambda x: '{:.2f}'.format(x))
+
+    ## merge unique_products_per_category_df with menu_item_cat_final_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_net_profit_margin_per_category, on='ITEM_CATEGORY', how='outer')
+    
+
     # Get the total quantity sold for each item category
+    ## convert 'QUANTITY' column to numeric
+    merged_df['QUANTITY'] = merged_df['QUANTITY'].astype(int)
+    
     ## Group by ITEM_CATEGORY to get the total quantity sold for each category
     avg_qty_sold_per_category = merged_df.groupby('ITEM_CATEGORY')['QUANTITY'].sum().reset_index()
 
@@ -431,6 +466,9 @@ def menu_item_cat_final_df():
 
 
     # Get the total sales for each item category
+    ## convert 'PRODUCT_TOTAL' column to numeric
+    merged_df['PRODUCT_TOTAL'] = merged_df['PRODUCT_TOTAL'].astype(float)
+    
     ## Group by 'MENU_ITEM_ID' and calculate the total sales
     avg_spending_per_category = merged_df.groupby('ITEM_CATEGORY')['PRODUCT_TOTAL'].sum().reset_index()
 
@@ -442,6 +480,23 @@ def menu_item_cat_final_df():
 
     ## merge unique_products_per_category_df with menu_item_cat_final_df
     menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, avg_spending_per_category, on='ITEM_CATEGORY', how='outer')
+
+
+    # Get the total profit for each menu item
+    ## convert 'PRODUCT_PROFIT' column to numeric
+    merged_df['PRODUCT_PROFIT'] = merged_df['PRODUCT_PROFIT'].astype(float)
+
+    ## group by 'MENU_ITEM_ID' and calculate the average 'PRODUCT_TOTAL'
+    total_profit_per_category = merged_df.groupby('ITEM_CATEGORY')['PRODUCT_PROFIT'].sum().reset_index()
+
+    ## rename the column for clarity
+    total_profit_per_category.rename(columns={'PRODUCT_PROFIT': 'TOTAL_PROFIT'}, inplace=True)
+
+    ## merge total_qty_sold_per_item with final_product_df
+    menu_item_cat_final_df = pd.merge(menu_item_cat_final_df, total_profit_per_category, on='ITEM_CATEGORY', how='outer')
+
+    # round off total profit price to 2dp
+    menu_item_cat_final_df['TOTAL_PROFIT'] = menu_item_cat_final_df['TOTAL_PROFIT'].apply(lambda x: '{:.2f}'.format(x))
 
 
     # Get the total number of transactions for each item category
