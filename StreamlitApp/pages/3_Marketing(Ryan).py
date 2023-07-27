@@ -25,7 +25,7 @@ def pipeline(data):
     data=data.copy()
 
     ## Removing columns not used in transformation
-    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
+    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
     not_Involved=data[cols_Not_Involved]
     data.drop(cols_Not_Involved,axis=1,inplace=True)
 
@@ -127,7 +127,7 @@ def main() -> None:
     seg_model = load_model("assets/rfm_kmeans.jbl")
 
     # Setup: Get predictions
-    cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
+    cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
     churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
     kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
     
@@ -200,7 +200,7 @@ def main() -> None:
     # filtered_data.rename(columns={'LENGTH_OF_RELATIONSHIP': 'LENGTH_OF_RELATIONSHIP_DAYS'}, inplace=True)
 
     ## Display table
-    beha_df=filtered_data[['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_ID','PREFERRED_TIME_OF_DAY']]
+    beha_df=filtered_data[['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY']]
     st.dataframe(beha_df, hide_index=True)
 
     # Overall Table
