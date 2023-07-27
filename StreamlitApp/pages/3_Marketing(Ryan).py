@@ -144,6 +144,9 @@ def main() -> None:
     data=pd.concat([df,kmeans_pred],axis=1)
     data=pd.concat([data, churn_pred], axis=1)
 
+    # High Level Goals
+    st.markdown("## High Level Goals: Sales")
+
     # Display predictions
     st.markdown("## Member Segmentation and Churn Prediction Results")
 
