@@ -11,7 +11,7 @@ import plotly.express as px
 import joblib 
 
 # path to assets
-path = 'assets/'
+path = ''
 
 st.set_page_config(page_title="Churn Prediction", page_icon="💀")
 
