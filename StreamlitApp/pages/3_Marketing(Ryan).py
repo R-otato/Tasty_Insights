@@ -11,6 +11,9 @@ from pandas.api.types import (
     is_numeric_dtype,
     is_object_dtype,
 )
+from PIL import Image
+import math
+from datetime import datetime
 
 
 #################
@@ -88,8 +91,73 @@ def main() -> None:
     tab1, tab2 = st.tabs(["High Level Goals", "Model Prediction"])
     with tab1:
         # High Level Goals
-        st.markdown("## High Level Goals: Sales")
+        st.markdown("## High Level Goals")
+        st.write("""As stated in our homepage, our team is dedicated to assisting Tasty Bytes in achieving its ambitious goals over the next 5 years. 
+                 In particular, we aim to assist helping Tasty Bytes achieve a remarkable 25% Year-Over-Year increase, with the objective of elevating 
+                 annual sales from \$105M to an impressive \$320M. This page is designed exclusively for the marketing team, showcasing our data-driven 
+                 approach to empower and elevate your marketing strategies, ultimately driving significant sales growth.""")
         
+        st.markdown('### How to Utilize the Predictions')
+        st.write(
+        """
+        In the Model Prediction tab, you will have access to valuable insights derived from both the Segmentation and Churn prediction models. These predictions empower you to:
+
+        - Explore Customer Segments: Dive into the different segments within your member base, understanding their unique behaviors and preferences.
+        - Identify Churn Likelihood: Gain visibility into which members are likely to churn or remain engaged, predicting their purchase behavior in the next 14 days.
+        - Targeted Marketing Strategies: Armed with these predictions, you can design targeted marketing schemes tailored to specific segments or groups of customers, 
+        maximizing the impact of your campaigns.
+
+        Leveraging these data-driven insights, your marketing team can make informed decisions, optimize marketing efforts, and drive sales growth for Tasty Bytes. 
+        Let's unlock the full potential of your marketing strategies together!
+        """
+        )
+
+        st.markdown('### Data Limitations')
+        st.write(
+        """
+        - Lack of Customer ID for non-members, limiting individual tracking and analysis for this group.
+        - Absence of data on marketing campaigns, hindering the assessment of campaign effectiveness.
+        - Missing information on Discounts and Order Channels, limiting insights into pricing strategies and sales channels.
+
+        Despite these limitations, we will leverage available data and employ advanced analytics techniques to drive actionable insights and optimize marketing strategies. 
+        Our data-driven approach aims to address the challenges and still provide valuable recommendations to support Tasty Bytes' growth and sales goals. 
+        Through creativity and resourcefulness, we are confident in our ability to make a significant impact and help Tasty Bytes succeed in its endeavors.
+        """
+        )
+
+        st.markdown('### Value of Membership')       
+        st.image(Image.open('assets/beforeConversionToMember.png'))
+        st.write(
+        """
+        The box plot provides valuable insights into the impact of membership. After customers become members, they exhibit a 
+        remarkable increase in their purchase frequency from Tasty Bytes. This finding underscores the significance of membership 
+        in fostering customer loyalty and driving repeat purchases. By focusing on members and offering tailored experiences, we 
+        can further nurture customer engagement and strengthen our relationship with them. These efforts, in turn, contribute to 
+        sustained sales growth and enhanced customer satisfaction.
+        """
+        )
+
+        st.markdown('### Simulation')
+        st.write('We have defined that after the members do not purchase from us within 14 days they are considered churn.')
+
+        regular_purchase_days = st.slider('Select the number of days between regular purchases', 1, 30, 14)
+        avg_Spending=pd.read_csv('assets/datasets/average_spending_members.csv')
+        last_date_datetime = datetime.strptime('2022-11-02', "%Y-%m-%d")
+        # Get the end of the year for the same year (2022)
+        end_of_year_datetime = datetime(last_date_datetime.year, 12, 31)
+
+        # Calculate the difference (timedelta) between the two dates
+        time_difference = end_of_year_datetime - last_date_datetime
+
+        # Extract the number of days from the timedelta
+        days_to_end_of_year = time_difference.days
+        # Calculate the estimated number of times customers will purchase
+        estimated_freq=math.floor(days_to_end_of_year/regular_purchase_days)
+        estimated_sales=round(sum(avg_Spending['AVERAGE_SPENDING']*estimated_freq),2)
+        st.metric('Estimated Frequency',estimated_freq)
+        st.metric('Estimated Sales', f"${estimated_sales}")
+        
+
     with tab2:
     # How to use this page
         with st.expander("How to Use This Page"):
