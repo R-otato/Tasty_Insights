@@ -85,142 +85,144 @@ def filter(selected_options,column,data):
 def main() -> None:
     # Page title
     st.markdown("# Marketing")
-
+    tab1, tab2 = st.tabs(["High Level Goals", "Model Prediction"])
+    with tab1:
+        # High Level Goals
+        st.markdown("## High Level Goals: Sales")
+        
+    with tab2:
     # How to use this page
-    with st.expander("How to Use This Page"):
-        #Going to add some stuff here 
-        st.write('How to Use This Page')
+        with st.expander("How to Use This Page"):
+            #Going to add some stuff here 
+            st.write('How to Use This Page')
 
-    # Input data
-    ## File Upload section
-    st.markdown("## Input Data")
-    uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
-    df=''
-    ### If uploaded file is not empty
-    if uploaded_files:
-        data_list = []
-        #Append all uploaded files into the list
-        for f in uploaded_files:
-            st.write(f)
-            temp_data = pd.read_csv(f)
-            data_list.append(temp_data)
-        st.success("Uploaded your file!")
-        #concat the files together if there are more than one file uploaded
-        df = pd.concat(data_list)
-    else:
-        st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
-        #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-        df=pd.read_csv('assets/marketing.csv')
+        # Input data
+        ## File Upload section
+        st.markdown("## Input Data")
+        uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
+        df=''
+        ### If uploaded file is not empty
+        if uploaded_files:
+            data_list = []
+            #Append all uploaded files into the list
+            for f in uploaded_files:
+                st.write(f)
+                temp_data = pd.read_csv(f)
+                data_list.append(temp_data)
+            st.success("Uploaded your file!")
+            #concat the files together if there are more than one file uploaded
+            df = pd.concat(data_list)
+        else:
+            st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
+            #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
+            df=pd.read_csv('assets/marketing.csv')
 
-    ## Display uploaded or defaul file
-    with st.expander("Raw Dataframe"):
-        st.write(df.head(10))
+        ## Display uploaded or defaul file
+        with st.expander("Raw Dataframe"):
+            st.write(df.head(10))
 
-    # Run pipeline
-    clean_df,kmeans_df=pipeline(df)
+        # Run pipeline
+        clean_df,kmeans_df=pipeline(df)
 
-    with st.expander("Cleaned and Transformed Data"):
-        st.write(clean_df.head(10))
+        with st.expander("Cleaned and Transformed Data"):
+            st.write(clean_df.head(10))
 
-    # Setup: Model loading
-    churn_model = load_model("assets/churn-prediction-model.jbl")
-    seg_model = load_model("assets/rfm_kmeans.jbl")
+        # Setup: Model loading
+        churn_model = load_model("assets/churn-prediction-model.jbl")
+        seg_model = load_model("assets/rfm_kmeans.jbl")
 
-    # Setup: Get predictions
-    cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
-    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
-    kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
-    
-    # Setup: Map predictions to understandable insights
-    churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
-    kmeans_pred['CLUSTER'] = kmeans_pred['CLUSTER'].map({
-    0: "Active Moderate-Value Members",
-    1: "Inactive Low-Spending Members",
-    2: "High-Value Loyal Members",
-    3: "Engaged Moderate-Value Members",
-    4: "Active Low-Spending Members"})
+        # Setup: Get predictions
+        cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
+        churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
+        kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
+        
+        # Setup: Map predictions to understandable insights
+        churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
+        kmeans_pred['CLUSTER'] = kmeans_pred['CLUSTER'].map({
+        0: "Active Moderate-Value Members",
+        1: "Inactive Low-Spending Members",
+        2: "High-Value Loyal Members",
+        3: "Engaged Moderate-Value Members",
+        4: "Active Low-Spending Members"})
 
-    # Setup:Combine tables with predictions
-    data=pd.concat([df,kmeans_pred],axis=1)
-    data=pd.concat([data, churn_pred], axis=1)
+        # Setup:Combine tables with predictions
+        data=pd.concat([df,kmeans_pred],axis=1)
+        data=pd.concat([data, churn_pred], axis=1)
+        
+        # Display predictions
+        st.markdown("## Member Segmentation and Churn Prediction Results")
 
-    # High Level Goals
-    st.markdown("## High Level Goals: Sales")
+        # Display a filter for selecting clusters
+        cluster_Options = ['All'] + data['CLUSTER'].unique().tolist()
+        selected_Cluster = st.multiselect("Filter by Member's Segment:", cluster_Options, default=['All'])
+        filtered_data=filter(selected_Cluster,'CLUSTER',data)
 
-    # Display predictions
-    st.markdown("## Member Segmentation and Churn Prediction Results")
+        churn_Options = ['All'] + data['CHURNED'].unique().tolist()
+        selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
+        filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
+        
+        #Summary
+        st.markdown("### Summary")
+        # Number of members of each cluster
+        cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
+        st.dataframe(cluster_counts, hide_index=True)
 
-    # Display a filter for selecting clusters
-    cluster_Options = ['All'] + data['CLUSTER'].unique().tolist()
-    selected_Cluster = st.multiselect("Filter by Member's Segment:", cluster_Options, default=['All'])
-    filtered_data=filter(selected_Cluster,'CLUSTER',data)
+        # Number of members who churned and not churned
+        churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
+        st.dataframe(churn_counts, hide_index=True)
 
-    churn_Options = ['All'] + data['CHURNED'].unique().tolist()
-    selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
-    filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
-    
-    #Summary
-    st.markdown("### Summary")
-    # Number of members of each cluster
-    cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
-    st.dataframe(cluster_counts, hide_index=True)
-
-    # Number of members who churned and not churned
-    churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
-    st.dataframe(churn_counts, hide_index=True)
-
-    # Metrics table
-    st.markdown("### Member's Metric")
-    ## Display table
-    metric_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','LENGTH_OF_RELATIONSHIP','PROFIT','PROFIT_MARGIN(%)']]
-    st.dataframe(metric_df, hide_index=True)
+        # Metrics table
+        st.markdown("### Member's Metric")
+        ## Display table
+        metric_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','LENGTH_OF_RELATIONSHIP','PROFIT','PROFIT_MARGIN(%)']]
+        st.dataframe(metric_df, hide_index=True)
 
 
-    # Demographic table
-    st.markdown("### Member's Demographic")
-    ## Clean up columns
-    filtered_data['CHILDREN_COUNT'] = filtered_data['CHILDREN_COUNT'].map({
-    '0': "No",
-    '1': "Yes",
-    '2': "Yes",
-    '3': "Yes",
-    '4': "Yes",
-    '5+': "Yes",
-    'Undisclosed':'Undisclosed'})
-    filtered_data.rename({'CHILDREN_COUNT':'HAVE_CHILDREN'},inplace=True,errors='ignore',axis=1)
-    ## Display table
-    demo_df=filtered_data[['CUSTOMER_ID','GENDER','MARITAL_STATUS','CITY','HAVE_CHILDREN','AGE']]
-    st.dataframe(demo_df, hide_index=True)
+        # Demographic table
+        st.markdown("### Member's Demographic")
+        ## Clean up columns
+        filtered_data['CHILDREN_COUNT'] = filtered_data['CHILDREN_COUNT'].map({
+        '0': "No",
+        '1': "Yes",
+        '2': "Yes",
+        '3': "Yes",
+        '4': "Yes",
+        '5+': "Yes",
+        'Undisclosed':'Undisclosed'})
+        filtered_data.rename({'CHILDREN_COUNT':'HAVE_CHILDREN'},inplace=True,errors='ignore',axis=1)
+        ## Display table
+        demo_df=filtered_data[['CUSTOMER_ID','GENDER','MARITAL_STATUS','CITY','HAVE_CHILDREN','AGE']]
+        st.dataframe(demo_df, hide_index=True)
 
-    # Behavioral table
-    st.markdown("### Member's Behaviour")
-    
-    ## Clean up columns
-    # # Convert 'LENGTH_OF_RELATIONSHIP' from days to years (with decimal point)
-    # filtered_data['LENGTH_OF_RELATIONSHIP_YEARS'] = filtered_data['LENGTH_OF_RELATIONSHIP'] / 365.25
+        # Behavioral table
+        st.markdown("### Member's Behaviour")
+        
+        ## Clean up columns
+        # # Convert 'LENGTH_OF_RELATIONSHIP' from days to years (with decimal point)
+        # filtered_data['LENGTH_OF_RELATIONSHIP_YEARS'] = filtered_data['LENGTH_OF_RELATIONSHIP'] / 365.25
 
-    # # Rename the new column to indicate it represents relationship duration in decimal years
-    # filtered_data.rename(columns={'LENGTH_OF_RELATIONSHIP': 'LENGTH_OF_RELATIONSHIP_DAYS'}, inplace=True)
+        # # Rename the new column to indicate it represents relationship duration in decimal years
+        # filtered_data.rename(columns={'LENGTH_OF_RELATIONSHIP': 'LENGTH_OF_RELATIONSHIP_DAYS'}, inplace=True)
 
-    ## Display table
-    beha_df=filtered_data[['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY']]
-    st.dataframe(beha_df, hide_index=True)
+        ## Display table
+        beha_df=filtered_data[['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY']]
+        st.dataframe(beha_df, hide_index=True)
 
-    # Overall Table
-    st.markdown("### Overall Table")
-    st.dataframe(filtered_data, hide_index=True)
+        # Overall Table
+        st.markdown("### Overall Table")
+        st.dataframe(filtered_data, hide_index=True)
 
-    #Allow user to download dataframe for further analysis
-    st.header('**Export results ✨**')
-    st.write("_Finally you can export the resulting table after Clustering and Churn Prediction._")
-    csv = convert_df(filtered_data)
-    st.download_button(
-    "Press to Download",
-    csv,
-    "marketing.csv",
-    "text/csv",
-    key='download-csv'
-    )
+        #Allow user to download dataframe for further analysis
+        st.header('**Export results ✨**')
+        st.write("_Finally you can export the resulting table after Clustering and Churn Prediction._")
+        csv = convert_df(filtered_data)
+        st.download_button(
+        "Press to Download",
+        csv,
+        "marketing.csv",
+        "text/csv",
+        key='download-csv'
+        )
 
  
 ###########################
