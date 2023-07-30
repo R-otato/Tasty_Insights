@@ -163,6 +163,12 @@ def main() -> None:
 
     with tab2:
     # How to use this page
+        st.markdown("## High Level Goals")
+        st.write("""As stated in our homepage, our team is dedicated to assisting Tasty Bytes in achieving its ambitious goals over the next 5 years. 
+                 In particular, we aim to assist helping Tasty Bytes achieve a remarkable 25% Year-Over-Year increase, with the objective of elevating 
+                 annual sales from \$105M to an impressive \$320M. This page is designed exclusively for the marketing team, showcasing our data-driven 
+                 approach to empower and elevate your marketing strategies, ultimately driving significant sales growth.""")
+        
         with st.expander("How to Use This Page"):
             #Going to add some stuff here 
             st.write("""
