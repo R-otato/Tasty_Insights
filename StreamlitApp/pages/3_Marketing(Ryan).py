@@ -112,33 +112,34 @@ def main() -> None:
         """
         )
 
-        st.markdown('### Data Limitations')
-        st.write(
-        """
-        - Lack of Customer ID for non-members, limiting individual tracking and analysis for this group.
-        - Absence of data on marketing campaigns, hindering the assessment of campaign effectiveness.
-        - Missing information on Discounts and Order Channels, limiting insights into pricing strategies and sales channels.
+        with st.expander('Data Limitations'):
+            st.write(
+            """
+            - Lack of Customer ID for non-members, limiting individual tracking and analysis for this group.
+            - Absence of data on marketing campaigns, hindering the assessment of campaign effectiveness.
+            - Missing information on Discounts and Order Channels, limiting insights into pricing strategies and sales channels.
 
-        Despite these limitations, we will leverage available data and employ advanced analytics techniques to drive actionable insights and optimize marketing strategies. 
-        Our data-driven approach aims to address the challenges and still provide valuable recommendations to support Tasty Bytes' growth and sales goals. 
-        Through creativity and resourcefulness, we are confident in our ability to make a significant impact and help Tasty Bytes succeed in its endeavors.
-        """
-        )
-
-        st.markdown('### Value of Membership')       
-        st.image(Image.open('assets/beforeConversionToMember.png'))
-        st.write(
-        """
-        The box plot provides valuable insights into the impact of membership. After customers become members, they exhibit a 
-        remarkable increase in their purchase frequency from Tasty Bytes. This finding underscores the significance of membership 
-        in fostering customer loyalty and driving repeat purchases. By focusing on members and offering tailored experiences, we 
-        can further nurture customer engagement and strengthen our relationship with them. These efforts, in turn, contribute to 
-        sustained sales growth and enhanced customer satisfaction.
-        """
-        )
-
-        st.markdown('### Simulation')
-        st.write('We have defined that after the members do not purchase from us within 14 days they are considered churn.')
+            Despite these limitations, we will leverage available data and employ advanced analytics techniques to drive actionable insights and optimize marketing strategies. 
+            Our data-driven approach aims to address the challenges and still provide valuable recommendations to support Tasty Bytes' growth and sales goals. 
+            Through creativity and resourcefulness, we are confident in our ability to make a significant impact and help Tasty Bytes succeed in its endeavors.
+            """
+            )
+        
+        with st.expander("Value of Membership"):
+            #Going to add some stuff here 
+            st.image(Image.open('assets/beforeConversionToMember.png'))
+            st.write(
+            """
+            The box plot provides valuable insights into the impact of membership. After customers become members, they exhibit a 
+            remarkable increase in their purchase frequency from Tasty Bytes. This finding underscores the significance of membership 
+            in fostering customer loyalty and driving repeat purchases. By focusing on members and offering tailored experiences, we 
+            can further nurture customer engagement and strengthen our relationship with them. These efforts, in turn, contribute to 
+            sustained sales growth and enhanced customer satisfaction.
+            """
+            )
+            
+        st.markdown('### Sales Forecasting for End of Year - All Members')
+        st.write('*Estimated Sales=Average Spending of Customer * (Remaining Time Period/Selected number of days between regular purchase)')
 
         regular_purchase_days = st.slider('Select the number of days between regular purchases', 1, 30, 14)
         avg_Spending=pd.read_csv('assets/datasets/average_spending_members.csv')
@@ -154,15 +155,23 @@ def main() -> None:
         # Calculate the estimated number of times customers will purchase
         estimated_freq=math.floor(days_to_end_of_year/regular_purchase_days)
         estimated_sales=round(sum(avg_Spending['AVERAGE_SPENDING']*estimated_freq),2)
+        st.metric ('Days to End of Year',days_to_end_of_year)
         st.metric('Estimated Frequency',estimated_freq)
         st.metric('Estimated Sales', f"${estimated_sales}")
+        st.write('In the next ',days_to_end_of_year,' days, if we get each member just to purchase ',estimated_freq,' time. The total estimated sales we can generate is $',estimated_sales,'.')
         
 
     with tab2:
     # How to use this page
         with st.expander("How to Use This Page"):
             #Going to add some stuff here 
-            st.write('How to Use This Page')
+            st.write("""
+            1. Default Data: The page displays default data for members in the United States. To update member information,
+            upload a new Excel file in the Input Data section.
+            2. Predictions: After uploading your file, the predictions will be automatically generated and shown.
+            3. Filter Data: Use filters to explore specific segments or refine the data for analysis.
+            4. Download Predictions: Download the predictions along with relevant data for further analysis, if desired.
+            """)
 
         # Input data
         ## File Upload section
@@ -197,16 +206,16 @@ def main() -> None:
 
         # Setup: Model loading
         churn_model = load_model("assets/churn-prediction-model.jbl")
-        seg_model = load_model("assets/rfm_kmeans.jbl")
+        seg_clf_model = load_model("assets/models/segment_classifier.jbl")
 
         # Setup: Get predictions
         cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
         churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
-        kmeans_pred=pd.DataFrame(seg_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
+        cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
         
         # Setup: Map predictions to understandable insights
         churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
-        kmeans_pred['CLUSTER'] = kmeans_pred['CLUSTER'].map({
+        cluster_pred['CLUSTER'] =cluster_pred['CLUSTER'].map({
         0: "Active Moderate-Value Members",
         1: "Inactive Low-Spending Members",
         2: "High-Value Loyal Members",
@@ -214,7 +223,7 @@ def main() -> None:
         4: "Active Low-Spending Members"})
 
         # Setup:Combine tables with predictions
-        data=pd.concat([df,kmeans_pred],axis=1)
+        data=pd.concat([df,cluster_pred],axis=1)
         data=pd.concat([data, churn_pred], axis=1)
         
         # Display predictions
