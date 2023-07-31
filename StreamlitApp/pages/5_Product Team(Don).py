@@ -379,20 +379,25 @@ user_input_full = {
     "NUT_FREE": selected_is_nut_free
 }
 
-user_input_df = pd.DataFrame(user_input_full, index=[1])  # Provide an index value here, e.g., [1], to create a DataFrame with one row
+# create dataframe with all the user's inputs
+user_input_df = pd.DataFrame(user_input_full, index=[1])
 
+# display dataframe
 st.dataframe(user_input_df, hide_index=True)
+
 
 # Check for null values in the user_input_df
 has_null_values = user_input_df.isnull().any().any()
 
 if has_null_values == False:
+    # display message if no null values are found
     st.write("Proceed to make a prediction.")
 else:
+    # display message if null values are found
     st.write("Make sure all options have an input.")
 
 
-
+# Make a prediction
 if st.button("Predict"):
     # Add your code here for model prediction based on user_input_df
     # For example, if you have a trained model called 'model', you can do:
