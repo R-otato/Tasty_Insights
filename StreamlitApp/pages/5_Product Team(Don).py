@@ -294,7 +294,7 @@ default_option = None
 menu_type_options = np.sort(menu_table['MENU_TYPE'].unique())
 
 ## use the updated list of options for the selectbox
-menu_type = st.selectbox("Menu Type: ", [default_option] + list(menu_type_options))
+selected_menu_type = st.selectbox("Menu Type: ", [default_option] + list(menu_type_options))
 
 
 ## Option: truck brand name
@@ -303,7 +303,7 @@ default_option = None
 truck_brand_name_options = np.sort(menu_table['TRUCK_BRAND_NAME'].unique())
 
 ## use the updated list of options for the selectbox
-truck_brand_name = st.selectbox("Truck Brand Name: ", [default_option] + list(truck_brand_name_options))
+selected_truck_brand_name = st.selectbox("Truck Brand Name: ", [default_option] + list(truck_brand_name_options))
 
 
 ## Option: item category
@@ -312,7 +312,7 @@ default_option = None
 item_cat_options = np.sort(menu_table['ITEM_CATEGORY'].unique())
 
 ## use the updated list of options for the selectbox
-item_cat = st.selectbox("Item Category: ", [default_option] + list(item_cat_options))
+selected_item_cat = st.selectbox("Item Category: ", [default_option] + list(item_cat_options))
 
 
 ## Option: item subcategory
@@ -321,7 +321,7 @@ default_option = None
 item_subcat_options = np.sort(menu_table['ITEM_SUBCATEGORY'].unique())
 
 ## use the updated list of options for the selectbox
-item_subcat = st.selectbox("Item Subcategory: ", [default_option] + list(item_subcat_options))
+selected_item_subcat = st.selectbox("Item Subcategory: ", [default_option] + list(item_subcat_options))
 
 
 ## Option: cost of goods
@@ -338,7 +338,7 @@ default_option = None
 healthy_options = np.sort(menu_table['HEALTHY'].unique())
 
 ## use the updated list of options for the selectbox
-is_healthy = st.selectbox("Healthy: ", [default_option] + list(healthy_options))
+selected_is_healthy = st.selectbox("Healthy: ", [default_option] + list(healthy_options))
 
 
 ## Option: dairy free
@@ -347,7 +347,7 @@ default_option = None
 dairy_free_options = np.sort(menu_table['DAIRY_FREE'].unique())
 
 ## use the updated list of options for the selectbox
-is_dairy_free = st.selectbox("Dairy Free: ", [default_option] + list(dairy_free_options))
+selected_is_dairy_free = st.selectbox("Dairy Free: ", [default_option] + list(dairy_free_options))
 
 
 ## Option: gluten free
@@ -356,7 +356,7 @@ default_option = None
 gluten_free_options = np.sort(menu_table['GLUTEN_FREE'].unique())
 
 ## use the updated list of options for the selectbox
-is_gluten_free = st.selectbox("Gluten Free: ", [default_option] + list(gluten_free_options))
+selected_is_gluten_free = st.selectbox("Gluten Free: ", [default_option] + list(gluten_free_options))
 
 
 ## Option: nut free
@@ -365,18 +365,48 @@ default_option = None
 nut_free_options = np.sort(menu_table['NUT_FREE'].unique())
 
 ## use the updated list of options for the selectbox
-is_nut_free = st.selectbox("Nut Free: ", [default_option] + list(nut_free_options))
+selected_is_nut_free = st.selectbox("Nut Free: ", [default_option] + list(nut_free_options))
+
+user_input_full = {
+    "MENU_TYPE": selected_menu_type, 
+    "TRUCK_BRAND_NAME": selected_truck_brand_name, 
+    "ITEM_CATEGORY": selected_item_cat, 
+    "ITEM_SUBCATEGORY": selected_item_subcat, 
+    "SALE_PRICE_USD": sale_price,
+    "HEALTHY": selected_is_healthy,
+    "DAIRY_FREE": selected_is_dairy_free, 
+    "GLUTEN_FREE": selected_is_gluten_free, 
+    "NUT_FREE": selected_is_nut_free
+}
+
+user_input_df = pd.DataFrame(user_input_full, index=[1])  # Provide an index value here, e.g., [1], to create a DataFrame with one row
+
+st.dataframe(user_input_df, hide_index=True)
+
+# Check for null values in the user_input_df
+has_null_values = user_input_df.isnull().any().any()
+
+if has_null_values == False:
+    st.write("Proceed to make a prediction.")
+else:
+    st.write("Make sure all options have an input.")
+
+
+
+if st.button("Predict"):
+    # Add your code here for model prediction based on user_input_df
+    # For example, if you have a trained model called 'model', you can do:
+    # prediction = model.predict(user_input_df)
+    # load product qty regression model
+    product_qty_model = joblib.load("assets/product_qty_regression.joblib")
+    # Once you have the prediction, you can display the result to the user
+    # For example:
+    # st.write("Prediction:", prediction)
 
 
 
 
 
-
-
-
-
-# load product qty regression model
-product_qty_model = joblib.load("assets/product_qty_regression.joblib")
 
 
 
