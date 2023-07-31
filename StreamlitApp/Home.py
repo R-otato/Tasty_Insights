@@ -91,7 +91,7 @@ st.dataframe(
 )
 """
 ### Column Explainer
-1) Churn Rate: The percentage of customers or transactions that lead to a day to next order greater than 9 days
+1) Churn Rate: The percentage of transactions that lead to a day to next order greater than 9 days
 2) Sales: The amount of sales in the month period
 3) Year: The year in which the data is from
 4) Month: The month in which the data is from
