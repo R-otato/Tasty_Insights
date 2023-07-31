@@ -62,9 +62,11 @@ def convert_df(df):
 # # not really efficient figure out a way to extract snowflake dataframe instead of tuple
 # df = pd.DataFrame(churn_to_sales, columns=["YEAR", "MONTH", "CHURN RATE", "SALES"])
 
-df = pd.read_csv('assets/Churn_to_Sales.csv')
+# df = pd.read_csv('assets/Churn_to_Sales.csv')
 
-df_cts = df.sort_values(by=["YEAR", "MONTH"])
+df_OTS = pd.read_csv('assets/latest_Order_Ts.csv')
+
+# df_cts = df.sort_values(by=["YEAR", "MONTH"])
 
 st.set_page_config(page_title="CFO-Sales Prediction",
                    page_icon="🍌")
@@ -133,13 +135,17 @@ if uploaded_files:
         #concat the files together if there are more than one file uploaded
         df = pd.concat(data_list)
 else:
-        st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
+        st.info("Using the last updated data of the members in United States (October and beyond). Upload a file above to use your own data!")
         #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
         df=pd.read_csv('assets/without_transformation.csv')
+        df = df.merge(df_OTS)
+        df = df[(df["MAX_ORDER_TS"]) > "2022-10-01"]
+        df = df.drop(columns="MAX_ORDER_TS")
 
-with st.expander("Raw Dataframe"):
-        st.write("This is the data set prior to any transformations")
-        st.write(df)
+# with st.expander("Raw Dataframe"):
+#         st.write("This is the data set prior to any transformations")
+#         st.write(df)
+#         st.write(df.info())
 
     ## Removing Customer ID column
 customer_id = df.pop("CUSTOMER_ID")
@@ -149,9 +155,9 @@ beha_df=df.loc[:, ~df.columns.isin(['GENDER','MARITAL_STATUS','CITY','CHILDREN_C
 
 df=pipeline(df)
 
-with st.expander("Cleaned and Transformed Data"):
-        st.write("This is the data set after cleaning and transformation")
-        st.write(df)
+# with st.expander("Cleaned and Transformed Data"):
+#         st.write("This is the data set after cleaning and transformation")
+#         st.write(df)
 
 model = load_model("assets/churn-prediction-model.jbl")
 predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
