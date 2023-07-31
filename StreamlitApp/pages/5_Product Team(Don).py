@@ -238,6 +238,28 @@ def get_health_metrics_menu_table(menu_table_df):
     return menu_table_df
 
 
+    #hide this using secrets
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "analytics"
+    )
+
+    my_cur = my_cnx.cursor()
+
+    # Construct the SQL query for the current chunk
+    query = f"SELECT MENU_ITEM_ID, TRUCK_ID FROM order_details_usa_matched"
+    
+    my_cur.execute(query)
+    
+    order_details_df = my_cur.fetchall()
+    
+    return order_details_df
+
 #####################
 ##### MAIN CODE #####
 #####################
@@ -252,30 +274,30 @@ with st.expander("How to Use This Page"):
     st.write('2. View the model\'s predictions')
     st.write('3. Analyse the visualisations below to gain insights on how to reduce customer churn from a product standpoint')
 
-# SEARCH FOR BUNDLES
-st.markdown("## Search for Bundles")
+# # SEARCH FOR BUNDLES
+# st.markdown("## Search for Bundles")
 
-# SECTION: INPUT DATA 
-## File Upload section
-st.markdown("### Input Data")
-uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
-df=''
-### If uploaded file is not empty
-if uploaded_files!=[]:
-    data_list = []
-    #Append all uploaded files into the list
-    for f in uploaded_files:
-        st.write(f)
-        temp_data = pd.read_csv(f)
-        data_list.append(temp_data)
-    st.success("Uploaded your file!")
-    #concat the files together if there are more than one file uploaded
-    df = pd.concat(data_list)
-else:
-    st.info("Using the last updated data of all the United States transactions. Upload a file above to use your own data!")
-    df=pd.read_csv('assets/apriori_dataset.csv')
+# # SECTION: INPUT DATA 
+# ## File Upload section
+# st.markdown("### Input Data")
+# uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
+# df=''
+# ### If uploaded file is not empty
+# if uploaded_files!=[]:
+#     data_list = []
+#     #Append all uploaded files into the list
+#     for f in uploaded_files:
+#         st.write(f)
+#         temp_data = pd.read_csv(f)
+#         data_list.append(temp_data)
+#     st.success("Uploaded your file!")
+#     #concat the files together if there are more than one file uploaded
+#     df = pd.concat(data_list)
+# else:
+#     st.info("Using the last updated data of all the United States transactions. Upload a file above to use your own data!")
+#     df=pd.read_csv('assets/apriori_dataset.csv')
 
-st.write(df)
+# st.write(df)
 
 
 # PRODUCT PERFORMANCE PREDICTION
@@ -399,14 +421,76 @@ else:
 
 # Make a prediction
 if st.button("Predict"):
-    # Add your code here for model prediction based on user_input_df
-    # For example, if you have a trained model called 'model', you can do:
-    # prediction = model.predict(user_input_df)
-    # load product qty regression model
+    # replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+    user_input_df = user_input_df.replace({"Yes": 1, "No":0})
+    
+    # MANUAL ENCODING
+    categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
+
+    # Loop through each categorical column
+    for col in categorical_cols:
+        # Get the unique values in the column
+        unique_values = menu_table[col].unique()
+
+        # Loop through unique values in the column
+        for value in unique_values:
+            # Check if the value in the menu_table matches the corresponding value in user_input_df
+            if value == user_input_df[col].values[0]:
+                # Create a column with the name 'column_selected_value' and set its value to 1
+                menu_table[f'{col}_{value}'] = 1
+
+                # Add this column to the user_input_df
+                user_input_df[f'{col}_{value}'] = 1
+            else:
+                # Create a column with the name 'column_unique_value' and set its value to 0
+                menu_table[f'{col}_{value}'] = 0
+
+                # Add this column to the user_input_df
+                user_input_df[f'{col}_{value}'] = 0
+
+
+    # Drop the original categorical columns from user_input_df
+    user_input_df.drop(columns=categorical_cols, inplace=True)
+
+    user_input_df.drop(columns=["ITEM_SUBCATEGORY_Hot Option", "MENU_TYPE_Sandwiches", "TRUCK_BRAND_NAME_Better Off Bread", "ITEM_CATEGORY_Dessert"], inplace = True)
+
+    desired_order = ['SALE_PRICE_USD', 'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
+                 'MENU_TYPE_Ethiopian', 'MENU_TYPE_Gyros', 'MENU_TYPE_Indian',
+                 'MENU_TYPE_Hot Dogs', 'MENU_TYPE_Vegetarian', 'MENU_TYPE_Tacos',
+                 'MENU_TYPE_BBQ', 'MENU_TYPE_Crepes', 'MENU_TYPE_Poutine',
+                 'MENU_TYPE_Ice Cream', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Ramen',
+                 'MENU_TYPE_Mac & Cheese', 'MENU_TYPE_Chinese',
+                 'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Cheeky Greek',
+                 'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Amped Up Franks',
+                 'TRUCK_BRAND_NAME_Plant Palace', 'TRUCK_BRAND_NAME_Guac n\' Roll',
+                 'TRUCK_BRAND_NAME_Smoky BBQ', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
+                 'TRUCK_BRAND_NAME_Revenge of the Curds',
+                 'TRUCK_BRAND_NAME_Freezing Point', 'TRUCK_BRAND_NAME_The Mega Melt',
+                 'TRUCK_BRAND_NAME_Kitakata Ramen Bar', 'TRUCK_BRAND_NAME_The Mac Shack',
+                 'TRUCK_BRAND_NAME_Peking Truck', 'ITEM_CATEGORY_Main',
+                 'ITEM_CATEGORY_Beverage', 'ITEM_CATEGORY_Snack',
+                 'ITEM_SUBCATEGORY_Warm Option', 'ITEM_SUBCATEGORY_Cold Option']
+
+    user_input_df = user_input_df.reindex(columns=desired_order)
+    
+    # Convert 'SALE_PRICE_USD' column to numeric type
+    user_input_df['SALE_PRICE_USD'] = pd.to_numeric(user_input_df['SALE_PRICE_USD'])
+    
+    # retrieve min max scaler
+    min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
+    
+    min_max_scaler.transform(user_input_df)
+    
+    # retrieve regression model
     product_qty_model = joblib.load("assets/product_qty_regression.joblib")
-    # Once you have the prediction, you can display the result to the user
-    # For example:
-    # st.write("Prediction:", prediction)
+    
+    prediction = product_qty_model.predict(user_input_df)
+    
+    # Round off the prediction to the nearest whole number
+    rounded_prediction = round(prediction[0])
+
+    # Display the rounded prediction
+    st.write("Prediction:", rounded_prediction)
 
 
 
