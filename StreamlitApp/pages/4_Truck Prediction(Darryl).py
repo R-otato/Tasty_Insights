@@ -190,7 +190,7 @@ def retrieve_order_details():
         customer_ids_str = ','.join(map(str, chunk))
 
         # Construct the SQL query for the current chunk
-        query = f"SELECT TRUCK_ID, CUSTOMER_ID, ORDER_AMOUNT, ORDER_TOTAL from order_header WHERE CUSTOMER_ID IN ({customer_ids_str})"
+        query = f"SELECT TRUCK_ID, CUSTOMER_ID, ORDER_AMOUNT, ORDER_TOTAL, ORDER_CURRENCY from order_header WHERE CUSTOMER_ID IN ({customer_ids_str})"
 
         # Execute the SQL query for the current chunk
         my_cur.execute(query)
@@ -202,7 +202,7 @@ def retrieve_order_details():
         order_details.extend(chunk_result)
 
     # Create a DataFrame from the fetched result
-    order_details_df = pd.DataFrame(order_details, columns=['TRUCK_ID', 'CUSTOMER_ID', 'ORDER_AMOUNT', 'ORDER_TOTAL'])
+    order_details_df = pd.DataFrame(order_details, columns=['TRUCK_ID', 'CUSTOMER_ID', 'ORDER_AMOUNT', 'ORDER_TOTAL', 'ORDER_CURRENCY'])
 
     # Convert ORDER_ID to string and then remove commas
     #order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
@@ -214,6 +214,28 @@ def retrieve_order_details():
 
     return order_details_df
 
+
+# Function: get_overall_truck_table
+# the purpose of this function is to merge the truck and menu details table together to form an overall table
+def get_overall_truck_table(truck_table_df, order_details_df):
+    ## Merge the DataFrames based on 'MENU_ITEM_ID'
+    overall_truck_df = pd.merge(truck_table_df, order_details_df, on='TRUCK_ID', how='left')
+
+    ## Define the desired column order
+    desired_columns = ['COUNTRY', 'REGION','PRIMARY_CITY', 'TRUCK_ID', 'CUSTOMER_ID', 'ORDER_TOTAL']
+
+    ## Re-arrange the columns in the merged DataFrame
+    overall_truck_df = overall_truck_df[desired_columns]
+    
+    ## Cast 'ORDER_TOTAL' to float
+    overall_truck_df['ORDER_TOTAL'] = overall_truck_df['ORDER_TOTAL'].astype(float)
+    
+    ## Group by 'TRUCK_ID' and combine 'ORDER_TOTAL' for each truck
+    overall_truck_df_grouped = overall_truck_df.groupby('TRUCK_ID').agg({
+        'ORDER_TOTAL': 'sum'           # Sum the 'ORDER_TOTAL' amounts for each truck_id
+    }).reset_index()
+    
+    return overall_truck_df_grouped
 
 # # Function: retrieve order_header table
 # # the purpose of this function is to retrieve the order_header table from snowflake containing all the details of the order_header items
@@ -242,11 +264,6 @@ def retrieve_order_details():
 #     return order_header_table_df
 
 
-# Function: convert_df_to_csv
-# the purpose of this function is to convert the pandas dataframe to csv so that the user can export the data for further visualisation, exploration, or analysis
-def convert_df_to_csv(df):
-   return df.to_csv(index=False).encode()
-
 # Function: get_overall_table
 # the purpose of this function is to merge the truck and menu details table together to form an overall table
 def get_overall_table(truck_details_df, menu_table_df):
@@ -263,6 +280,24 @@ def get_overall_table(truck_details_df, menu_table_df):
     
     return merged_df
 
+
+#Load model
+def load_model(model_path: str) -> object:
+    model = joblib.load(model_path)
+    return model    
+
+#Convert dataframe to csv 
+def convert_df(df):
+   return df.to_csv(index=False).encode('utf-8')
+
+#Filter dataframe
+def filter(selected_options,column,data):
+    # Filter the data based on selected clusters
+    if 'All' in selected_options:
+        filtered_data = data  # If 'All' is selected, show all data
+    else:
+        filtered_data = data[data[column].isin(selected_options)]
+    return filtered_data
 
 #####################
 ##### MAIN CODE #####
@@ -323,6 +358,41 @@ with tab1:
 
     ## ***table with custid and whether churn or not***
     data=pd.concat([customer_id, predictions], axis=1)
+    
+    ###TEST###
+    import plotly.graph_objs as go
+    # Map 0 n 1 to churn and not churn respectively
+    data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
+    # Add some filters to filter by churn --> not churned
+    churn_Options = ['All'] + pd.Series(data['CHURNED']).unique().tolist()
+    selected_Churn = st.multiselect("Filter by Churn:", churn_Options, default=['All'])
+
+    def filter_data(selected_values, column, data):
+        if 'All' in selected_values:
+            return data
+        return data[data[column].isin(selected_values)]
+
+    filtered_data = filter_data(selected_Churn, 'CHURNED', pd.DataFrame(data))
+
+    # Number of members who churned and not churned
+    churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
+    st.dataframe(churn_counts, hide_index=True)
+
+    # Create a pie chart based on the churn counts
+    fig = go.Figure(data=[go.Pie(labels=churn_counts['CHURNED'], values=churn_counts['Number of Members'])])
+    st.plotly_chart(fig)
+    
+    
+    
+    # # replace '0' and '1' to 'not churned' and 'churned' respectively
+    # data['CHURNED'] = data['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
+    # ## Add some filters to filter by churn --> not churned
+    # churn_Options = ['All'] + data['CHURNED'].unique().tolist()
+    # selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
+    # filtered_data=filter(selected_Churn,'CHURNED',data)
+    # # Number of members who churned and not churned
+    # churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
+    # st.dataframe(churn_counts, hide_index=True)
 
     # TRUCK TABLE #
     ## retrieve truck table
@@ -349,6 +419,22 @@ with tab1:
     order_details_df = retrieve_order_details()
     st.dataframe(order_details_df, width=0, hide_index=True)
     
+    
+    # OVERALL TRUCK TABLE #
+    ## retrieve overall_truck_df table
+    overall_truck_df_grouped = get_overall_truck_table(truck_table_df, order_details_df)
+
+    ## Display header
+    st.markdown("## Overall Truck Table")
+
+    ## Display the merged DataFrame
+    st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
+    
+    # Page Instructions (Why we should identity low value food trucks)
+    with st.expander("Why we should identity low value food trucks"):
+        # List of steps
+        st.write('Cutting back on low-sales food trucks aligns with Tasty Bytes goal of 25% YoY sales growth. By identifying and reducing underperforming trucks, they optimize resources, focus on high-potential markets, and boost profitability. Eliminating low-performing units improves resource allocation, maximizes ROI, and streamlines operations. It enables a data-driven approach to identify market trends, customer preferences, and expansion opportunities, resulting in increased sales and customer satisfaction')
+    
     # MENU TABLE #
     ## retrieve menu table
     menu_table_df = retrieve_menu_table()
@@ -360,15 +446,15 @@ with tab1:
     st.dataframe(menu_table_df, width=0, hide_index=True)  
     
     
-    # OVERALL TABLE #
-    ## retrieve the merged table from truck and menu
-    merged_df = get_overall_table(truck_table_df, menu_table_df)
+    # # OVERALL TABLE #
+    # ## retrieve the merged table from truck and menu
+    # merged_df = get_overall_table(truck_table_df, menu_table_df)
 
-    ## Display header
-    st.markdown("## Overall Table")
+    # ## Display header
+    # st.markdown("## Overall Table")
 
-    ## Display the merged DataFrame
-    st.dataframe(merged_df, width=0, hide_index=True)
+    # ## Display the merged DataFrame
+    # st.dataframe(merged_df, width=0, hide_index=True)
     
 
     
