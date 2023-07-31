@@ -82,6 +82,52 @@ def retrieve_menu_table():
 
     return menu_table_df
 
+# Function: display_bundles(my_rules)
+# the purpose of this function is to manipulate the table such that the identified bundles are displayed in a specific format
+def display_bundles(my_rules):
+    ## get only the antecedents and consequents from the my_rules dataframe
+    bundles_df = my_rules[['antecedents', 'consequents']]
+        
+    ## retrive menu table
+    menu_df = retrieve_menu_table()
+
+    ## convert both columns to int type
+    bundles_df["antecedents"] = bundles_df["antecedents"].astype(int)
+    bundles_df["consequents"] = bundles_df["consequents"].astype(int)
+
+    ## merge with 'antecedents' to get antecedents_menu_name
+    bundles_df = pd.merge(bundles_df, menu_df.rename(columns={'MENU_ITEM_ID': 'antecedents', 'MENU_ITEM_NAME': 'antecedents_item_name'}),
+                        on='antecedents', how='left')
+
+    ## merge with 'consequents' to get consequents_menu_name
+    bundles_df = pd.merge(bundles_df, menu_df.rename(columns={'MENU_ITEM_ID': 'consequents', 'MENU_ITEM_NAME': 'consequents_item_name'}),
+                        on='consequents', how='left')
+
+    ## re-arrange columns
+    bundles_df = bundles_df[["antecedents_item_name", "antecedents", "consequents_item_name", "consequents"]]
+
+
+    ## convert both columns to str type
+    bundles_df["antecedents"] = bundles_df["antecedents"].astype(str)
+    bundles_df["consequents"] = bundles_df["consequents"].astype(str)
+
+    ## create a new DataFrame with the rearranged columns and the new BundleNo, Item1, and Item2 columns
+    final_bundles_df = bundles_df[["antecedents_item_name", "antecedents", "consequents_item_name", "consequents"]].copy()
+
+    ## create the BundleNo column as an index starting from 1
+    final_bundles_df.insert(0, 'BundleNo', range(1, 1 + len(final_bundles_df)))
+
+    ## merge the 'antecedents_item_name' and 'antecedents' columns into 'Item1'
+    final_bundles_df['Item1'] = final_bundles_df['antecedents_item_name'] + ' (' + final_bundles_df['antecedents'] + ')'
+
+    ## merge the 'consequents_item_name' and 'consequents' columns into 'Item2'
+    final_bundles_df['Item2'] = final_bundles_df['consequents_item_name'] + ' (' + final_bundles_df['consequents'] + ')'
+
+    ## drop the individual 'antecedents_item_name', 'antecedents', 'consequents_item_name', and 'consequents' columns
+    final_bundles_df.drop(columns=["antecedents_item_name", "antecedents", "consequents_item_name", "consequents"], inplace=True)
+
+    return final_bundles_df
+
 
 #####################
 ##### MAIN CODE #####
@@ -122,62 +168,15 @@ else:
 
 st.write(df)
 
-# Assuming you already have the 'df' DataFrame with columns 'antecedents' and 'consequents'
-# Select only the 'antecedents' and 'consequents' columns to create the 'bundles_df' DataFrame
-
-
-
-
-# retrieve bundles found by apriori
+# Retrieve bundles found by apriori
 my_rules = get_item_bundles_unformatted(df)
-
-# show the bundles and its technical statistics
-st.dataframe(my_rules, hide_index = True)
 
 
 # Show identified bundles
 st.markdown("### Identified Bundles")
 
-## get only the antecedents and consequents from the my_rules dataframe
-bundles_df = my_rules[['antecedents', 'consequents']]
-    
-## retrive menu table
-menu_df = retrieve_menu_table()
-
-## convert both columns to int type
-bundles_df["antecedents"] = bundles_df["antecedents"].astype(int)
-bundles_df["consequents"] = bundles_df["consequents"].astype(int)
-
-## merge with 'antecedents' to get antecedents_menu_name
-bundles_df = pd.merge(bundles_df, menu_df.rename(columns={'MENU_ITEM_ID': 'antecedents', 'MENU_ITEM_NAME': 'antecedents_item_name'}),
-                      on='antecedents', how='left')
-
-## merge with 'consequents' to get consequents_menu_name
-bundles_df = pd.merge(bundles_df, menu_df.rename(columns={'MENU_ITEM_ID': 'consequents', 'MENU_ITEM_NAME': 'consequents_item_name'}),
-                      on='consequents', how='left')
-
-## re-arrange columns
-bundles_df = bundles_df[["antecedents_item_name", "antecedents", "consequents_item_name", "consequents"]]
-
-
-## convert both columns to str type
-bundles_df["antecedents"] = bundles_df["antecedents"].astype(str)
-bundles_df["consequents"] = bundles_df["consequents"].astype(str)
-
-## create a new DataFrame with the rearranged columns and the new BundleNo, Item1, and Item2 columns
-final_bundles_df = bundles_df[["antecedents_item_name", "antecedents", "consequents_item_name", "consequents"]].copy()
-
-## create the BundleNo column as an index starting from 1
-final_bundles_df.insert(0, 'BundleNo', range(1, 1 + len(final_bundles_df)))
-
-## merge the 'antecedents_item_name' and 'antecedents' columns into 'Item1'
-final_bundles_df['Item1'] = final_bundles_df['antecedents_item_name'] + ' (' + final_bundles_df['antecedents'] + ')'
-
-## merge the 'consequents_item_name' and 'consequents' columns into 'Item2'
-final_bundles_df['Item2'] = final_bundles_df['consequents_item_name'] + ' (' + final_bundles_df['consequents'] + ')'
-
-## drop the individual 'antecedents_item_name', 'antecedents', 'consequents_item_name', and 'consequents' columns
-final_bundles_df.drop(columns=["antecedents_item_name", "antecedents", "consequents_item_name", "consequents"], inplace=True)
+## retrieve bundle dataframe
+final_bundles_df = display_bundles(my_rules)
 
 ## print the new DataFrame with the desired structure
 st.dataframe(final_bundles_df, hide_index=True)
