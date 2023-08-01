@@ -157,6 +157,9 @@ def get_overall_truck_table(location_table_df, order_header_df):
     # Change the column name to "Number of Customers"
     overall_truck_df_grouped = overall_truck_df_grouped.rename(columns={'CUSTOMER_ID': 'Number of Customers'})
 
+    # Filter locations where the order total is more than 50000
+    overall_truck_df_grouped = overall_truck_df_grouped[overall_truck_df_grouped['ORDER_TOTAL'] > 50000]
+
     return overall_truck_df_grouped
 
 # # Function: retrieve order_header table
@@ -309,7 +312,7 @@ with tab1:
     overall_truck_df_grouped = get_overall_truck_table(location_table_df, order_details_df)
 
     ## Display header
-    st.markdown("## Overall Truck Table")
+    st.markdown("## Total Sales by Location")
 
     ## Display the merged DataFrame
     st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
