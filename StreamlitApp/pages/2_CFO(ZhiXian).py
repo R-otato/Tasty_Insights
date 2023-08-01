@@ -140,6 +140,7 @@ else:
         df=pd.read_csv('assets/without_transformation.csv')
         df = df.merge(df_OTS)
         df = df[(df["MAX_ORDER_TS"]) > "2022-10-01"]
+        # df = df[(df["MAX_ORDER_TS"]) <= "2022-10-31"]
         df = df.drop(columns="MAX_ORDER_TS")
 
 # with st.expander("Raw Dataframe"):
@@ -168,19 +169,9 @@ data=pd.concat([customer_id, predictions], axis=1)
     # st.write(demo_df)
     # st.write(beha_df)
     # st.write(data)
-
-    # data points to present
-    ## Churn - generate churn rate
-    ## Customer Location - Identify places of lower profitability and places of higher profitability (in relation to churn)
-    ## Order Timing - Time of day where operations are more busy
     
 output_data = pd.concat([data, demo_df[["GENDER", "CITY", "AGE"]]], axis=1)
-    
-churn_rate = predictions[['CHURNED']].sum()/predictions.count()
-
-    # Presenting Churn Rate
-value = round(churn_rate.iloc[0] * 100, 2)
-st.metric('Churn Rate', f"{value}%")
+#output_data["AGE"] = output_data["AGE"].astype(int)    
 
 with st.expander("Output Data"):
       st.write(output_data)
@@ -188,4 +179,33 @@ with st.expander("Output Data"):
     # temporary test
 output = convert_df(output_data)
 st.download_button("Download Data", output, "file.csv", "text/csv", key='download-csv')
+
+# see potential sales
+# predicting next month sales and growth
+model2 = load_model("assets/nextMonth.jbl")
+# inputs: Churn rate, distinct customers, month of year, average cust age
+
+# create button to select which cities and change the dataset accordingly
+# output_data
+
+churn_rate = predictions[['CHURNED']].sum()/predictions.count()
+
+# Presenting Churn Rate
+value = round(churn_rate.iloc[0] * 100, 2)
+st.metric('Churn Rate', f"{value}%")
+
+
+input_data = pd.DataFrame()
+
+input_data["CHURN_RATE"] = churn_rate
+input_data["DISTINCT_CUSTOMER"] = output_data.count()
+input_data["MONTH"] = 10
+input_data["AVERAGE_AGE"] = output_data["AGE"].mean()
+
+
+# daat to input in the model
+st.write(input_data)
+
+pred_sales = model2.predict(input_data)
+st.write(pred_sales)
     
