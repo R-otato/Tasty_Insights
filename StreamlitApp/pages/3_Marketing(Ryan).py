@@ -41,13 +41,12 @@ def kmeans_pipeline(data):
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
     data = windsorizer_gau.transform(data)  # Apply Gaussian Windsorization
     cols_to_scale=['RECENCY','FREQUENCY','MONETARY']
-    data_kmeans=data[cols_to_scale].copy() # For our Kmeans model, it does not include any yeo johnson transformation
-    data_kmeans[cols_to_scale] = kmeansMinMaxScaler.transform(data_kmeans[cols_to_scale])  # Apply Min-Max Scaling for Kmeans
+    data[cols_to_scale] = kmeansMinMaxScaler.transform(data[cols_to_scale])  # Apply Min-Max Scaling for Kmeans
 
     #Concat Customer ID back
-    data_kmeans=pd.concat([not_Involved, data_kmeans], axis=1)
+    data=pd.concat([not_Involved, data], axis=1)
 
-    return data_kmeans
+    return data
 
 
 def churn_pipeline(data):
@@ -180,8 +179,9 @@ def main() -> None:
 
     # Setup: Get predictions
     cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
+    kmeans_cols=['RECENCY','FREQUENCY','MONETARY']
     churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
-    cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df.drop(cols_to_ignore,axis=1)),columns=['CLUSTER'])
+    cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df[kmeans_cols]),columns=['CLUSTER'])
     
     # Setup: Map predictions to understandable insights
     churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
