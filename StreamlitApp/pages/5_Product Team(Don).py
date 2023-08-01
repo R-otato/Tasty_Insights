@@ -554,8 +554,7 @@ if has_null_values == False:
             ## display the new_product_details_df DataFrame
             st.dataframe(new_product_details_df, hide_index=True)
 else:
-    # display message if null values are found
-    st.write("<span style='color:red'>Make sure all options have an input.</span>", unsafe_allow_html=True)
+    st.error("Please fill in all required fields before proceeding with the prediction.")
 
 
 
