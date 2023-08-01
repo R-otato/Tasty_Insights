@@ -93,15 +93,28 @@ df_user_input = pd.DataFrame({
     'Amount_Spent_Per_Order': [amount_spent_per_order]
 })
 
-
+df_user_input_cust_demo = df_user_input.copy()
 
 # Display the filtered data
 st.subheader("Customer to Predict")
 st.dataframe(df_user_input)
 
+# accepts a dataframe, returns a dataframe with AGE column
+def get_age(df):
+    # cast BIRTHDAY_DATE to datetime
+    df['BIRTHDAY_DATE'] = pd.to_datetime(df['BIRTHDAY_DATE'])
+    # Calculate age in years and round to the nearest whole number
+    df['AGE'] = ((latest_date - df['BIRTHDAY_DATE']).dt.days/365).round()
+    # Convert age to integers
+    df['AGE'] = df['AGE'].astype(int)
+
+    return df
+
 if st.button('Predict!'):
     
-    df_user_input['BIRTHDAY_DATE'] = pd.to_datetime(df_user_input['BIRTHDAY_DATE'])
+    # churn prediction data manupulation
+    
+    # convert to datetime
     df_user_input['SIGN_UP_DATE'] = pd.to_datetime(df_user_input['SIGN_UP_DATE'])
 
     # RFM
@@ -116,9 +129,11 @@ if st.button('Predict!'):
     df_user_input['MAX_DAYS_WITHOUT_PURCHASE'] = df_before_scaling_sample['MAX_DAYS_WITHOUT_PURCHASE'].mean()
     df_user_input['MIN_DAYS_WITHOUT_PURCHASE'] = df_before_scaling_sample['MIN_DAYS_WITHOUT_PURCHASE'].mean()
     
-    # Age
+    # latest date of the dataset
     latest_date = pd.to_datetime('2022-10-31')
-    df_user_input['AGE'] = (latest_date - df_user_input['BIRTHDAY_DATE']).dt.days/365
+    
+    # Age
+    df_user_input = get_age(df_user_input)
     # Number of locations visited
     df_user_input['NUM_OF_LOCATIONS_VISITED'] = df_user_input['Number_of_Orders'] \
                                                 - round(df_user_input['Number_of_Orders']*0.05)
@@ -157,6 +172,8 @@ if st.button('Predict!'):
         CHURNED = 0,
     )
     
+    # churn prediction model usage
+    
     # perform one hot encoding
     onehotencoder = joblib.load(path + '/models/onehotencoder.jbl')
     df_user_input = onehotencoder.transform(df_user_input)
@@ -170,26 +187,67 @@ if st.button('Predict!'):
     
     # perform prediction    
     model = joblib.load(path + 'models/xgb_churn_model.jbl')
-    prediction = model.predict(df_user_input)
+    churn_prediction = model.predict(df_user_input)
     
-    # perform customer segmentation scaling
-    customer_segmentation_scaler = joblib.load(path + 'models/customer_segmentation_scaler_with_age.jbl')
-    df_user_input_scaled = customer_segmentation_scaler.transform(df_user_input_segmentation)
+    # churn results
+    st.title("Prediction Results")
+    if churn_prediction[0] == 1:
+        st.write("This customer is likely to churn.")
+    else:
+        st.write("This customer is unlikely to churn.")
     
-    # perform customer segmentation prediction
-    kmeans = joblib.load(path + 'models/kmeans_model_with_age.jbl')
-    segment = kmeans.predict(df_user_input_scaled)
+    # demographic prediction data manupulation
+    
+    # simplify children info
+    df_user_input_cust_demo['CHILDREN_COUNT'] = df_user_input_cust_demo['CHILDREN_COUNT'].map({
+    '0': "No",
+    '1': "Yes",
+    '2': "Yes",
+    '3': "Yes",
+    '4': "Yes",
+    '5+': "Yes",
+    'Undisclosed':'Undisclosed'})
+
+    df_user_input_cust_demo.rename({'CHILDREN_COUNT':'HAVE_CHILDREN'},inplace=True,errors='ignore',axis=1)
+    
+    # Define the age groups and corresponding labels
+    age_bins = [0, 46, 66, 83]
+    age_labels = ['Adults', 'Middle-Aged Adults', 'Seniors']
+    
+    # get age
+    df_user_input_cust_demo = get_age(df_user_input_cust_demo)
+    st.write(df_user_input_cust_demo)
+    # Bin the age column based on the age groups and labels
+    df_user_input_cust_demo['AGE_GROUP'] = pd.cut(df_user_input_cust_demo['AGE'], bins=age_bins, labels=age_labels)
+    
+    # Define the age groups and corresponding labels
+    DTNO_bins = [0, 7, 14, 30, 999]
+    DTNO_labels = ['<7 Days', '14 Days', '30 Days', '>30 Days']
+
+    # Bin the age column based on the age groups and labels
+    df_user_input_cust_demo['DAYS_TO_NEXT_ORDER'] = pd.cut(df_user_input_cust_demo['Days_Since_Last_Order'], bins=DTNO_bins, labels=DTNO_labels)
+    
+    # get churn
+    df_user_input_cust_demo['CHURNED'] = churn_prediction[0]
+    
+    # drop unnecessary columns
+    cust_seg_demo_df=df_user_input_cust_demo[['GENDER', 'MARITAL_STATUS', 'CITY', 'HAVE_CHILDREN', 'AGE_GROUP', 'CHURNED']]
+
+    # perform one hot encoding
+    onehotencoder_cust_demo = joblib.load(path + 'models/cust_demographic_ohe.jbl')
+    df_user_input_ohe = onehotencoder_cust_demo.transform(cust_seg_demo_df)
+    
+    # perform customer demographic prediction
+    model_cust_demo = joblib.load(path + 'models/cust_demographic_model.jbl')
+    cust_demo_results = model_cust_demo.predict(df_user_input_ohe)
+    
+    st.write("Customer Demographic Prediction:", cust_demo_results[0])
+    
     
     cluster_information = pd.read_csv(path + 'datasets/cluster_information.csv')
     
     info = cluster_information['Info2'][segment].to_string(index=False)
-    
-    # results
-    st.title("Prediction Results")
-    if prediction[0] == 1:
-        st.write("This customer is likely to churn.")
-    else:
-        st.write("This customer is unlikely to churn.")
+        
     
     def get_customer_segment(segment):
         st.write("Customer Type:", cluster_information['Title'].iloc[segment])
@@ -204,3 +262,6 @@ if st.button('Predict!'):
     
     # TODO - add customer churn, what is the probability of this customer churning?
     # TODO - add chloropleth of sales by country
+    # TODO - what impact in terms of sales does this cluster have?
+    # TODO - what is the average sales per customer in this cluster?
+    # TODO - figure out if DTNO is a good feature to use for clustering
