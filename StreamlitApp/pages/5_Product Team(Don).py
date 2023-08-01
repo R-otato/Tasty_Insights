@@ -158,9 +158,23 @@ st.markdown("# Product Team")
 tab1, tab2 = st.tabs(['Explore', 'Model Prediction'])
 
 with tab1:
-    st.write("Info Page")
+    st.markdown("# High Level Goals")
+    st.write("""Our solution, Tasty Insights, is dedicated to assisting Tasty Bytes in achieving its high-level goals over the next 5 years. 
+             More specifically, we aim to help Tasty Bytes achieve a remarkable 25% Year-Over-Year sales increase, from annual sales of 
+             \$105M to \$320M. This page is designed specifically to meet the needs of the marketing team, by showcasing our abilityto use historical data 
+             to predict future events. In this case, we utilize the data of existing products to predict the demand for new products!""")
 
+    st.markdown("# How to utilise predictions?")
+    st.write("""In the model prediction tab, you can input the details of a new product Tasty Bytes would like to predict the demand for in terms of quantity 
+             sold. The model would provide a prediction of the number of the new product that will be sold. This will will be displayed in a tabular format
+             which shows more than the quantity sold. More details below.""")
 
+    st.markdown("# Interpreting the model")
+    
+    st.markdown("# Limitations and assumptions the model makes")
+    
+    st.markdown("# Model's confidence level")
+    
 with tab2:
     # Page Instructions (How to Use This Page)
     with st.expander("How to Use This Page"):
