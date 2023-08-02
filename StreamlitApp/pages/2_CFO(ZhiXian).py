@@ -117,31 +117,18 @@ with st.expander("Guide to Using Page"):
                 B) Identify external factors that lead potential loss in  sales 
             """)
     
-    # copied from @ryan
-    # Input data
-    ## File Upload section
-st.markdown("## Input Data")
-uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
-df=''
 
-if uploaded_files:
-        data_list = []
-        #Append all uploaded files into the list
-        for f in uploaded_files:
-            st.write(f)
-            temp_data = pd.read_csv(f)
-            data_list.append(temp_data)
-        st.success("Uploaded your file!")
-        #concat the files together if there are more than one file uploaded
-        df = pd.concat(data_list)
-else:
-        st.info("Using the last updated data of the members in United States (October and beyond). Upload a file above to use your own data!")
-        #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-        df=pd.read_csv('assets/without_transformation.csv')
-        df = df.merge(df_OTS)
-        df = df[(df["MAX_ORDER_TS"]) > "2022-10-01"]
-        # df = df[(df["MAX_ORDER_TS"]) <= "2022-10-31"]
-        df = df.drop(columns="MAX_ORDER_TS")
+st.info("Using the last updated data of the members in United States (October and beyond).")
+history_data = pd.read_csv("assets/last_month_sales.csv")
+st.write("This is last months sales")
+st.write(history_data)
+
+#df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
+df=pd.read_csv('assets/without_transformation.csv')
+df = df.merge(df_OTS)
+df = df[(df["MAX_ORDER_TS"]) > "2022-10-01"]
+# df = df[(df["MAX_ORDER_TS"]) <= "2022-10-31"]
+df = df.drop(columns="MAX_ORDER_TS")
 
 # with st.expander("Raw Dataframe"):
 #         st.write("This is the data set prior to any transformations")
@@ -171,6 +158,7 @@ data=pd.concat([customer_id, predictions], axis=1)
     # st.write(data)
     
 output_data = pd.concat([data, demo_df[["GENDER", "CITY", "AGE"]]], axis=1)
+output_data = output_data.dropna()
 #output_data["AGE"] = output_data["AGE"].astype(int)    
 
 with st.expander("Output Data"):
@@ -186,26 +174,34 @@ model2 = load_model("assets/nextMonth.jbl")
 # inputs: Churn rate, distinct customers, month of year, average cust age
 
 # create button to select which cities and change the dataset accordingly
+city = st.selectbox(label="Select City", options=output_data["CITY"].unique())
+using = output_data.loc[output_data["CITY"] == city]
+
 # output_data
 
-churn_rate = predictions[['CHURNED']].sum()/predictions.count()
+churn_rate = using[['CHURNED']].sum()/predictions.count()
 
 # Presenting Churn Rate
 value = round(churn_rate.iloc[0] * 100, 2)
-st.metric('Churn Rate', f"{value}%")
+st.metric('Existing Customers Predicted to Churn', f"{value}%")
 
 
 input_data = pd.DataFrame()
 
 input_data["CHURN_RATE"] = churn_rate
-input_data["DISTINCT_CUSTOMER"] = output_data.count()
+input_data["DISTINCT_CUSTOMER"] = using.count()
 input_data["MONTH"] = 10
-input_data["AVERAGE_AGE"] = output_data["AGE"].mean()
+input_data["AVERAGE_AGE"] = using["AGE"].mean()
 
 
-# daat to input in the model
+# data to input in the model
 st.write(input_data)
 
 pred_sales = model2.predict(input_data)
-st.write(pred_sales)
+st.write(f"The predicted sales next month of {city} is {pred_sales[0]:.2f}")
+
+# Change in Sales
+lastMonthSales = history_data.loc[history_data["CITY"] == city]["SALES"].values  
+change_sales = (pred_sales - lastMonthSales)/lastMonthSales * 100
+st.metric("Change in sales", f"{change_sales[0]:.2f}%")
     
