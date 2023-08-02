@@ -115,6 +115,13 @@ def filter(selected_options,column,data):
         filtered_data = data[data[column].isin(selected_options)]
     return filtered_data
 
+# Define a function to validate if the input is an integer
+def validate_integer_input(input_str):
+    try:
+        return int(input_str)
+    except ValueError:
+        return None
+
 #################
 ### MAIN CODE ### 
 #################
@@ -218,22 +225,32 @@ def main() -> None:
 
     # Display forecasted sales
     st.write('### Member Forecasted Sales')
+    #Get user input
     forecast_months = st.slider('Months for forecast:', 1, 12, 1)
-    estimated_frequency = int(st.text_input("Expected purchases in period:", 1))
 
-    sales_model_input = filtered_data[['CUSTOMER_ID', 'FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS','MONETARY']]
+    # Get the input from the user
+    expected_purchases_input = st.text_input("Expected purchases in period:", "1")
 
-    sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
-    sales_model_input['TENURE_MONTHS'] = sales_model_input['TENURE_MONTHS'] + forecast_months
+    # Validate the input
+    estimated_frequency = validate_integer_input(expected_purchases_input)
 
-    sales_clean=sales_pipeline(sales_model_input)
-    monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1)),columns=['FORECAST_MONETARY'])
-
-    sales_model_input['FORECAST_MONETARY']=round(monetary_pred['FORECAST_MONETARY'],2)
-    sales_model_input['FORECAST_SALES']=round(sales_model_input['FORECAST_MONETARY']-sales_model_input['MONETARY'],2)
-
-    st.write(sales_model_input)
-    st.metric('Forecasted Sales', f"${round(sales_model_input['FORECAST_SALES'].sum(),2)}")
+    # Display error message if input is not an integer
+    if estimated_frequency is None:
+        st.error("Please enter a valid integer for the expected purchases.")
+    else:
+        #Setup data
+        sales_model_input = filtered_data[['CUSTOMER_ID', 'FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS','MONETARY']]
+        sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
+        sales_model_input['TENURE_MONTHS'] = sales_model_input['TENURE_MONTHS'] + forecast_months
+        #Transform data
+        sales_clean=sales_pipeline(sales_model_input)
+        monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1)),columns=['FORECAST_MONETARY'])
+        #Prep output data
+        sales_model_input['FORECAST_MONETARY']=round(monetary_pred['FORECAST_MONETARY'],2)
+        sales_model_input['FORECAST_SALES']=round(sales_model_input['FORECAST_MONETARY']-sales_model_input['MONETARY'],2)
+        # Display output data
+        st.write(sales_model_input)
+        st.metric('Forecasted Sales', f"${round(sales_model_input['FORECAST_SALES'].sum(),2)}")
 
 
     # # Metrics table
