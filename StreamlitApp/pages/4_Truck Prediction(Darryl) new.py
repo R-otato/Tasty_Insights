@@ -36,15 +36,36 @@ def pipeline(data):
     data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
     
     return data
-        
-# @cached(cache={})
-# #Load model
-# def load_model(model_path: str) -> object:
-#     model = joblib.load(model_path)
-#     return model   
 
-# def convert_df(df):
-#     return df.to_csv(index=False).encode('utf-8')
+    
+# Function: retrieve truck table
+# the purpose of this function is to retrieve the truck table from snowflake containing all the details of the truck items
+def retrieve_truck_table():
+    # RETRIEVE TRUCK TABLE FROM SNOWFLAKE
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
+
+    ## retrieve truck table from snowflake
+    my_cur = my_cnx.cursor()
+    # select united states
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID, MENU_TYPE_ID from truck where COUNTRY = 'United States'")
+    truck_table = my_cur.fetchall()
+    
+    ## create a DataFrame from the fetched result
+    truck_table_df = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID', 'MENU_TYPE_ID'])
+
+    # Group the DataFrame by 'PRIMARY_CITY' and count the number of trucks in each city
+    # truck_count_by_city = truck_table_df.groupBy("PRIMARY_CITY").count()
+
+    return truck_table_df
 
 # Function: retrieve location table
 # the purpose of this function is to retrieve the location table from snowflake containing all the details of the location items
@@ -206,6 +227,172 @@ def get_overall_table(truck_details_df, menu_table_df):
     return merged_df
 
 
+# Function: user_inputs()
+# the purpose of this function is to get the user's input for the sales of a truck by location they would like to get a prediction for
+def user_inputs(): 
+    
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
+
+    ## retrieve truck table from snowflake
+    my_cur = my_cnx.cursor()
+    # select united states
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID, MENU_TYPE_ID from truck where COUNTRY = 'United States'")
+    truck_table = my_cur.fetchall()
+    
+    ## create a DataFrame from the fetched result
+    truck_table = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID', 'MENU_TYPE_ID'])
+    
+    ## Option: primary city name
+    ## add None as the default value (it won't be an actual selectable option)
+    default_option = None
+    primary_city_options = np.sort(truck_table['PRIMARY_CITY'].unique())
+
+    ## use the updated list of options for the selectbox
+    selected_primary_city_name = st.selectbox("City Selected: ", [default_option] + list(primary_city_options))
+
+    # Filter the truck_table to find the truck id for the selected trucks in that city
+    truck_filter = truck_table['PRIMARY_CITY'] == selected_primary_city_name
+    if truck_filter.any():
+        selected_truck = truck_table.loc[truck_filter, 'TRUCK_ID'].values[0]
+    else:
+        selected_truck = None
+
+    ## Option: truck id
+    ## add None as the default value (it won't be an actual selectable option)
+    default_option = None
+    truck_id_options = np.sort(truck_table['TRUCK_ID'].unique())
+
+    ## use the updated list of options for the selectbox
+    selected_truck_id = st.selectbox("Truck Id: ", [default_option] + list(truck_id_options))
+
+
+    ## Option: menu type id
+    ## add None as the default value (it won't be an actual selectable option)
+    default_option = None
+    menu_type_options = np.sort(truck_table['MENU_TYPE_ID'].unique())
+
+    ## use the updated list of options for the selectbox
+    selected_menu_type = st.selectbox("Menu Type: ", [default_option] + list(menu_type_options))
+
+    # Use current date for model predictions
+    current_year = pd.Timestamp.now().year
+    current_month = pd.Timestamp.now().month
+
+    user_input_full = {
+        #"TRUCK": selected_truck,
+        "PRIMARY_CITY": selected_primary_city_name,
+        "TRUCK_ID": selected_truck_id, 
+        "MENU_TYPE_ID": selected_menu_type,
+        'YEAR': current_year,
+        'MONTH': current_month
+    }
+    
+    # # Create a dictionary with the current year and month
+    # data = {
+    #     'YEAR': current_year,
+    #     'MONTH': current_month
+    # }
+
+    # # Convert the dictionary to a DataFrame
+    # current_date_df = pd.DataFrame(data, index=[1])
+
+    # create dataframe with all the user's inputs
+    user_input_df = pd.DataFrame(user_input_full, index=[1])
+
+    return user_input_df
+
+# Function: prediction()
+# the purpose of this function is to carry out certain data transformations and create the 2 tables shown after prediction
+def prediction(user_input_df):
+    # replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+    user_input_df = user_input_df.replace({"Yes": 1, "No":0})
+    
+    # # MANUAL ENCODING
+    # categorical_cols = ["PRIMARY_CITY"]
+    
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
+
+    ## retrieve truck table from snowflake
+    my_cur = my_cnx.cursor()
+    # select united states
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID, MENU_TYPE_ID from truck where COUNTRY = 'United States'")
+    truck_table = my_cur.fetchall()
+    
+    ## create a DataFrame from the fetched result
+    truck_table = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID', 'MENU_TYPE_ID'])
+
+    # MANUAL ENCODING
+    categorical_cols = ["PRIMARY_CITY"]
+    
+    # Loop through each categorical column
+    for col in categorical_cols:
+        # Get the unique values in the column
+        unique_values = truck_table[col].unique()
+
+        # Loop through unique values in the column
+        for value in unique_values:
+            # Check if the value in the truck_table table matches the corresponding value in user_input_df
+            if value == user_input_df[col].values[0]:
+                # Create a column with the name 'column_selected_value' and set its value to 1
+                truck_table[f'{col}_{value}'] = 1
+
+                # Add this column to the user_input_df
+                user_input_df[f'{col}_{value}'] = 1
+            else:
+                # Create a column with the name 'column_unique_value' and set its value to 0
+                truck_table[f'{col}_{value}'] = 0
+
+                # Add this column to the user_input_df
+                user_input_df[f'{col}_{value}'] = 0
+
+
+    # Drop the original categorical columns from user_input_df
+    user_input_df.drop(columns=categorical_cols, inplace=True)
+
+    #user_input_df.drop(columns=["ITEM_SUBCATEGORY_Hot Option", "MENU_TYPE_Sandwiches", "TRUCK_BRAND_NAME_Better Off Bread", "ITEM_CATEGORY_Dessert"], inplace = True)
+
+    desired_order = ['YEAR', 'MONTH', 'TRUCK_ID', 'MENU_TYPE_ID', 
+                'PRIMARY_CITY_Boston', 'PRIMARY_CITY_Seattle', 'PRIMARY_CITY_Denver',
+                'PRIMARY_CITY_New York City']
+
+    user_input_df = user_input_df.reindex(columns=desired_order)
+    
+    
+    # retrieve min max scaler
+    min_max_scaler = joblib.load("assets/truck_min_max_scaler.joblib")
+    
+    min_max_scaler.transform(user_input_df)
+    
+    # retrieve regression model
+    truck_sales_model = joblib.load("assets/truck_xgb_improved.joblib")
+    
+    final_prediction = truck_sales_model.predict(user_input_df)
+    
+    # # Round off the prediction to the nearest whole number
+    # rounded_prediction = round(prediction[0])
+
+    
+    return final_prediction
+
+
 #Load model
 def load_model(model_path: str) -> object:
     model = joblib.load(model_path)
@@ -296,6 +483,46 @@ with tab1:
     st.dataframe(location_table_df, width=0, hide_index=True)  
 
     
+    ########## TESTING USER INPUT ###############
+    # Monthly Truck Sales Prediction
+    st.markdown("## Monthly Truck Sales")
+    
+    user_input_df = user_inputs()
+        
+    # display dataframe
+    st.dataframe(user_input_df, hide_index=True)
+
+
+    # Check for null values in the user_input_df
+    has_null_values = user_input_df.isnull().any().any()
+
+    if has_null_values == False:
+        # display message if no null values are found
+        st.write("Proceed to make a prediction.")
+        
+        # Make a prediction
+        if st.button("Predict"):
+            final_prediction = prediction(user_input_df)
+            
+            st.markdown("### Prediction")
+            ## display the rounded prediction
+            st.markdown("##### Predicted Sales for Next Month: {}".format(final_prediction))
+            
+            st.write('')
+            
+            # st.markdown("##### Total Item Details:")
+            # ## display the total_product_details_df DataFrame
+            # st.dataframe(total_product_details_df, hide_index=True)
+            
+            # # display current menu items
+            # with st.expander("Unit Item Details"):
+            #     st.write("This table contains details specific to a single unit or item of the new product")
+            #     ## display the new_product_details_df DataFrame
+            #     st.dataframe(new_product_details_df, hide_index=True)
+    else:
+        st.error("Please fill in all required fields before proceeding with the prediction.")
+    ###########################################################
+    
     # ORDER HEADER TABLE #
     ## retrieve order_header table
     order_details_df = retrieve_order_header()
@@ -315,18 +542,7 @@ with tab1:
     st.markdown("## Total Sales by Location")
 
     ## Display the merged DataFrame
-    st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
-    
-    
-    # # OVERALL TABLE #
-    # ## retrieve the merged table from truck and menu
-    # merged_df = get_overall_table(truck_table_df, menu_table_df)
-
-    # ## Display header
-    # st.markdown("## Overall Table")
-
-    # ## Display the merged DataFrame
-    # st.dataframe(merged_df, width=0, hide_index=True)
+    #st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
     
 
     
