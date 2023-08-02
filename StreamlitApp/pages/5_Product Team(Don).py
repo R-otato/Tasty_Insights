@@ -5,7 +5,7 @@ import joblib
 import snowflake.connector
 import ast
 import numpy as np
-from mlxtend.frequent_patterns import apriori, association_rules
+from PIL import Image
 
 #################
 ### FUNCTIONS ###
@@ -370,10 +370,18 @@ with tab1:
     st.write("""In the model prediction tab, you can input the details of a new product Tasty Bytes would like to predict the demand for in terms of quantity 
              sold. The model would provide a prediction of the number of the new product that will be sold. This will will be displayed in a tabular format
              which shows more than the quantity sold. More details below.""")
+    st.image(Image.open('assets/Product Qty Prediction Outcome.png'))
 
     st.markdown("# Interpreting the model")
+    st.image(Image.open('assets/Product Qty Model Feature Importance.png'))
     
     st.markdown("# Limitations and assumptions the model makes")
+    st.write("""The first assumption the model makes is that the total quantity sold total quantity from the transactions data as the lifetime quantity 
+             sold of a product which may not be the case for every product considering the fact that the launch date and removal date is not provided in 
+             the dataset. Hence, it is likely that the total quantity sold is more of the first transaction for that product till the current date.
+             
+             The second assumption is the independence of the observations in the training data. In other words, the model assumes that each menu item's 
+             sales data is not influenced by other menu items' sales or external factors.""")
     
     st.markdown("# Model's confidence level")
     
