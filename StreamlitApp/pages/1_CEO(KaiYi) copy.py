@@ -9,44 +9,39 @@ import joblib
 
 # path to assets
 path = 'assets/'
-
 # latest date of the dataset
 latest_date = pd.to_datetime('2022-10-31')
 
-st.set_page_config(page_title="Churn Prediction", page_icon="💀")
+def init_model():
+    
+    # churn prediction
+    yeojohnsontransformer = joblib.load(path + '/models/yeojohnsontransformer.jbl')
+    onehotencoder = joblib.load(path + '/models/onehotencoder.jbl')
+    minmaxscaler = joblib.load(path + 'models/minmaxscaler.jbl')
+    model = joblib.load(path + 'models/xgb_churn_model.jbl')
+    
+    # customer demographic
+    onehotencoder_cust_demo = joblib.load(path + 'models/cust_demographic_ohe.jbl')
+    model_cust_demo = joblib.load(path + 'models/cust_demographic_model.jbl')
+    
+    return yeojohnsontransformer, onehotencoder, minmaxscaler, model, \
+            onehotencoder_cust_demo, model_cust_demo
 
-# Page Title
-st.title("Churn Prediction")
-
-# load data
-customer_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
-df_before_scaling_sample = pd.read_csv(path + 'datasets/before_scaling_dataset.csv')
-cluster_information = pd.read_csv(path + 'datasets/cluster_information.csv')
-
-# load models
-yeojohnsontransformer = joblib.load(path + '/models/yeojohnsontransformer.jbl')
-onehotencoder = joblib.load(path + '/models/onehotencoder.jbl')
-minmaxscaler = joblib.load(path + 'models/minmaxscaler.jbl')
-model = joblib.load(path + 'models/xgb_churn_model.jbl')
-onehotencoder_cust_demo = joblib.load(path + 'models/cust_demographic_ohe.jbl')
-model_cust_demo = joblib.load(path + 'models/cust_demographic_model.jbl')
-
-
-# Show basic statistics about the customer data
-# TODO - connect to Snowflake with SQL to get transaction data
-st.header("Customer Data Overview")
-st.write("Total number of Transactions:", "673M")
-st.write("Total number of Transactions by Members:", "37M")
-st.write('')
-st.write("Number of Members:", "222K")
-st.write("Number of Unique Data on Members:", str(len(customer_data.columns)))
-
-# Display a sample of the customer data
-st.subheader("Customer Data")
-st.dataframe(customer_data)
+def init_dataset():
+    
+    # display dataset
+    customer_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
+    
+    # for churn prediction proxy values
+    df_before_scaling_sample = pd.read_csv(path + 'datasets/before_scaling_dataset.csv')
+    
+    # display cluster information
+    cluster_information = pd.read_csv(path + 'datasets/cluster_information.csv')
+    
+    return customer_data, df_before_scaling_sample, cluster_information
 
 # to search for a specific customer by first name, last name, or combination
-def search_customer():
+def search_customer(customer_data):
     search_term = st.text_input("Search for a customer by First Name, Last Name, or combination:")
 
     if search_term:
@@ -61,17 +56,13 @@ def search_customer():
             st.dataframe(selected_customer)
         else:
             st.write("No matching customer found.")
-
-search_customer()
-
-# Show insights on customer churn
-st.header("Customer Churn Predictor")
-
-customer_data['SIGN_UP_DATE'] = pd.to_datetime(customer_data['SIGN_UP_DATE'])
-customer_data['BIRTHDAY_DATE'] = pd.to_datetime(customer_data['BIRTHDAY_DATE'])
-
-# User Input for Dropdowns
-def user_input():
+            
+def user_input(customer_data):
+    
+    # cast date columns to datetime
+    customer_data['SIGN_UP_DATE'] = pd.to_datetime(customer_data['SIGN_UP_DATE'])
+    customer_data['BIRTHDAY_DATE'] = pd.to_datetime(customer_data['BIRTHDAY_DATE'])
+    
     city = st.selectbox("City", np.sort(customer_data['CITY'].unique()))
     gender = st.selectbox("Gender", np.sort(customer_data['GENDER'].unique()))
     marital_status = st.selectbox("Marital Status", np.sort(customer_data['MARITAL_STATUS'].unique()), index = 1)
@@ -107,14 +98,6 @@ def user_input():
     
     return df_user_input
 
-df_user_input = user_input()
-
-df_user_input_cust_demo = df_user_input.copy()
-
-# Display the filtered data
-st.subheader("Customer to Predict")
-st.dataframe(df_user_input)
-
 # accepts a dataframe, returns a dataframe with AGE column
 def get_age(df):
     
@@ -128,7 +111,7 @@ def get_age(df):
     return df
 
 # churn prediction data manupulation    
-def churn_prediction_data_manupulation():
+def churn_prediction_data_manupulation(df_user_input,df_before_scaling_sample):
     
     # convert to datetime
     df_user_input['SIGN_UP_DATE'] = pd.to_datetime(df_user_input['SIGN_UP_DATE'])
@@ -169,9 +152,37 @@ def churn_prediction_data_manupulation():
         ORDER_TS=latest_date,
         DAYS_TO_NEXT_ORDER=999,
     )
+    
+    return df_user_input
+
+def churn_preprocessing(df_user_input_churn_cleaned,yeojohnsontransformer,onehotencoder,minmaxscaler):
+    
+    # perform numerical transformation
+    df_user_input_churn_cleaned = yeojohnsontransformer.transform(df_user_input_churn_cleaned)
+    
+    # drop unnecessary columns
+    df_user_input_churn_cleaned = df_user_input_churn_cleaned.drop(columns=['CUSTOMER_ID','DAYS_TO_NEXT_ORDER',
+                                'MAX_ORDER_TS','ORDER_TS',
+                                'COUNTRY','BIRTHDAY_DATE','SIGN_UP_DATE'])
+    
+    # add dummy columns needed for the one hot encoding
+    df_user_input_churn_cleaned = df_user_input_churn_cleaned.assign(
+        CHURNED = 0,
+    )
+        
+    # perform one hot encoding
+    df_user_input_churn_cleaned = onehotencoder.transform(df_user_input_churn_cleaned)
+    df_user_input_churn_cleaned.rename({'MARITAL_STATUS_Divorced/Seperated':'MARITAL_STATUS_Divorced_Or_Seperated'}, axis=1,inplace=True)
+    df_user_input_churn_cleaned.columns = map(str.upper, df_user_input_churn_cleaned.columns)
+
+    # perform scaling
+    df_user_input_churn_cleaned = df_user_input_churn_cleaned.drop(columns=['CHURNED'])
+    df_user_input_churn_cleaned[df_user_input_churn_cleaned.columns] = minmaxscaler.transform(df_user_input_churn_cleaned[df_user_input_churn_cleaned.columns])
+    
+    return df_user_input_churn_cleaned
 
 # get similar customers as imputed
-def similar_customers_sales():
+def similar_customers_sales(df_user_input,df_before_scaling_sample):
     df_user_input_counterfactual = df_user_input.copy()
     counterfactual_columns = ['RECENCY','FREQUENCY','AGE','LENGTH_OF_RELATIONSHIP']
     df_non_churned = df_before_scaling_sample[df_before_scaling_sample['CHURNED']==0]
@@ -198,59 +209,8 @@ def similar_customers_sales():
     monthly_sales = monetary_per_month.mean()
     
     return lifetime_sales,monthly_sales
-    
-if st.button('Predict!'):
 
-    df_user_input = churn_prediction_data_manupulation()
-    
-    # get similar customers as imputed
-    lifetime_sales,monthly_sales = similar_customers_sales()
-    
-    # perform numerical transformation
-    df_user_input = yeojohnsontransformer.transform(df_user_input)
-    
-    # save a copy for customer segmentation
-    df_user_input_segmentation = df_user_input[['RECENCY','FREQUENCY','MONETARY','AGE','LENGTH_OF_RELATIONSHIP']].copy()
-    
-    # drop unnecessary columns
-    df_user_input = df_user_input.drop(columns=['CUSTOMER_ID','DAYS_TO_NEXT_ORDER',
-                                'MAX_ORDER_TS','ORDER_TS',
-                                'COUNTRY','BIRTHDAY_DATE','SIGN_UP_DATE'])
-        
-    # add dummy columns needed for the one hot encoding
-    df_user_input = df_user_input.assign(
-        CHURNED = 0,
-    )
-    
-    # churn prediction model usage
-    
-    # perform one hot encoding
-    df_user_input = onehotencoder.transform(df_user_input)
-    df_user_input.rename({'MARITAL_STATUS_Divorced/Seperated':'MARITAL_STATUS_Divorced_Or_Seperated'}, axis=1,inplace=True)
-    df_user_input.columns = map(str.upper, df_user_input.columns)
-
-    # perform scaling
-    df_user_input = df_user_input.drop(columns=['CHURNED'])
-    df_user_input[df_user_input.columns] = minmaxscaler.transform(df_user_input[df_user_input.columns])
-    
-    # perform prediction    
-    churn_prediction = model.predict(df_user_input)
-    
-    cust_result_message_template = """This customer is {} to churn.
-                        This means that the customer is {} purchasing from the Tasty Bytes, 
-                        resulting in {} the customer and potential sales. A customer similar to the inputted 
-                        customer has an average sales generated of **:blue[${:.0f}]**, with a lifetime total of **:blue[${:.0f}]**. Tasty Bytes 
-                        can expect to {} this amount of sales if this customer {} churn."""
-    
-    # churn results
-    st.header("Prediction Results")
-    if churn_prediction[0] == 1:
-        st.markdown(cust_result_message_template.format('likely', 'unlikely to continue', 'losing', monthly_sales, lifetime_sales, 'lose', 'does'))
-    else:
-        st.markdown(cust_result_message_template.format('unlikely', 'likely to continue', 'retaining', monthly_sales, lifetime_sales, 'gain', 'does not'))
-    
-    # demographic prediction data manupulation
-    
+def customer_demographic_data_manupulation(df_user_input_cust_demo,churn_prediction):
     # simplify children info
     df_user_input_cust_demo['CHILDREN_COUNT'] = df_user_input_cust_demo['CHILDREN_COUNT'].map({
     '0': "No",
@@ -284,32 +244,86 @@ if st.button('Predict!'):
     
     # drop unnecessary columns
     cust_seg_demo_df=df_user_input_cust_demo[['GENDER', 'MARITAL_STATUS', 'CITY', 'HAVE_CHILDREN', 'AGE_GROUP', 'CHURNED']]
-
-    # perform one hot encoding
-    df_user_input_ohe = onehotencoder_cust_demo.transform(cust_seg_demo_df)
     
-    # perform customer demographic prediction
-    cust_demo_results = model_cust_demo.predict(df_user_input_ohe)    
+    return cust_seg_demo_df
+
+def get_customer_segment(segment,cluster_information):
+    st.write("Customer Type:", cluster_information['Title'].iloc[segment])
+    st.write(cluster_information['Info'][segment])
+
+def main():
+    # set page title and icon
+    st.set_page_config(page_title="Churn Prediction", page_icon="💀")
+
+    # Page Title
+    st.title("Churn Prediction")
+    
+    # initalise dataset and model
+    customer_data, df_before_scaling_sample, cluster_information = init_dataset()
+    yeojohnsontransformer, onehotencoder, minmaxscaler, model, onehotencoder_cust_demo, model_cust_demo = init_model()
+    
+    # Show basic statistics about the customer data
+    st.header("Customer Data Overview")
+    st.write("Total number of Transactions:", "673M")
+    st.write("Total number of Transactions by Members:", "37M")
+    st.write('')
+    st.write("Number of Members:", "222K")
+    st.write("Number of Unique Data on Members:", str(len(customer_data.columns)))
+
+    # Display a sample of the customer data
+    st.subheader("Customer Data")
+    st.dataframe(customer_data)
+    
+    # allow for user to search for a customer
+    search_customer(customer_data)
+    
+    # Show insights on customer churn
+    st.header("Customer Churn Predictor")
+    
+    # User Input for Dropdowns and Sliders
+    df_user_input = user_input(customer_data)
+    st.write(df_user_input.rename(columns=str.lower).iloc[0])
+
+    
+    if st.button("Predict"):
+        # perform data manupulation for churn prediction
+        df_user_input_churn_cleaned = churn_prediction_data_manupulation(df_user_input,df_before_scaling_sample)
+        # apply preprocessing models
+        df_churn_preprocessed = churn_preprocessing(df_user_input_churn_cleaned,yeojohnsontransformer,onehotencoder,minmaxscaler)
+        # perform prediction    
+        churn_prediction = model.predict(df_churn_preprocessed)
         
-    info = cluster_information['Info'][cust_demo_results].to_string(index=False)
+        # get similar customers as imputed
+        lifetime_sales,monthly_sales = similar_customers_sales(df_user_input,df_before_scaling_sample)
         
-    def get_customer_segment(segment):
-        st.write("Customer Type:", cluster_information['Title'].iloc[segment])
-        st.write(cluster_information['Info'][segment])
-    
-    st.subheader('What type of customer is this?')
-    get_customer_segment(int(cust_demo_results))
-    
-    with st.expander("All Customer Types"):
-        for i in range(len(cluster_information)):
-            get_customer_segment(i)
-    
-    # TODO - add customer churn, what is the probability of this customer churning?
-    # TODO - add chloropleth of sales by country
-    # TODO - what impact in terms of sales does this cluster have?
-    # TODO - what is the average sales per customer in this cluster?
-    
-
-
-
-    
+        cust_result_message_template = """This customer is {} to churn.
+                            This means that the customer is {} purchasing from the Tasty Bytes, 
+                            resulting in {} the customer and potential sales. A customer similar to the inputted 
+                            customer has an average sales generated of **:blue[${:.0f}]**, with a lifetime total of **:blue[${:.0f}]**. Tasty Bytes 
+                            can expect to {} this amount of sales if this customer {} churn."""
+                            
+        # churn results
+        st.header("Prediction Results")
+        if churn_prediction[0] == 1:
+            st.markdown(cust_result_message_template.format('likely', 'unlikely to continue', 'losing', monthly_sales, lifetime_sales, 'lose', 'does'))
+        else:
+            st.markdown(cust_result_message_template.format('unlikely', 'likely to continue', 'retaining', monthly_sales, lifetime_sales, 'gain', 'does not'))
+        
+        # customer demographic data manupulation
+        cust_seg_demo_df = customer_demographic_data_manupulation(df_user_input,churn_prediction)
+        
+        # perform one hot encoding
+        cust_seg_demo_df_preprocessed = onehotencoder_cust_demo.transform(cust_seg_demo_df)
+        
+        # perform customer demographic prediction
+        cust_demo_results = model_cust_demo.predict(cust_seg_demo_df_preprocessed)   
+        
+        st.subheader('What type of customer is this?')
+        get_customer_segment(int(cust_demo_results),cluster_information)
+        
+        with st.expander("All Customer Types"):
+            for i in range(len(cluster_information)):
+                get_customer_segment(i,cluster_information)
+        
+main()        
+        
