@@ -194,15 +194,6 @@ with tab2:
     # PRODUCT PERFORMANCE PREDICTION
     st.markdown("## Product Performance")
 
-    ## Option: menu type option
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    menu_type_options = np.sort(menu_table['MENU_TYPE'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_menu_type = st.selectbox("Menu Type: ", [default_option] + list(menu_type_options))
-
-
     ## Option: truck brand name
     ## add None as the default value (it won't be an actual selectable option)
     default_option = None
@@ -210,6 +201,11 @@ with tab2:
 
     ## use the updated list of options for the selectbox
     selected_truck_brand_name = st.selectbox("Truck Brand Name: ", [default_option] + list(truck_brand_name_options))
+
+    # Filter the menu_table to find the menu type for the selected truck brand name
+    menu_type_filter = menu_table['TRUCK_BRAND_NAME'] == selected_truck_brand_name
+    if menu_type_filter.any():
+        selected_menu_type = menu_table.loc[menu_type_filter, 'MENU_TYPE'].values[0]
 
 
     ## Option: item category
@@ -434,7 +430,7 @@ with tab2:
             
             # display current menu items
             with st.expander("Unit Item Details"):
-                st.write("This label indicates that the table contains details specific to a single unit or item")
+                st.write("This table contains details specific to a single unit or item of the new product")
                 ## display the new_product_details_df DataFrame
                 st.dataframe(new_product_details_df, hide_index=True)
     else:
