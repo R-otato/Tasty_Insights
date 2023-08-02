@@ -532,40 +532,39 @@ with tab2:
 
             # Calculate the percentage increase in sales
             percentage_increase = (new_item_sales / total_sales_for_menu_type) * 100
-
                 
             st.markdown("### Prediction")
             ## display the rounded prediction
             st.markdown("##### Predicted Total Quantity Sold: {}".format(rounded_prediction))
             st.markdown(f"##### Percentage Increase in Sales: {percentage_increase:.2f}%")
             
-            # Calculate the total sales after adding the new menu item
+            # calculate the total sales after adding the new menu item
             total_sales_for_menu_type_after = total_sales_for_menu_type + new_item_sales
 
-            # Create a DataFrame to hold the data for the bar chart
+            # create a DataFrame to hold the data for the bar chart
             data = {
                 'Sales': ['Without New Item', 'With New Item'],
                 'Total Sales': [total_sales_for_menu_type, total_sales_for_menu_type_after]
             }
             df = pd.DataFrame(data)
 
-            # Plot the bar chart
-            plt.figure(figsize=(6, 7))
+            # plot the bar chart
+            plt.figure(figsize=(4, 5))
             bars = plt.bar(df['Sales'], df['Total Sales'])
             plt.title('Total Sales Before and After Adding New Menu Item')
             plt.grid(False)
 
-            # Add data labels to the bars
+            # add data labels to the bars
             for bar in bars:
                 height = bar.get_height()
                 plt.annotate(f'{height:.2f}', xy=(bar.get_x() + bar.get_width() / 2, height),
-                            xytext=(0, 3), textcoords="offset points",
-                            ha='center', va='bottom', fontsize=12)
+                            xytext=(0, 1), textcoords="offset points",
+                            ha='center', va='bottom', fontsize=9)
 
-            # Remove the y-axis values
+            # remove the y-axis values
             plt.gca().set_yticks([])
             
-            # Show the plot using Streamlit's st.pyplot function
+            # show the plot using Streamlit's st.pyplot function
             st.pyplot(plt)
             
             
