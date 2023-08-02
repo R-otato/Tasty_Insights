@@ -534,15 +534,15 @@ with tab1:
     # st.dataframe(order_details_df, width=0, hide_index=True)
     
     
-    # OVERALL TRUCK TABLE #
-    ## retrieve overall_truck_df table
-    overall_truck_df_grouped = get_overall_truck_table(location_table_df, order_details_df)
+    # # OVERALL TRUCK TABLE #
+    # ## retrieve overall_truck_df table
+    # overall_truck_df_grouped = get_overall_truck_table(location_table_df, order_details_df)
 
-    ## Display header
-    st.markdown("## Total Sales by Location")
+    # ## Display header
+    # st.markdown("## Total Sales by Location")
 
-    ## Display the merged DataFrame
-    #st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
+    # ## Display the merged DataFrame
+    # #st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
     
 
     
