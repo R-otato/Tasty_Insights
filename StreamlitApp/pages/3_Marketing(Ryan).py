@@ -130,127 +130,152 @@ def validate_integer_input(input_str):
 def main() -> None:
     # Page title
     st.markdown("# Marketing") 
-    # How to use this page
-    st.markdown("## High Level Goals")
-    st.write("""As stated in our homepage, our team is dedicated to assisting Tasty Bytes in achieving its ambitious goals over the next 5 years. 
-                In particular, we aim to assist helping Tasty Bytes achieve a remarkable 25% Year-Over-Year increase. This page is designed 
-                exclusively for the marketing team, showcasing our data-driven approach to empower and elevate your marketing strategies, 
-             ultimately driving significant sales growth.""")
-    
-    with st.expander("How to Use This Page"):
-        #Going to add some stuff here 
-        st.write("""
-        1. Default Data: The page displays default data for members in the United States. To update member information,
-        upload a new Excel file in the Input Data section.
-        2. Predictions: After uploading your file, the predictions will be automatically generated and shown.
-        3. Filter Data: Use filters to explore specific segments or refine the data for analysis.
-        4. Download Predictions: Download the predictions along with relevant data for further analysis, if desired.
-        """)
+    tab1, tab2 = st.tabs(['About', 'Model Prediction'])
+    with tab1:
+        # High level goals
+        st.markdown("## High Level Goals")
+        st.write("""As stated in our homepage, our team is dedicated to assisting Tasty Bytes in achieving its ambitious goals over the next 5 years. 
+                 In particular, we aim to help Tasty Bytes achieve a remarkable 25% Year-Over-Year increase in sales. This page is exclusively focused 
+                 on churn prediction, which is a twin concept of member retention. It is designed to empower and elevate your marketing strategies with 
+                 our data-driven approach, ultimately driving significant sales growth by retaining valuable customers and understanding their likelihood of churning.""")
+        # How to use predictions
+        st.markdown('## How to Utilize the Predictions')
+        st.write(
+            """
+            In the Model Prediction tab, you will have access to valuable insights derived from both the Segmentation and Churn prediction models. 
+            Additionally, we have incorporated a Sales Prediction model that predicts customer sales based on Frequency, Average Order Sales, and 
+            Tenure Month. Once you filter the segments and churn predictions, you can input your own frequency and months data to get personalized sales predictions.
 
-    # Input data
-    ## File Upload section
-    st.markdown("## Input Data")
-    uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
-    df=''
-    ### If uploaded file is not empty
-    if uploaded_files:
-        data_list = []
-        #Append all uploaded files into the list
-        for f in uploaded_files:
-            st.write(f)
-            temp_data = pd.read_csv(f)
-            data_list.append(temp_data)
-        st.success("Uploaded your file!")
-        #concat the files together if there are more than one file uploaded
-        df = pd.concat(data_list)
-    else:
-        st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
-        #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-        df=pd.read_csv('assets/marketing.csv')
+            With these powerful predictions, you can unlock various opportunities:
 
-    ## Display uploaded or defaul file
-    with st.expander("Raw Dataframe"):
-        st.write(df.head(10))
+            - Explore Customer Segments: Dive into the different segments within your member base, understanding their purchasing behavior.
 
-    # Run pipeline
-    clean_df=churn_pipeline(df)
-    kmeans_df=kmeans_pipeline(df)
+            - Identify Churn Likelihood: Gain visibility into which members are likely to churn or remain engaged, predicting their purchase behavior in the next 14 days.
 
-    with st.expander("Cleaned and Transformed Data"):
-        st.write(clean_df.head(10))
+            - Targeted Marketing Strategies: Armed with these predictions, you can design targeted marketing schemes tailored to specific segments or groups of customers, maximizing the impact of your campaigns.
 
-    # Setup: Model loading
-    churn_model = load_model("assets/churn-prediction-model.jbl")
-    seg_clf_model = load_model("assets/models/segment_classifier.jbl")
-    sales_model=load_model("assets/models/memb_sales_pred.jbl")
+            - Personalized Sales Predictions: Input the desired number of months and the expected number of purchases for each member in that period to assume the impact of your marketing strategy and generate forecasted sales.
 
-    # Setup: Get predictions
-    cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
-    kmeans_cols=['RECENCY','FREQUENCY','MONETARY']
-    churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
-    cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df[kmeans_cols]),columns=['CLUSTER'])
-    
-    # Setup: Map predictions to understandable insights
-    churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
-    cluster_pred['CLUSTER'] =cluster_pred['CLUSTER'].map({
-    0: "Active Moderate-Value Members",
-    1: "Inactive Low-Spending Members",
-    2: "High-Value Loyal Members",
-    3: "Engaged Moderate-Value Members",
-    4: "Active Low-Spending Members"})
+            Leveraging these data-driven insights, your marketing team can make informed decisions, optimize marketing efforts, and drive sales growth for Tasty Bytes. Let's unlock the full potential of your marketing strategies together!
+            """
+        )
 
-    # Setup:Combine tables with predictions
-    data=pd.concat([df,cluster_pred],axis=1)
-    data=pd.concat([data, churn_pred], axis=1)
-    
-    # Display predictions
-    st.markdown("## Member Segmentation and Churn Prediction Results")
+        # Models confidence
+        st.markdown("## Model's Confidence")
 
-    # Display a filter for selecting clusters
-    cluster_Options = ['All'] + data['CLUSTER'].unique().tolist()
-    selected_Cluster = st.multiselect("Filter by Member's Segment:", cluster_Options, default=['All'])
-    filtered_data=filter(selected_Cluster,'CLUSTER',data)
 
-    churn_Options = ['All'] + data['CHURNED'].unique().tolist()
-    selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
-    filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
-    
-    # Number of members of each cluster
-    cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
-    st.dataframe(cluster_counts, hide_index=True)
+    with tab2:
+        with st.expander("How to Use This Page"):
+            #Going to add some stuff here 
+            st.write("""
+            1. Default Data: The page displays default data for members in the United States. To update member information,
+            upload a new Excel file in the Input Data section.
+            2. Predictions: After uploading your file, the predictions will be automatically generated and shown.
+            3. Filter Data: Use filters to explore specific segments or refine the data for analysis.
+            4. Download Predictions: Download the predictions along with relevant data for further analysis, if desired.
+            """)
 
-    # Number of members who churned and not churned
-    churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
-    st.dataframe(churn_counts, hide_index=True)
+        # Input data
+        ## File Upload section
+        st.markdown("## Input Data")
+        uploaded_files = st.file_uploader('Upload your file(s)', accept_multiple_files=True)
+        df=''
+        ### If uploaded file is not empty
+        if uploaded_files:
+            data_list = []
+            #Append all uploaded files into the list
+            for f in uploaded_files:
+                st.write(f)
+                temp_data = pd.read_csv(f)
+                data_list.append(temp_data)
+            st.success("Uploaded your file!")
+            #concat the files together if there are more than one file uploaded
+            df = pd.concat(data_list)
+        else:
+            st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
+            #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
+            df=pd.read_csv('assets/marketing.csv')
 
-    # Display forecasted sales
-    st.write('### Member Forecasted Sales')
-    #Get user input
-    forecast_months = st.slider('Months for forecast:', 1, 12, 1)
+        ## Display uploaded or defaul file
+        with st.expander("Uploaded/Default Data"):
+            st.write(df)
 
-    # Get the input from the user
-    expected_purchases_input = st.text_input("Expected purchases in period:", "1")
+        # Run pipeline
+        clean_df=churn_pipeline(df)
+        kmeans_df=kmeans_pipeline(df)
 
-    # Validate the input
-    estimated_frequency = validate_integer_input(expected_purchases_input)
+        # Setup: Model loading
+        churn_model = load_model("assets/churn-prediction-model.jbl")
+        seg_clf_model = load_model("assets/models/segment_classifier.jbl")
+        sales_model=load_model("assets/models/memb_sales_pred.jbl")
 
-    # Display error message if input is not an integer
-    if estimated_frequency is None:
-        st.error("Please enter a valid integer for the expected purchases.")
-    else:
-        #Setup data
-        sales_model_input = filtered_data[['CUSTOMER_ID', 'FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS','MONETARY']]
-        sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
-        sales_model_input['TENURE_MONTHS'] = sales_model_input['TENURE_MONTHS'] + forecast_months
-        #Transform data
-        sales_clean=sales_pipeline(sales_model_input)
-        monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1)),columns=['FORECAST_MONETARY'])
-        #Prep output data
-        sales_model_input['FORECAST_MONETARY']=round(monetary_pred['FORECAST_MONETARY'],2)
-        sales_model_input['FORECAST_SALES']=round(sales_model_input['FORECAST_MONETARY']-sales_model_input['MONETARY'],2)
-        # Display output data
-        st.write(sales_model_input)
-        st.metric('Forecasted Sales', f"${round(sales_model_input['FORECAST_SALES'].sum(),2)}")
+        # Setup: Get predictions
+        cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
+        kmeans_cols=['RECENCY','FREQUENCY','MONETARY']
+        churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
+        cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df[kmeans_cols]),columns=['CLUSTER'])
+        
+        # Setup: Map predictions to understandable insights
+        churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
+        cluster_pred['CLUSTER'] =cluster_pred['CLUSTER'].map({
+        0: "Active Moderate-Value Members",
+        1: "Inactive Low-Spending Members",
+        2: "High-Value Loyal Members",
+        3: "Engaged Moderate-Value Members",
+        4: "Active Low-Spending Members"})
+
+        # Setup:Combine tables with predictions
+        data=pd.concat([df,cluster_pred],axis=1)
+        data=pd.concat([data, churn_pred], axis=1)
+        
+        # Display predictions
+        st.markdown("## Member Segmentation and Churn Prediction Results")
+
+        # Display a filter for selecting clusters
+        cluster_Options = ['All'] + data['CLUSTER'].unique().tolist()
+        selected_Cluster = st.multiselect("Filter by Member's Segment:", cluster_Options, default=['All'])
+        filtered_data=filter(selected_Cluster,'CLUSTER',data)
+
+        churn_Options = ['All'] + data['CHURNED'].unique().tolist()
+        selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
+        filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
+        
+        # Number of members of each cluster
+        cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
+        st.dataframe(cluster_counts, hide_index=True)
+
+        # Number of members who churned and not churned
+        churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
+        st.dataframe(churn_counts, hide_index=True)
+
+        # Display forecasted sales
+        st.write('### Member Forecasted Sales')
+        #Get user input
+        forecast_months = st.slider('Months for forecast:', 1, 12, 1)
+
+        # Get the input from the user
+        expected_purchases_input = st.text_input("Expected purchases in period:", "1")
+
+        # Validate the input
+        estimated_frequency = validate_integer_input(expected_purchases_input)
+
+        # Display error message if input is not an integer
+        if estimated_frequency is None:
+            st.error("Please enter a valid integer for the expected purchases.")
+        else:
+            #Setup data
+            sales_model_input = filtered_data[['CUSTOMER_ID', 'FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS','MONETARY']]
+            sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
+            sales_model_input['TENURE_MONTHS'] = sales_model_input['TENURE_MONTHS'] + forecast_months
+            #Transform data
+            sales_clean=sales_pipeline(sales_model_input)
+            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1)),columns=['FORECAST_MONETARY'])
+            #Prep output data
+            sales_model_input['FORECAST_MONETARY']=round(monetary_pred['FORECAST_MONETARY'],2)
+            sales_model_input['FORECAST_SALES']=round(sales_model_input['FORECAST_MONETARY']-sales_model_input['MONETARY'],2)
+            # Display output data
+            st.write(sales_model_input)
+            st.metric('Forecasted Sales', f"${round(sales_model_input['FORECAST_SALES'].sum(),2)}")
 
 
     # # Metrics table
