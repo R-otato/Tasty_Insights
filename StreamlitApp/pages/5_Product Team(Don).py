@@ -7,7 +7,9 @@ import ast
 import numpy as np
 from mlxtend.frequent_patterns import apriori, association_rules
 
-# FUNCTIONS #
+#################
+### FUNCTIONS ###
+#################
 
 # Function: my_encode_units(x)
 # the purpose of this function is to convert all positive values to 1 and everything else to 0
@@ -127,73 +129,9 @@ def get_health_metrics_menu_table(menu_table_df):
     
     return menu_table_df
 
-
-    #hide this using secrets
-    my_cnx = snowflake.connector.connect(
-        user = "RLIAM",
-        password = "Cats2004",
-        account = "LGHJQKA-DJ92750",
-        role = "TASTY_BI",
-        warehouse = "TASTY_BI_WH",
-        database = "frostbyte_tasty_bytes",
-        schema = "analytics"
-    )
-
-    my_cur = my_cnx.cursor()
-
-    # Construct the SQL query for the current chunk
-    query = f"SELECT MENU_ITEM_ID, TRUCK_ID FROM order_details_usa_matched"
-    
-    my_cur.execute(query)
-    
-    order_details_df = my_cur.fetchall()
-    
-    return order_details_df
-
-#####################
-##### MAIN CODE #####
-#####################
-
-st.markdown("# Product Team")
-tab1, tab2 = st.tabs(['Explore', 'Model Prediction'])
-
-with tab1:
-    st.markdown("# High Level Goals")
-    st.write("""Our solution, Tasty Insights, is dedicated to assisting Tasty Bytes in achieving its high-level goals over the next 5 years. 
-             More specifically, we aim to help Tasty Bytes achieve a remarkable 25% Year-Over-Year sales increase, from annual sales of 
-             \$105M to \$320M. This page is designed specifically to meet the needs of the marketing team, by showcasing our abilityto use historical data 
-             to predict future events. In this case, we utilize the data of existing products to predict the demand for new products!""")
-
-    st.markdown("# How to utilise predictions?")
-    st.write("""In the model prediction tab, you can input the details of a new product Tasty Bytes would like to predict the demand for in terms of quantity 
-             sold. The model would provide a prediction of the number of the new product that will be sold. This will will be displayed in a tabular format
-             which shows more than the quantity sold. More details below.""")
-
-    st.markdown("# Interpreting the model")
-    
-    st.markdown("# Limitations and assumptions the model makes")
-    
-    st.markdown("# Model's confidence level")
-    
-with tab2:
-    # Page Instructions (How to Use This Page)
-    with st.expander("How to Use This Page"):
-        # List of steps
-        st.write('1. Load you own dataset or Use the provided dataset')
-        st.write('2. View the model\'s predictions')
-        st.write('3. Analyse the visualisations below to gain insights on how to reduce customer churn from a product standpoint')
-
-    ## retrieve menu table with health metrics in different columns
-    menu_table_df = retrieve_menu_table()
-    menu_table = get_health_metrics_menu_table(menu_table_df)
-
-    # display current menu items
-    with st.expander("Current Menu Items"):
-        st.dataframe(menu_table, hide_index=True)
-
-    # PRODUCT PERFORMANCE PREDICTION
-    st.markdown("## Product Performance")
-
+# Function: user_inputs()
+# the purpose of this function is to get the user's input for the new product item they would like to predict the total quantity sold for
+def user_inputs():        
     ## Option: truck brand name
     ## add None as the default value (it won't be an actual selectable option)
     default_option = None
@@ -206,7 +144,8 @@ with tab2:
     menu_type_filter = menu_table['TRUCK_BRAND_NAME'] == selected_truck_brand_name
     if menu_type_filter.any():
         selected_menu_type = menu_table.loc[menu_type_filter, 'MENU_TYPE'].values[0]
-
+    else:
+        selected_menu_type = None
 
     ## Option: item category
     ## add None as the default value (it won't be an actual selectable option)
@@ -284,6 +223,182 @@ with tab2:
     # create dataframe with all the user's inputs
     user_input_df = pd.DataFrame(user_input_full, index=[1])
 
+    return user_input_df, sale_price, cost_of_goods
+
+# Function: prediction()
+# the purpose of this function is to carry out certain data transformations and create the 2 tables shown after prediction
+def prediction(user_input_df):
+    # replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+    user_input_df = user_input_df.replace({"Yes": 1, "No":0})
+    
+    # MANUAL ENCODING
+    categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
+
+    # Loop through each categorical column
+    for col in categorical_cols:
+        # Get the unique values in the column
+        unique_values = menu_table[col].unique()
+
+        # Loop through unique values in the column
+        for value in unique_values:
+            # Check if the value in the menu_table matches the corresponding value in user_input_df
+            if value == user_input_df[col].values[0]:
+                # Create a column with the name 'column_selected_value' and set its value to 1
+                menu_table[f'{col}_{value}'] = 1
+
+                # Add this column to the user_input_df
+                user_input_df[f'{col}_{value}'] = 1
+            else:
+                # Create a column with the name 'column_unique_value' and set its value to 0
+                menu_table[f'{col}_{value}'] = 0
+
+                # Add this column to the user_input_df
+                user_input_df[f'{col}_{value}'] = 0
+
+
+    # Drop the original categorical columns from user_input_df
+    user_input_df.drop(columns=categorical_cols, inplace=True)
+
+    user_input_df.drop(columns=["ITEM_SUBCATEGORY_Hot Option", "MENU_TYPE_Sandwiches", "TRUCK_BRAND_NAME_Better Off Bread", "ITEM_CATEGORY_Dessert"], inplace = True)
+
+    desired_order = ['SALE_PRICE_USD', 'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
+                'MENU_TYPE_Ethiopian', 'MENU_TYPE_Gyros', 'MENU_TYPE_Indian',
+                'MENU_TYPE_Hot Dogs', 'MENU_TYPE_Vegetarian', 'MENU_TYPE_Tacos',
+                'MENU_TYPE_BBQ', 'MENU_TYPE_Crepes', 'MENU_TYPE_Poutine',
+                'MENU_TYPE_Ice Cream', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Ramen',
+                'MENU_TYPE_Mac & Cheese', 'MENU_TYPE_Chinese',
+                'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Cheeky Greek',
+                'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Amped Up Franks',
+                'TRUCK_BRAND_NAME_Plant Palace', 'TRUCK_BRAND_NAME_Guac n\' Roll',
+                'TRUCK_BRAND_NAME_Smoky BBQ', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
+                'TRUCK_BRAND_NAME_Revenge of the Curds',
+                'TRUCK_BRAND_NAME_Freezing Point', 'TRUCK_BRAND_NAME_The Mega Melt',
+                'TRUCK_BRAND_NAME_Kitakata Ramen Bar', 'TRUCK_BRAND_NAME_The Mac Shack',
+                'TRUCK_BRAND_NAME_Peking Truck', 'ITEM_CATEGORY_Main',
+                'ITEM_CATEGORY_Beverage', 'ITEM_CATEGORY_Snack',
+                'ITEM_SUBCATEGORY_Warm Option', 'ITEM_SUBCATEGORY_Cold Option']
+
+    user_input_df = user_input_df.reindex(columns=desired_order)
+    
+    # Convert 'SALE_PRICE_USD' column to numeric type
+    user_input_df['SALE_PRICE_USD'] = pd.to_numeric(user_input_df['SALE_PRICE_USD'])
+    
+    # retrieve min max scaler
+    min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
+    
+    min_max_scaler.transform(user_input_df)
+    
+    # retrieve regression model
+    product_qty_model = joblib.load("assets/product_qty_regression.joblib")
+    
+    prediction = product_qty_model.predict(user_input_df)
+    
+    # Round off the prediction to the nearest whole number
+    rounded_prediction = round(prediction[0])
+
+    
+    # Show New Product Details Table
+    ## calculate UNIT_SALE_PRICE, UNIT_COST_PRICE, UNIT_PROFIT
+    unit_sale_price = float(sale_price)
+    unit_cost_price = float(cost_of_goods)
+    unit_profit = unit_sale_price - unit_cost_price
+
+    ## calculate UNIT_GROSS_PROFIT_MARGIN (%) and UNIT_NET_PROFIT_MARGIN (%)
+    unit_gross_profit_margin = (unit_profit / unit_sale_price) * 100
+    unit_net_profit_margin = (unit_profit / unit_sale_price) * 100
+
+    # Round the profit margin values to the nearest whole number
+    unit_gross_profit_margin = round(unit_gross_profit_margin)
+    unit_net_profit_margin = round(unit_net_profit_margin)
+
+    ## create the new_product_details_df DataFrame
+    data = {
+        'UNIT_SALE_PRICE': [unit_sale_price],
+        'UNIT_COST_PRICE': [unit_cost_price],
+        'UNIT_PROFIT': [unit_profit],
+        'UNIT_GROSS_PROFIT_MARGIN (%)': [unit_gross_profit_margin],
+        'UNIT_NET_PROFIT_MARGIN (%)': [unit_net_profit_margin]
+    }
+    ## convert to dataframe
+    new_product_details_df = pd.DataFrame(data)
+    
+    
+    # Prediction Total Details Table
+    ## calculate TOTAL_SALE_PRICE, TOTAL_COST_PRICE, TOTAL_PROFIT
+    total_sale_price = float(sale_price) * rounded_prediction
+    total_cost_price = float(cost_of_goods) * rounded_prediction
+    total_profit = total_sale_price - total_cost_price
+
+    ## calculate TOTAL_GROSS_PROFIT_MARGIN (%) and TOTAL_NET_PROFIT_MARGIN (%)
+    total_gross_profit_margin = (total_profit / total_sale_price) * 100
+    total_net_profit_margin = (total_profit / total_sale_price) * 100
+
+    ## round the profit margin values to the nearest whole number
+    total_gross_profit_margin = round(total_gross_profit_margin)
+    total_net_profit_margin = round(total_net_profit_margin)
+
+    ## create the total_product_details_df DataFrame
+    data = {
+        'TOTAL_SALES': [total_sale_price],
+        'TOTAL_COSTSE': [total_cost_price],
+        'TOTAL_PROFIT': [total_profit],
+        'GROSS_PROFIT_MARGIN (%)': [total_gross_profit_margin],
+        'NET_PROFIT_MARGIN (%)': [total_net_profit_margin]
+    }
+
+    total_product_details_df = pd.DataFrame(data)
+    
+    return total_product_details_df, new_product_details_df, rounded_prediction
+
+
+
+#####################
+##### MAIN CODE #####
+#####################
+
+st.markdown("# Product Team")
+tab1, tab2 = st.tabs(['Explore', 'Model Prediction'])
+
+with tab1:
+    st.markdown("# High Level Goals")
+    st.write("""Our solution, Tasty Insights, is dedicated to assisting Tasty Bytes in achieving its high-level goals over the next 5 years. 
+             More specifically, we aim to help Tasty Bytes achieve a remarkable 25% Year-Over-Year sales increase, from annual sales of 
+             \$105M to \$320M. This page is designed specifically to meet the needs of the marketing team, by showcasing our abilityto use historical data 
+             to predict future events. In this case, we utilize the data of existing products to predict the demand for new products!""")
+
+    st.markdown("# How to utilise predictions?")
+    st.write("""In the model prediction tab, you can input the details of a new product Tasty Bytes would like to predict the demand for in terms of quantity 
+             sold. The model would provide a prediction of the number of the new product that will be sold. This will will be displayed in a tabular format
+             which shows more than the quantity sold. More details below.""")
+
+    st.markdown("# Interpreting the model")
+    
+    st.markdown("# Limitations and assumptions the model makes")
+    
+    st.markdown("# Model's confidence level")
+    
+with tab2:
+    # Page Instructions (How to Use This Page)
+    with st.expander("How to Use This Page"):
+        # List of steps
+        st.write('1. Load you own dataset or Use the provided dataset')
+        st.write('2. View the model\'s predictions')
+        st.write('3. Analyse the visualisations below to gain insights on how to reduce customer churn from a product standpoint')
+
+    ## retrieve menu table with health metrics in different columns
+    menu_table_df = retrieve_menu_table()
+    menu_table = get_health_metrics_menu_table(menu_table_df)
+
+    # display current menu items
+    with st.expander("Current Menu Items"):
+        st.dataframe(menu_table, hide_index=True)
+
+
+    # PRODUCT PERFORMANCE PREDICTION
+    st.markdown("## Product Performance")
+
+    user_input_df, sale_price, cost_of_goods = user_inputs()
+    
     # display dataframe
     st.dataframe(user_input_df, hide_index=True)
 
@@ -297,128 +412,9 @@ with tab2:
         
         # Make a prediction
         if st.button("Predict"):
-            # replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
-            user_input_df = user_input_df.replace({"Yes": 1, "No":0})
-            
-            # MANUAL ENCODING
-            categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
-
-            # Loop through each categorical column
-            for col in categorical_cols:
-                # Get the unique values in the column
-                unique_values = menu_table[col].unique()
-
-                # Loop through unique values in the column
-                for value in unique_values:
-                    # Check if the value in the menu_table matches the corresponding value in user_input_df
-                    if value == user_input_df[col].values[0]:
-                        # Create a column with the name 'column_selected_value' and set its value to 1
-                        menu_table[f'{col}_{value}'] = 1
-
-                        # Add this column to the user_input_df
-                        user_input_df[f'{col}_{value}'] = 1
-                    else:
-                        # Create a column with the name 'column_unique_value' and set its value to 0
-                        menu_table[f'{col}_{value}'] = 0
-
-                        # Add this column to the user_input_df
-                        user_input_df[f'{col}_{value}'] = 0
-
-
-            # Drop the original categorical columns from user_input_df
-            user_input_df.drop(columns=categorical_cols, inplace=True)
-
-            user_input_df.drop(columns=["ITEM_SUBCATEGORY_Hot Option", "MENU_TYPE_Sandwiches", "TRUCK_BRAND_NAME_Better Off Bread", "ITEM_CATEGORY_Dessert"], inplace = True)
-
-            desired_order = ['SALE_PRICE_USD', 'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
-                        'MENU_TYPE_Ethiopian', 'MENU_TYPE_Gyros', 'MENU_TYPE_Indian',
-                        'MENU_TYPE_Hot Dogs', 'MENU_TYPE_Vegetarian', 'MENU_TYPE_Tacos',
-                        'MENU_TYPE_BBQ', 'MENU_TYPE_Crepes', 'MENU_TYPE_Poutine',
-                        'MENU_TYPE_Ice Cream', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Ramen',
-                        'MENU_TYPE_Mac & Cheese', 'MENU_TYPE_Chinese',
-                        'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Cheeky Greek',
-                        'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Amped Up Franks',
-                        'TRUCK_BRAND_NAME_Plant Palace', 'TRUCK_BRAND_NAME_Guac n\' Roll',
-                        'TRUCK_BRAND_NAME_Smoky BBQ', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
-                        'TRUCK_BRAND_NAME_Revenge of the Curds',
-                        'TRUCK_BRAND_NAME_Freezing Point', 'TRUCK_BRAND_NAME_The Mega Melt',
-                        'TRUCK_BRAND_NAME_Kitakata Ramen Bar', 'TRUCK_BRAND_NAME_The Mac Shack',
-                        'TRUCK_BRAND_NAME_Peking Truck', 'ITEM_CATEGORY_Main',
-                        'ITEM_CATEGORY_Beverage', 'ITEM_CATEGORY_Snack',
-                        'ITEM_SUBCATEGORY_Warm Option', 'ITEM_SUBCATEGORY_Cold Option']
-
-            user_input_df = user_input_df.reindex(columns=desired_order)
-            
-            # Convert 'SALE_PRICE_USD' column to numeric type
-            user_input_df['SALE_PRICE_USD'] = pd.to_numeric(user_input_df['SALE_PRICE_USD'])
-            
-            # retrieve min max scaler
-            min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
-            
-            min_max_scaler.transform(user_input_df)
-            
-            # retrieve regression model
-            product_qty_model = joblib.load("assets/product_qty_regression.joblib")
-            
-            prediction = product_qty_model.predict(user_input_df)
-            
-            # Round off the prediction to the nearest whole number
-            rounded_prediction = round(prediction[0])
-
-            
-            # Show New Product Details Table
-            ## calculate UNIT_SALE_PRICE, UNIT_COST_PRICE, UNIT_PROFIT
-            unit_sale_price = float(sale_price)
-            unit_cost_price = float(cost_of_goods)
-            unit_profit = unit_sale_price - unit_cost_price
-
-            ## calculate UNIT_GROSS_PROFIT_MARGIN (%) and UNIT_NET_PROFIT_MARGIN (%)
-            unit_gross_profit_margin = (unit_profit / unit_sale_price) * 100
-            unit_net_profit_margin = (unit_profit / unit_sale_price) * 100
-
-            # Round the profit margin values to the nearest whole number
-            unit_gross_profit_margin = round(unit_gross_profit_margin)
-            unit_net_profit_margin = round(unit_net_profit_margin)
-
-            ## create the new_product_details_df DataFrame
-            data = {
-                'UNIT_SALE_PRICE': [unit_sale_price],
-                'UNIT_COST_PRICE': [unit_cost_price],
-                'UNIT_PROFIT': [unit_profit],
-                'UNIT_GROSS_PROFIT_MARGIN (%)': [unit_gross_profit_margin],
-                'UNIT_NET_PROFIT_MARGIN (%)': [unit_net_profit_margin]
-            }
-            ## convert to dataframe
-            new_product_details_df = pd.DataFrame(data)
-            
-            
-            # Prediction Total Details Table
-            ## calculate TOTAL_SALE_PRICE, TOTAL_COST_PRICE, TOTAL_PROFIT
-            total_sale_price = float(sale_price) * rounded_prediction
-            total_cost_price = float(cost_of_goods) * rounded_prediction
-            total_profit = total_sale_price - total_cost_price
-
-            ## calculate TOTAL_GROSS_PROFIT_MARGIN (%) and TOTAL_NET_PROFIT_MARGIN (%)
-            total_gross_profit_margin = (total_profit / total_sale_price) * 100
-            total_net_profit_margin = (total_profit / total_sale_price) * 100
-
-            ## round the profit margin values to the nearest whole number
-            total_gross_profit_margin = round(total_gross_profit_margin)
-            total_net_profit_margin = round(total_net_profit_margin)
-
-            ## create the total_product_details_df DataFrame
-            data = {
-                'TOTAL_SALES': [total_sale_price],
-                'TOTAL_COSTSE': [total_cost_price],
-                'TOTAL_PROFIT': [total_profit],
-                'GROSS_PROFIT_MARGIN (%)': [total_gross_profit_margin],
-                'NET_PROFIT_MARGIN (%)': [total_net_profit_margin]
-            }
-
-            total_product_details_df = pd.DataFrame(data)
+            total_product_details_df, new_product_details_df, rounded_prediction = prediction(user_input_df)
             
             st.markdown("### Prediction")
-            
             ## display the rounded prediction
             st.markdown("##### Predicted Total Quantity Sold: {}".format(rounded_prediction))
             
@@ -435,30 +431,3 @@ with tab2:
                 st.dataframe(new_product_details_df, hide_index=True)
     else:
         st.error("Please fill in all required fields before proceeding with the prediction.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Retrieve bundles found by apriori
-# my_rules = get_item_bundles_unformatted(df)
-
-
-# # Show identified bundles
-# st.markdown("### Identified Bundles")
-
-# ## retrieve bundle dataframe
-# final_bundles_df = display_bundles(my_rules)
-
-# ## print the new DataFrame with the desired structure
-# st.dataframe(final_bundles_df, hide_index=True)
