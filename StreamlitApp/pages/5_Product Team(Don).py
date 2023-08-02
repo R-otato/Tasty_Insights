@@ -359,6 +359,7 @@ def prediction(user_input_df):
 st.markdown("# Product Team")
 tab1, tab2 = st.tabs(['About', 'Model Prediction'])
 
+# TAB 1: About
 with tab1:
     # High Level Goals Explanations
     st.markdown("# High Level Goals")
@@ -452,7 +453,7 @@ with tab1:
     
     
     
-    
+# TAB 2: Model Prediction   
 with tab2:
     # Page Instructions (How to Use This Page)
     with st.expander("How to Use This Page"):
