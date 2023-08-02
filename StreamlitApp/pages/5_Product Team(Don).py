@@ -6,6 +6,7 @@ import snowflake.connector
 import ast
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 #################
 ### FUNCTIONS ###
@@ -340,7 +341,7 @@ def prediction(user_input_df):
     ## create the total_product_details_df DataFrame
     data = {
         'TOTAL_SALES': [total_sale_price],
-        'TOTAL_COSTSE': [total_cost_price],
+        'TOTAL_COSTS': [total_cost_price],
         'TOTAL_PROFIT': [total_profit],
         'GROSS_PROFIT_MARGIN (%)': [total_gross_profit_margin],
         'NET_PROFIT_MARGIN (%)': [total_net_profit_margin]
@@ -350,6 +351,8 @@ def prediction(user_input_df):
     
     return total_product_details_df, new_product_details_df, rounded_prediction
 
+# Function: retrieve_order_detail_table()
+# the purpose of this function is to retrieve the order details for USA from Snowflake to merge with the menu column to get total sales for a current menu type
 def retrieve_order_detail_table():
     ## get connection to snowflake
     my_cnx = snowflake.connector.connect(
@@ -533,8 +536,38 @@ with tab2:
                 
             st.markdown("### Prediction")
             ## display the rounded prediction
-            st.markdown("###### Predicted Total Quantity Sold: {}".format(rounded_prediction))
-            st.markdown(f"###### Percentage Increase in Sales: {percentage_increase:.2f}%")
+            st.markdown("##### Predicted Total Quantity Sold: {}".format(rounded_prediction))
+            st.markdown(f"##### Percentage Increase in Sales: {percentage_increase:.2f}%")
+            
+            # Calculate the total sales after adding the new menu item
+            total_sales_for_menu_type_after = total_sales_for_menu_type + new_item_sales
+
+            # Create a DataFrame to hold the data for the bar chart
+            data = {
+                'Sales': ['Without New Item', 'With New Item'],
+                'Total Sales': [total_sales_for_menu_type, total_sales_for_menu_type_after]
+            }
+            df = pd.DataFrame(data)
+
+            # Plot the bar chart
+            plt.figure(figsize=(6, 7))
+            bars = plt.bar(df['Sales'], df['Total Sales'])
+            plt.title('Total Sales Before and After Adding New Menu Item')
+            plt.grid(False)
+
+            # Add data labels to the bars
+            for bar in bars:
+                height = bar.get_height()
+                plt.annotate(f'{height:.2f}', xy=(bar.get_x() + bar.get_width() / 2, height),
+                            xytext=(0, 3), textcoords="offset points",
+                            ha='center', va='bottom', fontsize=12)
+
+            # Remove the y-axis values
+            plt.gca().set_yticks([])
+            
+            # Show the plot using Streamlit's st.pyplot function
+            st.pyplot(plt)
+            
             
             st.write('')
             
