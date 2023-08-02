@@ -371,10 +371,14 @@ with tab1:
     # Utilisation of model's prediction
     st.markdown("# How to utilise predictions?")
     st.write("""The model's output will show the predicted total quantity sold for the new menu item as well as its respective sales, profits and gross
-             and net profit margins. In addition, it will show the unit item details in a expander. The image below shows what the model prediction will be.""")
+             and net profit margins. In addition, it will show the unit item details in a expander. The image below shows what the model prediction will be
+             displayed.""")
     st.write('')
     st.image(Image.open('assets/Product Qty Prediction Outcome.png'))
+    st.caption("Prediction display after model makes prediction")
 
+    st.write("")
+    
     st.write("""
              The model's prediction can provide insights on:
              - Risk Assessment: Assess the potential risk associated with introducing a new menu item. Understand the level of uncertainty and take 
@@ -394,6 +398,7 @@ with tab1:
     st.write("""The model's feature importance analysis provides valuable insights into the factors that significantly influence the prediction of total 
              quantity sold for new menu items.""")
     st.image(Image.open('assets/Product Qty Model Feature Importance.png'))
+    st.caption("The image shows the feature importance in order of its importance, starting with the most important feature.")
     st.write("""Among the features considered, "ITEM_CATEGORY_Beverage" emerges as the most influential, with a high importance value of 0.626. This suggests
              that the choice of menu item category, particularly beverages, plays a crucial role in determining the sales performance of new products. 
              Additionally, "SALE_PRICE_USD" follows as the second most important feature with an importance value of 0.224, indicating that the sale price
@@ -429,7 +434,21 @@ with tab1:
     
     # Model's Confidence Level
     st.markdown("# Model's confidence level")
-    
+    st.image(Image.open('assets/Product Qty Model Performance.png'))
+    st.caption("The image below shows the performance of the model.")
+    st.write("""The root mean squared error (RMSE) measures the average prediction error, where a lower value indicates better predictive performance. 
+             In this case, the training RMSE is 42.18, and the testing RMSE is 96.78. The relatively low RMSE values demonstrate that the model's 
+             predictions are close to the actual values, both during training and when dealing with unseen data.""")
+    st.write("""The mean squared error (MSE) provides another perspective on prediction accuracy, and lower values are preferable. The training MSE is 
+             1779.03, and the testing MSE is 9366.61, reinforcing the notion that the model achieves good accuracy on both training and testing datasets.""")
+    st.write("""The accuracy of the regression model is another critical metric. While accuracy is more commonly associated with classification tasks, it 
+             can be interpreted here as a measure of how well the model captures the variance in the data. The training accuracy is 99.88%, and the testing
+             accuracy is 99.33%. These high accuracy values indicate that the model captures a significant portion of the data's variability, demonstrating
+             its effectiveness in predicting the total quantity sold.""")
+    st.write("""In summary, the regression model performs exceptionally well in making predictions for new menu items' total quantity sold. The low RMSE 
+             and MSE values indicate that the model's predictions are close to the actual values, while the high accuracy values suggest that the model 
+             captures a substantial portion of the data's variability. The product team can be confident in relying on this model to make data driven 
+             decisions about menu planning and optimising sales performance.""")
     
     
     
