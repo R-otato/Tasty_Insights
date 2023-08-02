@@ -357,33 +357,82 @@ def prediction(user_input_df):
 #####################
 
 st.markdown("# Product Team")
-tab1, tab2 = st.tabs(['Explore', 'Model Prediction'])
+tab1, tab2 = st.tabs(['About', 'Model Prediction'])
 
 with tab1:
+    # High Level Goals Explanations
     st.markdown("# High Level Goals")
     st.write("""Our solution, Tasty Insights, is dedicated to assisting Tasty Bytes in achieving its high-level goals over the next 5 years. 
-             More specifically, we aim to help Tasty Bytes achieve a remarkable 25% Year-Over-Year sales increase, from annual sales of 
-             \$105M to \$320M. This page is designed specifically to meet the needs of the marketing team, by showcasing our abilityto use historical data 
-             to predict future events. In this case, we utilize the data of existing products to predict the demand for new products!""")
+             More specifically, to remarkable 25% Year-Over-Year sales increase, from annual sales of \$105M to \$320M. This page is designed 
+             to meet the needs of the product team, to help them with menu optimisation. """)
 
+
+
+    # Utilisation of model's prediction
     st.markdown("# How to utilise predictions?")
-    st.write("""In the model prediction tab, you can input the details of a new product Tasty Bytes would like to predict the demand for in terms of quantity 
-             sold. The model would provide a prediction of the number of the new product that will be sold. This will will be displayed in a tabular format
-             which shows more than the quantity sold. More details below.""")
+    st.write("""The model's output will show the predicted total quantity sold for the new menu item as well as its respective sales, profits and gross
+             and net profit margins. In addition, it will show the unit item details in a expander. The image below shows what the model prediction will be.""")
+    st.write('')
     st.image(Image.open('assets/Product Qty Prediction Outcome.png'))
 
+    st.write("""
+             The model's prediction can provide insights on:
+             - Risk Assessment: Assess the potential risk associated with introducing a new menu item. Understand the level of uncertainty and take 
+             proactive measures to mitigate risks if the predicted quantity is lower than desired
+             - Demand Forecasting: Estimate the expected demand for the new menu item. Plan inventory levels, production schedules, and supply chain 
+             logistics more effectively, minimising the risk of overstocking or understocking
+             - Optimised Menu Planning: Assess the potential success of introducing new menu items. Focus on items with projected to have higher sales and 
+             ensure that the menu aligns with customer preferences and demands.
+             - Pricing Strategies: Determine appropriate pricing strategies. Optimise prices to achieve a balance between maximizing revenue and 
+             maintaining customer satisfaction and loyalty.
+             """)
+
+
+
+    # Interpretability of the model
     st.markdown("# Interpreting the model")
+    st.write("""The model's feature importance analysis provides valuable insights into the factors that significantly influence the prediction of total 
+             quantity sold for new menu items.""")
     st.image(Image.open('assets/Product Qty Model Feature Importance.png'))
+    st.write("""Among the features considered, "ITEM_CATEGORY_Beverage" emerges as the most influential, with a high importance value of 0.626. This suggests
+             that the choice of menu item category, particularly beverages, plays a crucial role in determining the sales performance of new products. 
+             Additionally, "SALE_PRICE_USD" follows as the second most important feature with an importance value of 0.224, indicating that the sale price
+             of the item strongly affects its quantity sold. Further down the list, we observe other menu types, such as "MENU_TYPE_Tacos" and 
+             "MENU_TYPE_BBQ," showing moderate importance values, suggesting they also have some impact on sales performance. Conversely, some features 
+             like "TRUCK_BRAND_NAME_Revenge of the Curds" and "ITEM_CATEGORY_Snack" have negligible importance, implying that they have minimal influence 
+             on the total quantity sold. Overall, this feature importance analysis aids the product team in understanding which attributes have the most 
+             significant impact on product sales, enabling them to make data-driven decisions to optimize menu planning and maximize revenue.""")
     
+    
+    # Limitations and Assumptions the model makes
     st.markdown("# Limitations and assumptions the model makes")
-    st.write("""The first assumption the model makes is that the total quantity sold total quantity from the transactions data as the lifetime quantity 
+    st.markdown("## Assumptions")
+    st.write("""The first assumption the model makes is that the total quantity sold from the order details data as the total lifetime quantity 
              sold of a product which may not be the case for every product considering the fact that the launch date and removal date is not provided in 
-             the dataset. Hence, it is likely that the total quantity sold is more of the first transaction for that product till the current date.
-             
-             The second assumption is the independence of the observations in the training data. In other words, the model assumes that each menu item's 
-             sales data is not influenced by other menu items' sales or external factors.""")
+             the dataset. Hence, it is likely that the total quantity sold is more of the first transaction for that product till the current date.""")
     
+    st.write("""The second assumption the model makes is the independence of the observations in the training data. In other words, the model assumes that 
+             each menu item's sales data is not influenced by other menu items' sales or external factors.""")
+    
+    st.write("""The last assumption the model might make is the linear relationships between certain features and the target variable (quantity sold). This
+             assumption may not hold in some cases, especially if there are complex interactions or non-linear patterns in the data.""")
+    
+    st.markdown("## Limitations")
+    st.write("""The first limitation of the model is that the model does not account for seasonality or temporal trends in sales. The model assumes 
+             that sales patterns are consistent over time, which might not hold true for certain menu items affected by seasonal demand or changing trends.""")
+    
+    st.write("""The second limitation of the model is that the model does not consider external factors such as changes in customer preferences, market 
+             trends, economic conditions, or marketing efforts that might influence sales. These factors can significantly impact the quantity sold but 
+             are not explicitly captured in the model.""")
+    
+    
+    
+    # Model's Confidence Level
     st.markdown("# Model's confidence level")
+    
+    
+    
+    
     
 with tab2:
     # Page Instructions (How to Use This Page)
