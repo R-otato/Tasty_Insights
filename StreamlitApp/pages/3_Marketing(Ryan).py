@@ -154,7 +154,7 @@ def main() -> None:
 
             - Targeted Marketing Strategies: Armed with these predictions, you can design targeted marketing schemes tailored to specific segments or groups of customers, maximizing the impact of your campaigns.
 
-            - Personalized Sales Predictions: Input the desired number of months and the expected number of purchases for each member in that period to assume the impact of your marketing strategy and generate forecasted sales.
+            - Personalized Sales Predictions: Asssume the impact of your marketing strategy to get the forecasted sales
 
             Leveraging these data-driven insights, your marketing team can make informed decisions, optimize marketing efforts, and drive sales growth for Tasty Bytes. Let's unlock the full potential of your marketing strategies together!
             """
@@ -172,7 +172,7 @@ def main() -> None:
             upload a new Excel file in the Input Data section.
             2. Predictions: After uploading your file, the predictions will be automatically generated and shown.
             3. Filter Data: Use filters to explore specific segments or refine the data for analysis.
-            4. Download Predictions: Download the predictions along with relevant data for further analysis, if desired.
+            4. Sales Forecast: Input the desired number of months and the expected number of purchases for all memberd in that period to assume the impact of your marketing strategy and generate forecasted sales.
             """)
 
         # Input data
@@ -241,10 +241,31 @@ def main() -> None:
         filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
         
         # Number of members of each cluster
+        st.markdown("""### Member's Segments""")
         cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
         st.dataframe(cluster_counts, hide_index=True)
+        with st.expander('Cluster terms'):
+            st.write("""
+                     1. Active: Members who have made a transaction recently
+                     2. Engaged: Members who have made a transaction quite recently
+                     3. Inactive: Members who have not made a transaction in a significant period.
+                     4. High-Value: Members with a high monetary and frequency value
+                     5. Moderate-Value: Members with a moderate monetary and frequency value
+                     6. Low-Value: Members with a low monetary and frequency value.
+                     """)
+        with st.expander('Marketing Opportunities'):
+            st.write("""
+            - **Personalized Offers:** Tailor offers and promotions to active low-spending and engaged moderate-value members to increase their spending and encourage repeat purchases.
+
+            - **Loyalty Programs:** Reward high-value loyal members with exclusive perks and incentives to strengthen their loyalty and retain them as brand advocates.
+
+            - **Reactivation Campaigns:** Design targeted campaigns to reactivate inactive low-spending members and bring them back into the fold.
+
+            - **Upselling and Cross-selling:** Identify opportunities to upsell and cross-sell to active moderate-value members, maximizing their average order value.
+            """)
 
         # Number of members who churned and not churned
+        st.markdown("""### Churn Analysis""")
         churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
         st.dataframe(churn_counts, hide_index=True)
 
