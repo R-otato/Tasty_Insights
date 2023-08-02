@@ -56,7 +56,8 @@ def search_customer(customer_data):
             st.dataframe(selected_customer)
         else:
             st.write("No matching customer found.")
-            
+
+# get user input
 def user_input(customer_data):
     
     # cast date columns to datetime
@@ -155,6 +156,7 @@ def churn_prediction_data_manupulation(df_user_input,df_before_scaling_sample):
     
     return df_user_input
 
+# use preprocessing models to transform data
 def churn_preprocessing(df_user_input_churn_cleaned,yeojohnsontransformer,onehotencoder,minmaxscaler):
     
     # perform numerical transformation
@@ -210,6 +212,7 @@ def similar_customers_sales(df_user_input,df_before_scaling_sample):
     
     return lifetime_sales,monthly_sales
 
+# customer demographic data manupulation
 def customer_demographic_data_manupulation(df_user_input_cust_demo,churn_prediction):
     # simplify children info
     df_user_input_cust_demo['CHILDREN_COUNT'] = df_user_input_cust_demo['CHILDREN_COUNT'].map({
@@ -247,6 +250,7 @@ def customer_demographic_data_manupulation(df_user_input_cust_demo,churn_predict
     
     return cust_seg_demo_df
 
+# show customer segment
 def get_customer_segment(segment,cluster_information):
     st.write("Customer Type:", cluster_information['Title'].iloc[segment])
     st.write(cluster_information['Info'][segment])
@@ -282,6 +286,9 @@ def main():
     
     # User Input for Dropdowns and Sliders
     df_user_input = user_input(customer_data)
+    
+    # Show the user input
+    st.subheader("Customer to Predict")
     st.write(df_user_input.rename(columns=str.lower).iloc[0])
 
     
@@ -296,11 +303,11 @@ def main():
         # get similar customers as imputed
         lifetime_sales,monthly_sales = similar_customers_sales(df_user_input,df_before_scaling_sample)
         
-        cust_result_message_template = """This customer is {} to churn.
-                            This means that the customer is {} purchasing from the Tasty Bytes, 
-                            resulting in {} the customer and potential sales. A customer similar to the inputted 
+        cust_result_message_template = """This customer is **:blue[{}]** to churn.
+                            This means that the customer is **:blue[{}]** purchasing from the Tasty Bytes, 
+                            resulting in **:blue[{}]** the customer and potential sales. A customer similar to the input
                             customer has an average sales generated of **:blue[${:.0f}]**, with a lifetime total of **:blue[${:.0f}]**. Tasty Bytes 
-                            can expect to {} this amount of sales if this customer {} churn."""
+                            can expect to **:blue[{}]** this amount of sales if this customer **:blue[{}]** churn."""
                             
         # churn results
         st.header("Prediction Results")
@@ -327,3 +334,4 @@ def main():
         
 main()        
         
+# TODO: add sales amount to each segment
