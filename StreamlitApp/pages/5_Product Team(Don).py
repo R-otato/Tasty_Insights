@@ -223,7 +223,7 @@ def user_inputs():
     # create dataframe with all the user's inputs
     user_input_df = pd.DataFrame(user_input_full, index=[1])
 
-    return user_input_df, sale_price, cost_of_goods
+    return user_input_df, sale_price, cost_of_goods, selected_menu_type
 
 # Function: prediction()
 # the purpose of this function is to carry out certain data transformations and create the 2 tables shown after prediction
@@ -350,6 +350,26 @@ def prediction(user_input_df):
     
     return total_product_details_df, new_product_details_df, rounded_prediction
 
+def retrieve_order_detail_table():
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "analytics"
+    )
+
+    # retrieve menu table from snowflake
+    my_cur = my_cnx.cursor()
+    my_cur.execute("select MENU_ITEM_ID, PRICE from ORDER_DETAILS_USA_MATCHED")
+    order_table = my_cur.fetchall()
+    
+    order_table_pandas = pd.DataFrame(order_table, columns=['MENU_ITEM_ID', 'PRICE'])
+    
+    return order_table_pandas
 
 
 #####################
@@ -474,7 +494,7 @@ with tab2:
     # PRODUCT PERFORMANCE PREDICTION
     st.markdown("## Product Performance")
     
-    user_input_df, sale_price, cost_of_goods = user_inputs()
+    user_input_df, sale_price, cost_of_goods, menu_type = user_inputs()
         
     # display dataframe
     st.dataframe(user_input_df, hide_index=True)
@@ -491,9 +511,30 @@ with tab2:
         if st.button("Predict"):
             total_product_details_df, new_product_details_df, rounded_prediction = prediction(user_input_df)
             
+            order_data = retrieve_order_detail_table()
+            menu_table_required = menu_table[["MENU_ITEM_ID", "MENU_TYPE"]]
+            
+            # Merge the two DataFrames based on the 'MENU_ITEM_ID' column
+            required_data_df = pd.merge(order_data, menu_table_required, on='MENU_ITEM_ID')
+
+            # Group the data by 'MENU_TYPE' and calculate the total sales (sum of 'PRICE') for each menu type
+            total_sales_by_menu_type = required_data_df.groupby('MENU_TYPE')['PRICE'].sum().reset_index()
+            
+            total_sales_for_menu_type = total_sales_by_menu_type[total_sales_by_menu_type["MENU_TYPE"] == menu_type]
+
+            total_sales_for_menu_type = float(total_sales_for_menu_type['PRICE'])
+            
+            new_item_sales = total_product_details_df["TOTAL_SALES"]
+            new_item_sales = float(new_item_sales)
+
+            # Calculate the percentage increase in sales
+            percentage_increase = (new_item_sales / total_sales_for_menu_type) * 100
+
+
             st.markdown("### Prediction")
             ## display the rounded prediction
             st.markdown("##### Predicted Total Quantity Sold: {}".format(rounded_prediction))
+            st.markdown(f"##### Percentage Increase in Sales: {percentage_increase:.2f}%")
             
             st.write('')
             
@@ -506,5 +547,11 @@ with tab2:
                 st.write("This table contains details specific to a single unit or item of the new product")
                 ## display the new_product_details_df DataFrame
                 st.dataframe(new_product_details_df, hide_index=True)
+
+            
+
+            
+            
+            
     else:
         st.error("Please fill in all required fields before proceeding with the prediction.")
