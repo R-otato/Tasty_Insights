@@ -83,16 +83,13 @@ def sales_pipeline(data):
     data=data.copy()
 
     ## Filter columns
-    not_Involved=data[['CUSTOMER_ID','MONETARY']]
     data=data[['CUSTOMER_ID','MONETARY','FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']]
 
     # Load the necessary transformations
-    windsorizer_gau = joblib.load("assets/memb_sales_win_gau.jbl")
     minMaxScaler = joblib.load("assets/memb_sales_scale.jbl")
 
     # Apply the transformations to the data
-    data = windsorizer_gau.transform(data)  # Apply Gaussian Windsorization
-    data[['FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']] = minMaxScaler.transform(data[['FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']])  # Apply Min-Max Scaling
+    data[['MONETARY','FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']] = minMaxScaler.transform(data[['MONETARY','FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']])  # Apply Min-Max Scaling
 
     return data
 
@@ -271,9 +268,7 @@ def main() -> None:
 
         # Display forecasted sales
         st.write('### Member Forecasted Sales')
-        #Get user input
-        forecast_months = st.slider('Months for forecast:', 1, 12, 1)
-
+        # #Get user input
         # Get the input from the user
         expected_purchases_input = st.text_input("Expected purchases in period:", "1")
 
@@ -287,16 +282,15 @@ def main() -> None:
             #Setup data
             sales_model_input = filtered_data[['CUSTOMER_ID', 'FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS','MONETARY']]
             sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
-            sales_model_input['TENURE_MONTHS'] = sales_model_input['TENURE_MONTHS'] + forecast_months
             #Transform data
             sales_clean=sales_pipeline(sales_model_input)
-            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1,errors='ignore')),columns=['FORECAST_MONETARY'])
+            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID'],axis=1,errors='ignore')),columns=['NEXT_MONTH_MONETARY'])
             #Prep output data
-            sales_model_input['FORECAST_MONETARY']=round(monetary_pred['FORECAST_MONETARY'],2)
-            sales_model_input['FORECAST_SALES']=round(sales_model_input['FORECAST_MONETARY']-sales_model_input['MONETARY'],2)
+            sales_model_input['NEXT_MONTH_MONETARY']=round(monetary_pred['NEXT_MONTH_MONETARY'],2)
+            sales_model_input['NEXT_MONTH_SALES']=round(sales_model_input['NEXT_MONTH_MONETARY']-sales_model_input['MONETARY'],2)
             # Display output data
             st.write(sales_model_input)
-            st.metric('Forecasted Sales', f"${round(sales_model_input['FORECAST_SALES'].sum(),2)}")
+            st.metric('Next Month Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum(),2)}")
 
 
     # # Metrics table
