@@ -530,11 +530,11 @@ with tab2:
             # Calculate the percentage increase in sales
             percentage_increase = (new_item_sales / total_sales_for_menu_type) * 100
 
-
+                
             st.markdown("### Prediction")
             ## display the rounded prediction
-            st.markdown("##### Predicted Total Quantity Sold: {}".format(rounded_prediction))
-            st.markdown(f"##### Percentage Increase in Sales: {percentage_increase:.2f}%")
+            st.markdown("###### Predicted Total Quantity Sold: {}".format(rounded_prediction))
+            st.markdown(f"###### Percentage Increase in Sales: {percentage_increase:.2f}%")
             
             st.write('')
             
