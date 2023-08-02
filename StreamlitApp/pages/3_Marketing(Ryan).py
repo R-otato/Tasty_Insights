@@ -29,7 +29,7 @@ def kmeans_pipeline(data):
     ## Removing columns not used in transformation
     cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
     not_Involved=data[cols_Not_Involved]
-    data.drop(cols_Not_Involved,axis=1,inplace=True)
+    data.drop(cols_Not_Involved,axis=1,inplace=True,errors='ignore')
 
     # Load the necessary transformations
     windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
@@ -56,7 +56,7 @@ def churn_pipeline(data):
     ## Removing columns not used in transformation
     cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
     not_Involved=data[cols_Not_Involved]
-    data.drop(cols_Not_Involved,axis=1,inplace=True)
+    data.drop(cols_Not_Involved,axis=1,inplace=True,errors='ignore')
 
     # Load the necessary transformations
     windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
@@ -212,7 +212,7 @@ def main() -> None:
         # Setup: Get predictions
         cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
         kmeans_cols=['RECENCY','FREQUENCY','MONETARY']
-        churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1)),columns=['CHURNED'])
+        churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1,errors='ignore')),columns=['CHURNED'])
         cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df[kmeans_cols]),columns=['CLUSTER'])
         
         # Setup: Map predictions to understandable insights
@@ -269,7 +269,7 @@ def main() -> None:
             sales_model_input['TENURE_MONTHS'] = sales_model_input['TENURE_MONTHS'] + forecast_months
             #Transform data
             sales_clean=sales_pipeline(sales_model_input)
-            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1)),columns=['FORECAST_MONETARY'])
+            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1,errors='ignore')),columns=['FORECAST_MONETARY'])
             #Prep output data
             sales_model_input['FORECAST_MONETARY']=round(monetary_pred['FORECAST_MONETARY'],2)
             sales_model_input['FORECAST_SALES']=round(sales_model_input['FORECAST_MONETARY']-sales_model_input['MONETARY'],2)
