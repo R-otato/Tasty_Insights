@@ -169,7 +169,7 @@ def main() -> None:
             upload a new Excel file in the Input Data section.
             2. Predictions: After uploading your file, the predictions will be automatically generated and shown.
             3. Filter Data: Use filters to explore specific segments or refine the data for analysis.
-            4. Sales Forecast: Input the desired number of months and the expected number of purchases for all memberd in that period to assume the impact of your marketing strategy and generate forecasted sales.
+            4. Sales Forecast: Input the expected number of purchases for all members in the next month to assume the impact of your marketing strategy and generate forecasted sales.
             """)
 
         # Input data
@@ -270,7 +270,7 @@ def main() -> None:
         st.write('### Member Forecasted Sales')
         # #Get user input
         # Get the input from the user
-        expected_purchases_input = st.text_input("Expected purchases in period:", "1")
+        expected_purchases_input = st.text_input("Expected purchases in the next month:", "1")
 
         # Validate the input
         estimated_frequency = validate_integer_input(expected_purchases_input)
