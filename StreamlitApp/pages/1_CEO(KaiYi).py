@@ -4,10 +4,7 @@
 #--Import statements--
 import streamlit as st
 import pandas as pd
-import numpy as np
-from xgboost import XGBClassifier
-
-import plotly.express as px
+import numpy as np 
 import joblib 
 
 # path to assets
@@ -17,9 +14,6 @@ st.set_page_config(page_title="Churn Prediction", page_icon="💀")
 
 # Page Title
 st.title("Churn Prediction")
-
-# Load the pre-trained machine learning model
-model = joblib.load(path + 'churn-prediction-model.jbl')
 
 # Load the customer data from a CSV file
 customer_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
@@ -78,7 +72,7 @@ birthday_date = st.date_input("Select Birthday Date",
 # Sliders for days since last order, number of orders, and amount spent per order
 days_since_last_order = st.slider("Days Since Last Order:", 1, 40, 10)
 num_of_orders = st.slider("Number of Orders:", 1, 60, 40)
-amount_spent_per_order = st.slider("Amount Spent per Order ($):", 2, 30, 8)
+amount_spent_per_order = st.slider("Amount Spent per Order ($):", 10, 70, 20)
 
 # DataFrame based on user input
 df_user_input = pd.DataFrame({
@@ -155,6 +149,31 @@ if st.button('Predict!'):
         DAYS_TO_NEXT_ORDER=999,
     )
     
+    df_user_input_counterfactual = df_user_input.copy()
+    counterfactual_columns = ['RECENCY','FREQUENCY','AGE','LENGTH_OF_RELATIONSHIP']
+    df_non_churned = df_before_scaling_sample[df_before_scaling_sample['CHURNED']==0]
+    
+    # Calculate the Euclidean distances between df_user_input_counterfactual and all rows in df_non_churned
+    user_input_array = df_user_input_counterfactual[counterfactual_columns].values
+    non_churned_array = df_non_churned[counterfactual_columns].values
+
+    # Calculate the pairwise Euclidean distances using NumPy broadcasting
+    distances = np.linalg.norm(user_input_array - non_churned_array, axis=1)
+
+    # Find the indices of the five rows with the smallest Euclidean distances
+    top_five_indices = distances.argsort()[:1]
+
+    # Get the 'MONETARY' and 'LENGTH_OF_RELATIONSHIP' values from the top five rows
+    monetary_values = df_non_churned.iloc[top_five_indices]['MONETARY']
+    relationship_lengths = df_non_churned.iloc[top_five_indices]['LENGTH_OF_RELATIONSHIP']
+
+    # Calculate monetary value per month for the top five counterfactuals
+    monetary_per_month = monetary_values / (relationship_lengths / 30)  # Assuming 30 days per month
+
+    # Calculate the average monetary value per month for the top five counterfactuals
+    lifetime_sales = monetary_values.mean()
+    monthly_sales = monetary_per_month.mean()
+    
     # perform numerical transformation
     yeojohnsontransformer = joblib.load(path + '/models/yeojohnsontransformer.jbl')
     df_user_input = yeojohnsontransformer.transform(df_user_input)
@@ -189,12 +208,18 @@ if st.button('Predict!'):
     model = joblib.load(path + 'models/xgb_churn_model.jbl')
     churn_prediction = model.predict(df_user_input)
     
+    cust_result_message_template = """This customer is {} to churn.
+                        This means that the customer is {} purchasing from the Tasty Bytes, 
+                        resulting in {} the customer and potential sales. A customer similar to the inputted 
+                        customer has an average sales generated of **:blue[${:.0f}]**, with a lifetime total of **:blue[${:.0f}]**. Tasty Bytes 
+                        can expect to {} this amount of sales if this customer {} churn."""
+    
     # churn results
-    st.title("Prediction Results")
+    st.header("Prediction Results")
     if churn_prediction[0] == 1:
-        st.write("This customer is likely to churn.")
+        st.markdown(cust_result_message_template.format('likely', 'unlikely to continue', 'losing', monthly_sales, lifetime_sales, 'lose', 'does'))
     else:
-        st.write("This customer is unlikely to churn.")
+        st.markdown(cust_result_message_template.format('unlikely', 'likely to continue', 'retaining', monthly_sales, lifetime_sales, 'gain', 'does not'))
     
     # demographic prediction data manupulation
     
@@ -216,7 +241,6 @@ if st.button('Predict!'):
     
     # get age
     df_user_input_cust_demo = get_age(df_user_input_cust_demo)
-    st.write(df_user_input_cust_demo)
     # Bin the age column based on the age groups and labels
     df_user_input_cust_demo['AGE_GROUP'] = pd.cut(df_user_input_cust_demo['AGE'], bins=age_bins, labels=age_labels)
     
@@ -239,22 +263,18 @@ if st.button('Predict!'):
     
     # perform customer demographic prediction
     model_cust_demo = joblib.load(path + 'models/cust_demographic_model.jbl')
-    cust_demo_results = model_cust_demo.predict(df_user_input_ohe)
-    
-    st.write("Customer Demographic Prediction:", cust_demo_results[0])
-    
+    cust_demo_results = model_cust_demo.predict(df_user_input_ohe)    
     
     cluster_information = pd.read_csv(path + 'datasets/cluster_information.csv')
     
-    info = cluster_information['Info2'][segment].to_string(index=False)
+    info = cluster_information['Info'][cust_demo_results].to_string(index=False)
         
-    
     def get_customer_segment(segment):
         st.write("Customer Type:", cluster_information['Title'].iloc[segment])
-        st.write(cluster_information['Info2'][segment])
+        st.write(cluster_information['Info'][segment])
     
     st.subheader('What type of customer is this?')
-    get_customer_segment(int(segment))
+    get_customer_segment(int(cust_demo_results))
     
     with st.expander("All Customer Types"):
         for i in range(len(cluster_information)):
@@ -264,4 +284,8 @@ if st.button('Predict!'):
     # TODO - add chloropleth of sales by country
     # TODO - what impact in terms of sales does this cluster have?
     # TODO - what is the average sales per customer in this cluster?
-    # TODO - figure out if DTNO is a good feature to use for clustering
+    
+
+
+
+    
