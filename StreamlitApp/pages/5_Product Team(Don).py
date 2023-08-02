@@ -131,7 +131,7 @@ def get_health_metrics_menu_table(menu_table_df):
 
 # Function: user_inputs()
 # the purpose of this function is to get the user's input for the new product item they would like to predict the total quantity sold for
-def user_inputs():        
+def user_inputs(): 
     ## Option: truck brand name
     ## add None as the default value (it won't be an actual selectable option)
     default_option = None
@@ -396,9 +396,9 @@ with tab2:
 
     # PRODUCT PERFORMANCE PREDICTION
     st.markdown("## Product Performance")
-
-    user_input_df, sale_price, cost_of_goods = user_inputs()
     
+    user_input_df, sale_price, cost_of_goods = user_inputs()
+        
     # display dataframe
     st.dataframe(user_input_df, hide_index=True)
 
