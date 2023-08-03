@@ -6,7 +6,7 @@ import snowflake.connector
 import ast
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 #################
 ### FUNCTIONS ###
@@ -438,7 +438,7 @@ with tab1:
     st.markdown("## Assumptions")
     st.write("""The first assumption the model makes is that the total quantity sold from the order details data as the total lifetime quantity 
              sold of a product which may not be the case for every product considering the fact that the launch date and removal date is not provided in 
-             the dataset. Hence, it is likely that the total quantity sold is more of the first transaction for that product till the current date.""")
+             the dataset.""")
     
     st.write("""The second assumption the model makes is the independence of the observations in the training data. In other words, the model assumes that 
              each menu item's sales data is not influenced by other menu items' sales or external factors.""")
@@ -548,24 +548,20 @@ with tab2:
             }
             df = pd.DataFrame(data)
 
-            # plot the bar chart
-            plt.figure(figsize=(4, 5))
-            bars = plt.bar(df['Sales'], df['Total Sales'])
-            plt.title('Total Sales Before and After Adding New Menu Item')
-            plt.grid(False)
+            # create the Plotly bar chart
+            fig = go.Figure(data=[go.Bar(x=df['Sales'], y=df['Total Sales'])])
+
+            # set the title
+            fig.update_layout(title_text='Total Sales Before and After Adding New Menu Item', title_x=0.23)
+
+            # remove y-axis ticks and labels
+            fig.update_yaxes(showticklabels=False, showgrid=False)
 
             # add data labels to the bars
-            for bar in bars:
-                height = bar.get_height()
-                plt.annotate(f'{height:.2f}', xy=(bar.get_x() + bar.get_width() / 2, height),
-                            xytext=(0, 1), textcoords="offset points",
-                            ha='center', va='bottom', fontsize=9)
+            fig.update_traces(texttemplate='%{y:.2f}', textposition='outside', textfont=dict(size=12))
 
-            # remove the y-axis values
-            plt.gca().set_yticks([])
-            
-            # show the plot using Streamlit's st.pyplot function
-            st.pyplot(plt)
+            # show the plot using Streamlit's st.plotly_chart function
+            st.plotly_chart(fig)
             
             
             st.write('')
