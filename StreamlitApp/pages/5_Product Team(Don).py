@@ -6,7 +6,7 @@ import snowflake.connector
 import ast
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 #################
 ### FUNCTIONS ###
@@ -548,24 +548,20 @@ with tab2:
             }
             df = pd.DataFrame(data)
 
-            # plot the bar chart
-            plt.figure(figsize=(4, 5))
-            bars = plt.bar(df['Sales'], df['Total Sales'])
-            plt.title('Total Sales Before and After Adding New Menu Item')
-            plt.grid(False)
+            # create the Plotly bar chart
+            fig = go.Figure(data=[go.Bar(x=df['Sales'], y=df['Total Sales'])])
+
+            # set the title
+            fig.update_layout(title_text='Total Sales Before and After Adding New Menu Item', title_x=0.23)
+
+            # remove y-axis ticks and labels
+            fig.update_yaxes(showticklabels=False, showgrid=False)
 
             # add data labels to the bars
-            for bar in bars:
-                height = bar.get_height()
-                plt.annotate(f'{height:.2f}', xy=(bar.get_x() + bar.get_width() / 2, height),
-                            xytext=(0, 1), textcoords="offset points",
-                            ha='center', va='bottom', fontsize=9)
+            fig.update_traces(texttemplate='%{y:.2f}', textposition='outside', textfont=dict(size=12))
 
-            # remove the y-axis values
-            plt.gca().set_yticks([])
-            
-            # show the plot using Streamlit's st.pyplot function
-            st.pyplot(plt)
+            # show the plot using Streamlit's st.plotly_chart function
+            st.plotly_chart(fig)
             
             
             st.write('')
