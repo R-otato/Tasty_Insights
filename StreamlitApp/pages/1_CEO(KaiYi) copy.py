@@ -266,6 +266,17 @@ def main():
     customer_data, df_before_scaling_sample, cluster_information = init_dataset()
     yeojohnsontransformer, onehotencoder, minmaxscaler, model, onehotencoder_cust_demo, model_cust_demo = init_model()
     
+    st.write("""
+            This page allows us to predict if a customer is likely to churn or not. 
+            As explained in the Home page, to reach our goal of 25% YoY sales 
+            growth is to reduce churn. This in turn increases the number of repeat customers, contributing
+            to the growth in sales.
+             
+            By predicting if a customer is likely to churn, we can take action to retain the customer. 
+            This can be extrapolated to entire customer demographics, allowing us to direct attention to stop
+            groups of customers likely to churn from churning.
+             """)
+    
     # Show basic statistics about the customer data
     st.header("Customer Data Overview")
     st.write("Total number of Transactions:", "673M")
@@ -283,6 +294,7 @@ def main():
     
     # Show insights on customer churn
     st.header("Customer Churn Predictor")
+    st.write("Input a customer's details to predict if they are likely to churn or not")
     
     # User Input for Dropdowns and Sliders
     df_user_input = user_input(customer_data)
@@ -292,7 +304,7 @@ def main():
     st.write(df_user_input.rename(columns=str.lower).iloc[0])
 
     
-    if st.button("Predict"):
+    if st.button("Predict Churn!"):
         # perform data manupulation for churn prediction
         df_user_input_churn_cleaned = churn_prediction_data_manupulation(df_user_input,df_before_scaling_sample)
         # apply preprocessing models
@@ -331,7 +343,21 @@ def main():
         with st.expander("All Customer Types"):
             for i in range(len(cluster_information)):
                 get_customer_segment(i,cluster_information)
+                
+        st.subheader('What next?')
+        st.markdown("""
+                With the ability to predict **:blue[whether a customer will churn]**, and the customer type, 
+                we can now take **:blue[preventative action]** to retain the customer. By successfully foreseeing
+                which customers will churn and taking action to retain them, we **:blue[safeguard our existing customer base]**
+                from shrinkage whilst attracting new customers. This approach ensures a
+                **:blue[sustained growth in sales]**, and enables us to achieve our overarching goals.
+                 """)
         
 main()        
+
+
+
+
+
         
 # TODO: add sales amount to each segment
