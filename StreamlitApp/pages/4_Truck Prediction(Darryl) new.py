@@ -183,6 +183,29 @@ def get_overall_truck_table(location_table_df, order_header_df):
 
     return overall_truck_df_grouped
 
+
+# Function: get_overall_truck_sales_table
+# the purpose of this function is to merge the truck and menu details table together to form an overall table
+def get_overall_truck_sales_table(truck_table_df, order_header_df):
+    ## Merge the DataFrames based on 'MENU_ITEM_ID'
+    overall_truck_sales_df = pd.merge(truck_table_df, order_header_df, on='TRUCK_ID', how='left')
+
+    ## Define the desired column order
+    desired_columns = ['COUNTRY', 'REGION','PRIMARY_CITY', 'TRUCK_ID', 'CUSTOMER_ID', 'ORDER_TOTAL']
+
+    ## Re-arrange the columns in the merged DataFrame
+    overall_truck_sales_df = overall_truck_sales_df[desired_columns]
+    
+    ## Cast 'ORDER_TOTAL' to float
+    overall_truck_sales_df['ORDER_TOTAL'] = overall_truck_sales_df['ORDER_TOTAL'].astype(float)
+    
+    ## Group by 'TRUCK_ID' and combine 'ORDER_TOTAL' for each truck
+    overall_truck_sales_df_grouped = overall_truck_sales_df.groupby('TRUCK_ID').agg({
+        'ORDER_TOTAL': 'sum'           # Sum the 'ORDER_TOTAL' amounts for each truck_id
+    }).reset_index()
+    
+    return overall_truck_sales_df_grouped
+
 # # Function: retrieve order_header table
 # # the purpose of this function is to retrieve the order_header table from snowflake containing all the details of the order_header items
 # def retrieve_order_header_table():
@@ -419,9 +442,48 @@ def filter(selected_options,column,data):
 st.set_page_config(page_title="Truck Prediction", page_icon="📈")
 
 st.markdown("# Truck Prediction")
-tab1, tab2 = st.tabs(['Explore', 'Cluster'])
+tab1, tab2 = st.tabs(['Explore', 'Prediction'])
 
+# Explore page 
 with tab1:
+    # High level goals
+    st.markdown("# High Level Goals")
+    st.markdown("This Streamlit page plays a crucial role in contributing to Tasty Bytes' goal of achieving a 25% YoY sales increase. \
+                By leveraging the power of data analysis and machine learning, the page predicts next month's sales for each food truck based on historical data. \
+                This accurate forecasting enables Tasty Bytes to make informed decisions and implement targeted strategies to optimize sales for individual trucks and menu items. \
+                \n\n With a clear understanding of upcoming sales trends, Tasty Bytes can proactively adjust inventory, marketing efforts, and operational aspects, maximizing revenue potential. \
+                As a result, this page empowers Tasty Bytes to make data-driven decisions, improve overall sales performance, and work towards their ambitious high-level sales target.") 
+    
+    # Benefits of the sales predictions
+    st.markdown("## Benefits of this Prediction")
+    st.markdown("Tasty Bytes can utilize the predictions of next month's sales for each truck ID to strategically boost their sales and achieve their growth target. \
+                With accurate foresight into future sales trends, Tasty Bytes can optimize their inventory management, ensuring that popular menu items are well-stocked, \
+                reducing waste, and minimizing stockouts. \n\nMoreover, they can tailor their marketing efforts, focusing on promoting specific menu items or trucks that are \
+                projected to perform exceptionally well. By allocating resources efficiently and proactively adapting their operations, Tasty Bytes can provide a more \
+                personalized and customer-centric experience, fostering customer loyalty and attracting new patrons.")
+    st.write(
+            """
+            Using this prediction, you can implement the following strategies:
+
+            - Demand Forecasting: By analyzing historical sales data, the company can identify patterns and trends in customer behavior. This allows you to anticipate fluctuations in demand, helping you be better prepared \
+                for busy periods and ensuring you can meet customer expectations. On the other hand, during slower times, you can adjust your operations to reduce costs while maintaining service quality.
+
+            - Sales Target Setting: Incorporating the predictions into sales target setting will enable Tasty Bytes to set realistic and achievable goals for each truck. This will ensure that performance expectations are aligned with market trends and growth potentials.
+
+            - Real-time Monitoring: Integrating the predictions into a real-time monitoring system will enable Tasty Bytes to stay agile and respond promptly to changing sales trends, ensuring optimal performance.
+            
+            By adopting these strategies and actively utilizing the sales predictions, Tasty Bytes can unlock new growth opportunities, optimize their operations, and stay ahead in the competitive market, ultimately propelling them towards their ambitious 25% YoY sales increase goal.
+            """
+        )
+    
+    # Limitations
+    st.markdown("## Limitations of the Model")
+    st.markdown("While my predictive model offers valuable insights, it has some limitations. It doesn't account for seasonal variations in sales, leading to inaccurate resource allocation and inventory management during specific periods. \
+                Additionally, the model might not account for extreme weather events that can disrupt customer behavior and sales. It relies solely on historical data and internal factors, overlooking external variables like economic conditions or competitor activities.")
+    
+    
+# Prediction and Analysis
+with tab2:
     st.markdown("##")
     
 # Input data
@@ -459,8 +521,8 @@ with tab1:
 
     df=pipeline(df)
 
-    # with st.expander("Cleaned and Transformed Data"):
-    #     st.write(df)
+    with st.expander("Cleaned and Transformed Data"):
+        st.write(df)
         
     # MODEL FOR PREDICTION
     model = joblib.load("assets/churn-prediction-model.jbl")
@@ -474,16 +536,48 @@ with tab1:
 
     # LOCATION TABLE #
     ## retrieve location table
-    location_table_df = retrieve_location_table()
+    #location_table_df = retrieve_location_table()
     
+    # ## Display header
+    # st.markdown("## Location Table")
+
+    # ## Display the merged DataFrame
+    # st.dataframe(location_table_df, width=0, hide_index=True)  
+    
+    
+    # ORDER HEADER TABLE #
+    ## retrieve order_header table
+    #order_details_df = retrieve_order_header()
+
+    # OVERALL TRUCK TABLE #
+    ## retrieve overall_truck_df table
+    #overall_truck_df_grouped = get_overall_truck_table(location_table_df, order_details_df)
+
     ## Display header
-    st.markdown("## Location Table")
+    #st.markdown("## Total Sales by Location")
 
     ## Display the merged DataFrame
-    st.dataframe(location_table_df, width=0, hide_index=True)  
-
+    #st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
     
-    ########## TESTING USER INPUT ###############
+    
+    ## FOR PLOTTING OF Total Sales by Truck table
+    # ## retrieve order header table
+    # order_header_df = retrieve_order_header()
+    # ## retrieve truck table
+    # truck_table_df = retrieve_truck_table()
+    
+    # # OVERALL TRUCK TABLE #
+    # ## retrieve overall_truck_df table
+    # overall_truck_sales_df_grouped = get_overall_truck_sales_table(truck_table_df, order_header_df)
+
+    # ## Display header
+    # st.markdown("## Total Sales by Truck")
+
+    # ## Display the merged DataFrame
+    # st.dataframe(overall_truck_sales_df_grouped, width=0, hide_index=True) 
+    
+    
+    ########## USER INPUT ###############
     # Monthly Truck Sales Prediction
     st.markdown("## Monthly Truck Sales")
     
@@ -508,24 +602,13 @@ with tab1:
             ## display the rounded prediction
             st.markdown("##### Predicted Sales for Next Month: {}".format(final_prediction))
             
-            st.write('')
-            
-            # st.markdown("##### Total Item Details:")
-            # ## display the total_product_details_df DataFrame
-            # st.dataframe(total_product_details_df, hide_index=True)
-            
-            # # display current menu items
-            # with st.expander("Unit Item Details"):
-            #     st.write("This table contains details specific to a single unit or item of the new product")
-            #     ## display the new_product_details_df DataFrame
-            #     st.dataframe(new_product_details_df, hide_index=True)
     else:
         st.error("Please fill in all required fields before proceeding with the prediction.")
     ###########################################################
     
-    # ORDER HEADER TABLE #
-    ## retrieve order_header table
-    order_details_df = retrieve_order_header()
+    # # ORDER HEADER TABLE #
+    # ## retrieve order_header table
+    # order_details_df = retrieve_order_header()
     
     # ## Display header
     # st.markdown("## Order Header Table")
@@ -546,9 +629,3 @@ with tab1:
     
 
     
-with tab2:
-    st.markdown("## Cluster")
-    st.markdown("What is clustering? <br> Clustering is the task of dividing the population \
-                or data points into a number of groups such that data") 
-    
-    st.markdown("## Clustering variables")
