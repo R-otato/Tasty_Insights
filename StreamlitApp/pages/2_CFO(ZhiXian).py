@@ -101,6 +101,9 @@ st.markdown("# Sales Prediction")
 # with tab2:
 # page title
 st.markdown("## CFO")
+st.write("""This page shows a prediction of next months sales, the inital churn percent value is an underestimate
+         of the months actual churn value. Here we can see what our churn value can hit and while still achieving our goal of
+         25 percent growth in sales, as well as changing number of customers to see the effect on the sales change.""")
 
     # page guide
 with st.expander("Guide to Using Page"):
@@ -195,19 +198,22 @@ input_data["MONTH"] = 10
 input_data["AVERAGE_AGE"] = using["AGE"].mean()
 
 
+st.markdown("### Based on month initial information")
 # data to input in the model
 st.write(input_data)
 
 pred_sales = model2.predict(input_data)
-st.write(f"The adjusted predicted sales next month of {city} is {pred_sales[0]:.2f}")
+st.metric("Predicted Sales", f"${pred_sales[0]:.2f}")
+# st.write(f"The predicted sales next month of {city} is {pred_sales[0]:.2f}")
 
 # Change in Sales
 lastMonthSales = history_data.loc[history_data["CITY"] == city]["SALES"].values  
 change_sales = (pred_sales - lastMonthSales)/lastMonthSales * 100
 st.metric("Change in sales", f"{change_sales[0]:.2f}%")
-    
+
+st.markdown("### Adjust churn and distinct customers to see effect on sales")
 new_churn = st.slider(label="Adjust Churn Rate", min_value=0, max_value=100)
-new_customers = st.slider(label="Adjust Unique Customers", min_value=0, max_value=20000, value=len(using))
+new_customers = st.slider(label="Adjust Distinct Customers", min_value=0, max_value=20000, value=len(using))
 
 # show adjusted sales
 input_data_new = input_data.copy()
@@ -215,7 +221,8 @@ input_data_new["CHURN_RATE"] = new_churn/100
 input_data_new["DISTINCT_CUSTOMER"] = new_customers
 
 new_pred_sales = model2.predict(input_data_new)
-st.write(f"The predicted sales next month of {city} is {new_pred_sales[0]:.2f}")
+st.metric("Adjusted Predicted Sales", f"${new_pred_sales[0]:.2f}")
+# st.write(f"The adjust predicted sales next month of {city} is {new_pred_sales[0]:.2f}")
 
 change_sales_new = (new_pred_sales - lastMonthSales)/lastMonthSales * 100
-st.metric("New Change in Sales", f"{change_sales_new[0]:.2f}%")
+st.metric("Adjusted Change in Sales", f"{change_sales_new[0]:.2f}%")
