@@ -575,14 +575,13 @@ with tab3:
         total_qty_by_item['YEAR'] = total_qty_by_item['YEAR'].astype(str).replace(',', '').astype(int)
         
         
-        
         # get the highest year and month
         max_year_month = total_qty_by_item.groupby('MENU_ITEM_ID')[['YEAR', 'MONTH']].max().reset_index()
 
         menu_item_max_year_month = max_year_month[max_year_month["MENU_ITEM_ID"]==menu_item_id]
 
         total_qty_by_item_over_time = total_qty_by_item[total_qty_by_item["MENU_ITEM_ID"]==menu_item_id]
-
+        
         # Plotly Line Chart
         ## create the line chart
         fig = go.Figure(data=go.Line(x=total_qty_by_item_over_time['MONTH'], y=total_qty_by_item_over_time['TOTAL_QTY_SOLD_PER_MONTH'], mode='lines+markers'))
@@ -694,6 +693,28 @@ with tab3:
         unit_price = menu_table.loc[menu_table['MENU_ITEM_ID'] == menu_item_id, 'UNIT_PRICE'].values[0]
         sales_next_month = float(unit_price) * int(rounded_prediction)
         
+        # Get previous month sales
+        ## sort the DataFrame by 'MONTH' in descending order
+        total_qty_by_item_over_time_sorted = total_qty_by_item_over_time.sort_values(by='MONTH', ascending=False)
+
+        ## keep only the first row for each 'MENU_ITEM_ID' which is the latest
+        total_qty_by_item_over_time = total_qty_by_item_over_time_sorted.groupby('MENU_ITEM_ID').first().reset_index()
+        
+        ## get the quantity sold for the latest month
+        qty_sold_last_month = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_MONTH"])
+        
+        ## get the total sales for the latest month
+        sales_last_month = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_MONTH"]) * float(unit_price)
+
+        
+        # Get the percentage month to month change (latest to predicted)
+        sales_change = (rounded_prediction*float(unit_price)) - sales_last_month
+        
+        percent_change = ((sales_change / sales_last_month)*100)
+
+        # DISPLAY
         st.markdown("## Prediction:")
         st.markdown("### No. of {} sold next month: {}".format(menu_item_name, rounded_prediction))
         st.markdown("### Estimated sales next month: ${:.2f}".format(sales_next_month))
+        st.markdown("### Percentage change from last month: {:.2f}%".format(percent_change))
+        
