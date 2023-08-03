@@ -746,7 +746,3 @@ with tab3:
         st.markdown("## Prediction:")
         st.markdown("### No. of {} sold next month: {}".format(menu_item_name, rounded_prediction))
         st.markdown("### Estimated sales next month: ${:.2f}".format(sales_next_month))
-        
-        
-        st.write(menu_table_df)
-        st.write(unit_price)
