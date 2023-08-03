@@ -367,10 +367,10 @@ def retrieve_order_detail_table():
 
     # retrieve menu table from snowflake
     my_cur = my_cnx.cursor()
-    my_cur.execute("select MENU_ITEM_ID, PRICE from ORDER_DETAILS_USA_MATCHED")
+    my_cur.execute("select MENU_ITEM_ID, PRICE, ORDER_TS, QUANTITY from ORDER_DETAILS_USA_MATCHED")
     order_table = my_cur.fetchall()
     
-    order_table_pandas = pd.DataFrame(order_table, columns=['MENU_ITEM_ID', 'PRICE'])
+    order_table_pandas = pd.DataFrame(order_table, columns=['MENU_ITEM_ID', 'PRICE', 'ORDER_TS', 'QUANTITY'])
     
     return order_table_pandas
 
@@ -380,7 +380,7 @@ def retrieve_order_detail_table():
 #####################
 
 st.markdown("# Product Team")
-tab1, tab2 = st.tabs(['About', 'Model Prediction'])
+tab1, tab2, tab3 = st.tabs(['About', 'Model Prediction', 'New Model'])
 
 # TAB 1: About
 with tab1:
@@ -575,11 +575,147 @@ with tab2:
                 st.write("This table contains details specific to a single unit or item of the new product")
                 ## display the new_product_details_df DataFrame
                 st.dataframe(new_product_details_df, hide_index=True)
-
-            
-
-            
-            
-            
     else:
         st.error("Please fill in all required fields before proceeding with the prediction.")
+        
+
+with tab3:
+    st.markdown("## Menu Item Next Month Sales Prediction")
+    
+    default_option = None
+    
+    # get menu item options for users to choose
+    menu_item_options = [
+    f"({row['MENU_ITEM_ID']}) {row['MENU_ITEM_NAME']}"
+    for _, row in menu_table.iterrows()
+    ]
+
+    # use the updated list of options for the selectbox
+    # user can select menu item they want to predict next month quantity sold for
+    selected_item_cat = st.selectbox("Menu Item: ", [default_option] + list(menu_item_options))
+    
+    if selected_item_cat == None:
+        st.error("Please fill in the required field to get a prediction")
+    
+    else:
+        # extract MENU_ITEM_ID from the option string
+        menu_item_id = int(selected_item_cat.split(")")[0][1:])
+
+        menu_item_name = selected_item_cat.split(") ")[1]
+        
+        item_info_df = menu_table[menu_table["MENU_ITEM_ID"] == menu_item_id]
+        
+        item_info_df = item_info_df.drop(["MENU_ITEM_NAME", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"], axis=1)
+        
+        item_info_df = item_info_df.rename(columns={'UNIT_PRICE': 'SALE_PRICE_USD'})
+        
+        # retrieve year and month from order timestamp
+        order_df = retrieve_order_detail_table()
+        order_df['YEAR'] = order_df['ORDER_TS'].dt.year
+        order_df['MONTH'] = order_df['ORDER_TS'].dt.month
+        
+        # Group order total to truck id
+        total_qty_by_item = order_df.groupby(['YEAR', 'MONTH', 'MENU_ITEM_ID'])['QUANTITY'].sum().reset_index()
+        
+        # Renaming the 'ORDER_TOTAL' column to 'TOTAL_SALES_PER_MONTH'
+        total_qty_by_item = total_qty_by_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD_PER_MONTH'})
+
+        # Assuming your DataFrame is named 'df'
+        max_year_month = total_qty_by_item.groupby('MENU_ITEM_ID')[['YEAR', 'MONTH']].max().reset_index()
+
+        menu_item_max_year_month = max_year_month[max_year_month["MENU_ITEM_ID"]==menu_item_id]
+
+        st.dataframe(menu_item_max_year_month)
+
+        if int(menu_item_max_year_month["MONTH"])<=11:
+            month = int(menu_item_max_year_month["MONTH"]) + 1
+            year = int(menu_item_max_year_month["YEAR"])
+        elif int(menu_item_max_year_month["MONTH"])== 12:
+            month = 1
+            year = int(menu_item_max_year_month["YEAR"]) + 1
+        
+        
+        # MANUAL ONT HOT ENCODING
+        
+        # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+        item_info_df = item_info_df.replace({'Yes': 1, 'No': 0})
+        
+        categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
+        
+        ## loop through each categorical column
+        for col in categorical_cols:
+            ## get the unique values in the column
+            unique_values = menu_table[col].unique()
+
+            ## loop through unique values in the column
+            for value in unique_values:
+                ## check if the value in the menu_table table matches the corresponding value in user_input_df
+                if value == item_info_df[col].values[0]:
+                    ## create a column with the name 'column_selected_value' and set its value to 1
+                    menu_table[f'{col}_{value}'] = 1
+
+                    ## add this column to the item_info_df
+                    item_info_df[f'{col}_{value}'] = 1
+                else:
+                    ## create a column with the name 'column_unique_value' and set its value to 0
+                    menu_table[f'{col}_{value}'] = 0
+
+                    ## add this column to the item_info_df
+                    item_info_df[f'{col}_{value}'] = 0
+
+
+        ## drop the original categorical columns from item_info_df
+        item_info_df.drop(columns=categorical_cols, inplace=True)
+        
+        item_info_df['YEAR'] = year
+        item_info_df['MONTH'] = month
+        
+        # Define the desired column order
+        desired_columns = ['MENU_ITEM_ID', 'SALE_PRICE_USD', 'YEAR', 'MONTH', 'DAIRY_FREE',
+                        'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE', 'MENU_TYPE_BBQ',
+                        'MENU_TYPE_Ramen', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Poutine',
+                        'MENU_TYPE_Ethiopian', 'MENU_TYPE_Mac & Cheese', 'MENU_TYPE_Sandwiches',
+                        'MENU_TYPE_Indian', 'MENU_TYPE_Gyros', 'MENU_TYPE_Hot Dogs',
+                        'MENU_TYPE_Tacos', 'MENU_TYPE_Chinese', 'MENU_TYPE_Crepes',
+                        'MENU_TYPE_Ice Cream', 'TRUCK_BRAND_NAME_Smoky BBQ',
+                        'TRUCK_BRAND_NAME_Kitakata Ramen Bar', 'TRUCK_BRAND_NAME_The Mega Melt',
+                        'TRUCK_BRAND_NAME_Revenge of the Curds', 'TRUCK_BRAND_NAME_Tasty Tibs',
+                        'TRUCK_BRAND_NAME_The Mac Shack', 'TRUCK_BRAND_NAME_Better Off Bread',
+                        'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Cheeky Greek',
+                        'TRUCK_BRAND_NAME_Amped Up Franks', 'TRUCK_BRAND_NAME_Guac n\' Roll',
+                        'TRUCK_BRAND_NAME_Peking Truck', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
+                        'TRUCK_BRAND_NAME_Freezing Point', 'ITEM_CATEGORY_Beverage',
+                        'ITEM_CATEGORY_Main', 'ITEM_CATEGORY_Snack',
+                        'ITEM_SUBCATEGORY_Cold Option', 'ITEM_SUBCATEGORY_Hot Option']
+
+        # Drop columns not in the desired column list
+        item_info_df = item_info_df[desired_columns]
+
+        item_info_df["SALE_PRICE_USD"] = item_info_df["SALE_PRICE_USD"].astype(float)
+
+        
+        # retrieve min max scaler
+        min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
+        
+        min_max_scaler.fit(item_info_df)
+        
+        min_max_scaler.transform(item_info_df)
+        
+        # retrieve regression model
+        product_qty_per_month_model = joblib.load("assets/product_qty_per_month_model.joblib")
+        
+        model_prediction = product_qty_per_month_model.predict(item_info_df)
+        
+        # Round off the prediction to the nearest whole number
+        rounded_prediction = round(model_prediction[0])
+        
+        unit_price = menu_table.loc[menu_table['MENU_ITEM_ID'] == menu_item_id, 'UNIT_PRICE'].values[0]
+        sales_next_month = float(unit_price) * int(rounded_prediction)
+        
+        st.markdown("## Prediction:")
+        st.markdown("### No. of {} sold next month: {}".format(menu_item_name, rounded_prediction))
+        st.markdown("### Estimated sales next month: ${:.2f}".format(sales_next_month))
+        
+        
+        st.write(menu_table_df)
+        st.write(unit_price)
