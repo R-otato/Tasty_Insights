@@ -89,7 +89,7 @@ def sales_pipeline(data):
     minMaxScaler = joblib.load("assets/memb_sales_scale.jbl")
 
     # Apply the transformations to the data
-    data[['MONETARY','FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']] = minMaxScaler.transform(data[['MONETARY','FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']])  # Apply Min-Max Scaling
+    data[['FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']] = minMaxScaler.transform(data[['FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']])  # Apply Min-Max Scaling
 
     return data
 
@@ -280,11 +280,11 @@ def main() -> None:
             st.error("Please enter a valid integer for the expected purchases.")
         else:
             #Setup data
-            sales_model_input = filtered_data[['CUSTOMER_ID', 'FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS','MONETARY']]
+            sales_model_input = filtered_data[['CUSTOMER_ID', 'MONETARY','FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS']]
             sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
             #Transform data
             sales_clean=sales_pipeline(sales_model_input)
-            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID'],axis=1,errors='ignore')),columns=['NEXT_MONTH_MONETARY'])
+            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1,errors='ignore')),columns=['NEXT_MONTH_MONETARY'])
             #Prep output data
             sales_model_input['NEXT_MONTH_MONETARY']=round(monetary_pred['NEXT_MONTH_MONETARY'],2)
             sales_model_input['NEXT_MONTH_SALES']=round(sales_model_input['NEXT_MONTH_MONETARY']-sales_model_input['MONETARY'],2)
