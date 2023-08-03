@@ -183,7 +183,7 @@ using = output_data.loc[output_data["CITY"] == city]
 
 # output_data
 
-churn_rate = using[['CHURNED']].sum()/predictions.count()
+churn_rate = using[['CHURNED']].sum()/using[['CHURNED']].count()
 
 # Presenting Churn Rate
 value = round(churn_rate.iloc[0] * 100, 2)
