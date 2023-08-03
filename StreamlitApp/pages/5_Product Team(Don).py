@@ -438,7 +438,7 @@ with tab1:
     st.markdown("## Assumptions")
     st.write("""The first assumption the model makes is that the total quantity sold from the order details data as the total lifetime quantity 
              sold of a product which may not be the case for every product considering the fact that the launch date and removal date is not provided in 
-             the dataset. Hence, it is likely that the total quantity sold is more of the first transaction for that product till the current date.""")
+             the dataset.""")
     
     st.write("""The second assumption the model makes is the independence of the observations in the training data. In other words, the model assumes that 
              each menu item's sales data is not influenced by other menu items' sales or external factors.""")
