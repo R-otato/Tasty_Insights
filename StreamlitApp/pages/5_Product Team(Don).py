@@ -386,93 +386,44 @@ tab1, tab2, tab3 = st.tabs(['About', 'Model Prediction', 'New Model'])
 with tab1:
     # High Level Goals Explanations
     st.markdown("# High Level Goals")
-    st.write("""Our solution, Tasty Insights, is dedicated to assisting Tasty Bytes in achieving its high-level goals over the next 5 years. 
-             More specifically, to remarkable 25% Year-Over-Year sales increase, from annual sales of \$105M to \$320M. This page is designed 
-             to meet the needs of the product team, to help them with menu optimisation. """)
+    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a 25% YoY sales increase, from \$105M per year to \$320M per year. 
+
+Combining the power of data analysis and machine learning, the page predicts the quantity sold for a specific menu item based on historical
+                data. Accurately forecasting the next month's quantity sold of a specific menu item can help Tasty Bytes can make informed decisions and 
+                implement targeted strategies to optimise sales for menu items. With a clear understanding of upcoming sales trends, Tasty Bytes can 
+                proactively adjust inventory, marketing efforts, and operational aspects, maximizing revenue potential.
+
+The data-driven insights provided by this page offer Tasty Bytes a competitive advantage, enabling Tasty Bytes to stay ahead in the highly
+                dynamic food truck industry. By leveraging the personalized predictions for each menu item, the product team can focus on strategic 
+                decision-making tailored to the performance of individual products. This personalized approach enhances customer satisfaction, fosters 
+                loyalty, and boosts overall profitability.""")
 
 
 
     # Utilisation of model's prediction
     st.markdown("# How to utilise predictions?")
-    st.write("""The model's output will show the predicted total quantity sold for the new menu item as well as its respective sales, profits and gross
-             and net profit margins. In addition, it will show the unit item details in a expander. The image below shows what the model prediction will be
-             displayed.""")
-    st.write('')
-    st.image(Image.open('assets/Product Qty Prediction Outcome.png'))
-    st.caption("Prediction display after model makes prediction")
-
-    st.write("")
+    
+    st.write("""The model prediction tab will allow you to gain insights from the next month quantity sold prediction model. You can select the different
+             menu items from the dropdown and view the model's predicted quantities sold for the next month.""")
     
     st.write("""
              The model's prediction can provide insights on:
-             - Risk Assessment: Assess the potential risk associated with introducing a new menu item. Understand the level of uncertainty and take 
-             proactive measures to mitigate risks if the predicted quantity is lower than desired
-             - Demand Forecasting: Estimate the expected demand for the new menu item. Plan inventory levels, production schedules, and supply chain 
-             logistics more effectively, minimising the risk of overstocking or understocking
+             - Inventory Management: Enable the product team to optimize inventory levels for each menu item. Avoid overstocking or understocking, reducing
+             waste and minimizing carrying costs.
+             - Marketing Strategies: Tailor marketing efforts and promotions to maximise the impact. Focus marketing campaigns on menu items that are 
+             predicted to perform well, driving customer interest and boosting sales.
              - Optimised Menu Planning: Assess the potential success of introducing new menu items. Focus on items with projected to have higher sales and 
              ensure that the menu aligns with customer preferences and demands.
-             - Pricing Strategies: Determine appropriate pricing strategies. Optimise prices to achieve a balance between maximizing revenue and 
-             maintaining customer satisfaction and loyalty.
+             - Menu Optimization: The predictions help the product team identify underperforming menu items. By analyzing the predicted sales for different
+             menu items, they can consider making adjustments to the menu, such as introducing new items or removing less popular ones.
              """)
 
-
-
-    # Interpretability of the model
-    st.markdown("# Interpreting the model")
-    st.write("""The model's feature importance analysis provides valuable insights into the factors that significantly influence the prediction of total 
-             quantity sold for new menu items.""")
-    st.image(Image.open('assets/Product Qty Model Feature Importance.png'))
-    st.caption("The image shows the feature importance in order of its importance, starting with the most important feature.")
-    st.write("""Among the features considered, "ITEM_CATEGORY_Beverage" emerges as the most influential, with a high importance value of 0.626. This suggests
-             that the choice of menu item category, particularly beverages, plays a crucial role in determining the sales performance of new products. 
-             Additionally, "SALE_PRICE_USD" follows as the second most important feature with an importance value of 0.224, indicating that the sale price
-             of the item strongly affects its quantity sold. Further down the list, we observe other menu types, such as "MENU_TYPE_Tacos" and 
-             "MENU_TYPE_BBQ," showing moderate importance values, suggesting they also have some impact on sales performance. Conversely, some features 
-             like "TRUCK_BRAND_NAME_Revenge of the Curds" and "ITEM_CATEGORY_Snack" have negligible importance, implying that they have minimal influence 
-             on the total quantity sold. Overall, this feature importance analysis aids the product team in understanding which attributes have the most 
-             significant impact on product sales, enabling them to make data-driven decisions to optimize menu planning and maximize revenue.""")
-    
     
     # Limitations and Assumptions the model makes
     st.markdown("# Limitations and assumptions the model makes")
-    st.markdown("## Assumptions")
-    st.write("""The first assumption the model makes is that the total quantity sold from the order details data as the total lifetime quantity 
-             sold of a product which may not be the case for every product considering the fact that the launch date and removal date is not provided in 
-             the dataset.""")
-    
-    st.write("""The second assumption the model makes is the independence of the observations in the training data. In other words, the model assumes that 
-             each menu item's sales data is not influenced by other menu items' sales or external factors.""")
-    
-    st.write("""The last assumption the model might make is the linear relationships between certain features and the target variable (quantity sold). This
-             assumption may not hold in some cases, especially if there are complex interactions or non-linear patterns in the data.""")
-    
-    st.markdown("## Limitations")
-    st.write("""The first limitation of the model is that the model does not account for seasonality or temporal trends in sales. The model assumes 
-             that sales patterns are consistent over time, which might not hold true for certain menu items affected by seasonal demand or changing trends.""")
-    
-    st.write("""The second limitation of the model is that the model does not consider external factors such as changes in customer preferences, market 
-             trends, economic conditions, or marketing efforts that might influence sales. These factors can significantly impact the quantity sold but 
-             are not explicitly captured in the model.""")
-    
-    
-    
-    # Model's Confidence Level
-    st.markdown("# Model's confidence level")
-    st.image(Image.open('assets/Product Qty Model Performance.png'))
-    st.caption("The image below shows the performance of the model.")
-    st.write("""The root mean squared error (RMSE) measures the average prediction error, where a lower value indicates better predictive performance. 
-             In this case, the training RMSE is 42.18, and the testing RMSE is 96.78. The relatively low RMSE values demonstrate that the model's 
-             predictions are close to the actual values, both during training and when dealing with unseen data.""")
-    st.write("""The mean squared error (MSE) provides another perspective on prediction accuracy, and lower values are preferable. The training MSE is 
-             1779.03, and the testing MSE is 9366.61, reinforcing the notion that the model achieves good accuracy on both training and testing datasets.""")
-    st.write("""The accuracy of the regression model is another critical metric. While accuracy is more commonly associated with classification tasks, it 
-             can be interpreted here as a measure of how well the model captures the variance in the data. The training accuracy is 99.88%, and the testing
-             accuracy is 99.33%. These high accuracy values indicate that the model captures a significant portion of the data's variability, demonstrating
-             its effectiveness in predicting the total quantity sold.""")
-    st.write("""In summary, the regression model performs exceptionally well in making predictions for new menu items' total quantity sold. The low RMSE 
-             and MSE values indicate that the model's predictions are close to the actual values, while the high accuracy values suggest that the model 
-             captures a substantial portion of the data's variability. The product team can be confident in relying on this model to make data driven 
-             decisions about menu planning and optimising sales performance.""")
+    st.write("""The limitation to my model is that it assumes that all the time business is as usual. It does not take into account external factors such as
+             changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to inaccurate
+             insights and data driven decisions such as menu optimisation, marketing strategies and inventory management.""")
     
     
     
