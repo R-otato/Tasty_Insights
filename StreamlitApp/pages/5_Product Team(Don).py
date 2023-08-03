@@ -616,30 +616,55 @@ with tab3:
         
         # Group order total to truck id
         total_qty_by_item = order_df.groupby(['YEAR', 'MONTH', 'MENU_ITEM_ID'])['QUANTITY'].sum().reset_index()
-        
+
         # Renaming the 'ORDER_TOTAL' column to 'TOTAL_SALES_PER_MONTH'
         total_qty_by_item = total_qty_by_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD_PER_MONTH'})
 
-        # Assuming your DataFrame is named 'df'
+        # Convert the 'YEAR' column to numeric values
+        total_qty_by_item['YEAR'] = total_qty_by_item['YEAR'].astype(str).replace(',', '').astype(int)
+        
+        
+        
+        # get the highest year and month
         max_year_month = total_qty_by_item.groupby('MENU_ITEM_ID')[['YEAR', 'MONTH']].max().reset_index()
 
         menu_item_max_year_month = max_year_month[max_year_month["MENU_ITEM_ID"]==menu_item_id]
 
-        st.dataframe(menu_item_max_year_month)
+        total_qty_by_item_over_time = total_qty_by_item[total_qty_by_item["MENU_ITEM_ID"]==menu_item_id]
 
+        # Plotly Line Chart
+        ## create the line chart
+        fig = go.Figure(data=go.Line(x=total_qty_by_item_over_time['MONTH'], y=total_qty_by_item_over_time['TOTAL_QTY_SOLD_PER_MONTH'], mode='lines+markers'))
+
+        ## update the layout
+        fig.update_layout(title='Total Quantity Sold per Month',
+                        xaxis_title='Month',
+                        yaxis_title='Total Qty Sold')
+
+        ## show the plot in the Streamlit app 
+        st.plotly_chart(fig)
+
+
+        # Form month and year column for prediction
+        ## if month is less than or equal to 11 then plus 1
         if int(menu_item_max_year_month["MONTH"])<=11:
             month = int(menu_item_max_year_month["MONTH"]) + 1
             year = int(menu_item_max_year_month["YEAR"])
+        ## if month is equal to 12 then month will be 1 and year plus 1
         elif int(menu_item_max_year_month["MONTH"])== 12:
             month = 1
             year = int(menu_item_max_year_month["YEAR"]) + 1
         
         
-        # MANUAL ONT HOT ENCODING
         
         # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
         item_info_df = item_info_df.replace({'Yes': 1, 'No': 0})
         
+        
+        
+        # MANUAL ONT HOT ENCODING
+        
+        ## state cat cols to carry out manual encoding on
         categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
         
         ## loop through each categorical column
@@ -649,7 +674,7 @@ with tab3:
 
             ## loop through unique values in the column
             for value in unique_values:
-                ## check if the value in the menu_table table matches the corresponding value in user_input_df
+                ## check if the value in the menu_table table matches the corresponding value in item_info_df
                 if value == item_info_df[col].values[0]:
                     ## create a column with the name 'column_selected_value' and set its value to 1
                     menu_table[f'{col}_{value}'] = 1
@@ -663,14 +688,16 @@ with tab3:
                     ## add this column to the item_info_df
                     item_info_df[f'{col}_{value}'] = 0
 
-
         ## drop the original categorical columns from item_info_df
         item_info_df.drop(columns=categorical_cols, inplace=True)
         
+        
+        
+        ## assign the columsn YEAR and MONTH with their respective values
         item_info_df['YEAR'] = year
         item_info_df['MONTH'] = month
         
-        # Define the desired column order
+        # define the desired column order
         desired_columns = ['MENU_ITEM_ID', 'SALE_PRICE_USD', 'YEAR', 'MONTH', 'DAIRY_FREE',
                         'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE', 'MENU_TYPE_BBQ',
                         'MENU_TYPE_Ramen', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Poutine',
@@ -688,11 +715,13 @@ with tab3:
                         'ITEM_CATEGORY_Main', 'ITEM_CATEGORY_Snack',
                         'ITEM_SUBCATEGORY_Cold Option', 'ITEM_SUBCATEGORY_Hot Option']
 
-        # Drop columns not in the desired column list
+        # drop columns not in the desired column list
         item_info_df = item_info_df[desired_columns]
 
+        # convert SALE_PRICE_USD column value to float
         item_info_df["SALE_PRICE_USD"] = item_info_df["SALE_PRICE_USD"].astype(float)
 
+        
         
         # retrieve min max scaler
         min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
@@ -701,10 +730,12 @@ with tab3:
         
         min_max_scaler.transform(item_info_df)
         
+        
         # retrieve regression model
         product_qty_per_month_model = joblib.load("assets/product_qty_per_month_model.joblib")
         
         model_prediction = product_qty_per_month_model.predict(item_info_df)
+        
         
         # Round off the prediction to the nearest whole number
         rounded_prediction = round(model_prediction[0])
