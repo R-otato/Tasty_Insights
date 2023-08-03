@@ -5,4 +5,4 @@ xgboost==1.7.5
 scikit-learn==1.2.2
 pandas
 feature-engine==1.6.0
-matplotlib == 3.4.3
+matplotlib
