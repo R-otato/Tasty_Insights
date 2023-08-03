@@ -110,12 +110,13 @@ with st.expander("Guide to Using Page"):
                  The output data will contain the churn of each customer as well as some categorising information
                  to assist in visualising and showing areas of churn. This information will help to predict the effct
                  of churn on sales in different regions.
-
-                After identifying where Churn is happening what can the CFO do? They can take actions through identifying factors
-                that are causing either...
-                A) Customers to Churn
-                B) Identify external factors that lead potential loss in  sales 
             """)
+with st.expander("Page Disclaimer"):
+    st.write("""An issue with this page is the inital churn number is inaccurate
+                Based on how the churn value is calculated (transactions that churned/transactions in month)
+                the output of the initial prediction may not be accurate because of the churn %
+                adjust the churn percent to see how many transactions can churn while still
+                meeting KPI goals.""")
     
 
 st.info("Using the last updated data of the members in United States (October and beyond).")
@@ -198,10 +199,23 @@ input_data["AVERAGE_AGE"] = using["AGE"].mean()
 st.write(input_data)
 
 pred_sales = model2.predict(input_data)
-st.write(f"The predicted sales next month of {city} is {pred_sales[0]:.2f}")
+st.write(f"The adjusted predicted sales next month of {city} is {pred_sales[0]:.2f}")
 
 # Change in Sales
 lastMonthSales = history_data.loc[history_data["CITY"] == city]["SALES"].values  
 change_sales = (pred_sales - lastMonthSales)/lastMonthSales * 100
 st.metric("Change in sales", f"{change_sales[0]:.2f}%")
     
+new_churn = st.slider(label="Adjust Churn Rate", min_value=0, max_value=100)
+new_customers = st.slider(label="Adjust Unique Customers", min_value=0, max_value=20000, value=len(using))
+
+# show adjusted sales
+input_data_new = input_data.copy()
+input_data_new["CHURN_RATE"] = new_churn/100
+input_data_new["DISTINCT_CUSTOMER"] = new_customers
+
+new_pred_sales = model2.predict(input_data_new)
+st.write(f"The predicted sales next month of {city} is {new_pred_sales[0]:.2f}")
+
+change_sales_new = (new_pred_sales - lastMonthSales)/lastMonthSales * 100
+st.metric("New Change in Sales", f"{change_sales_new[0]:.2f}%")
