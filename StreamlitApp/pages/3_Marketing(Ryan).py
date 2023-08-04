@@ -157,8 +157,6 @@ def main() -> None:
             """
         )
 
-        # Models confidence
-        st.markdown("## Model's Confidence")
 
 
     with tab2:
@@ -263,8 +261,12 @@ def main() -> None:
 
         # Number of members who churned and not churned
         st.markdown("""### Churn Analysis""")
+        # Display assumption
+        st.write('*Note: Churn is defined by whether or not a member will purchase from us in the next 14 days')
+        # Display churn analysis
         churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
         st.dataframe(churn_counts, hide_index=True)
+        
 
         # Display forecasted sales
         st.write('### Member Forecasted Sales')
@@ -288,9 +290,26 @@ def main() -> None:
             #Prep output data
             sales_model_input['NEXT_MONTH_MONETARY']=round(monetary_pred['NEXT_MONTH_MONETARY'],2)
             sales_model_input['NEXT_MONTH_SALES']=round(sales_model_input['NEXT_MONTH_MONETARY']-sales_model_input['MONETARY'],2)
-            # Display output data
-            st.write(sales_model_input)
-            st.metric('Next Month Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum(),2)}")
+
+            # Calculate the next month, quarter, and year sales
+            next_month_sales = sales_model_input['NEXT_MONTH_SALES'].sum()
+            next_quarter_sales = next_month_sales * 4
+            next_year_sales = next_month_sales * 12
+
+            # Convert to millions
+            next_month_sales_millions = next_month_sales / 10**6
+            next_quarter_sales_millions = next_quarter_sales / 10**6
+            next_year_sales_millions = next_year_sales / 10**6
+
+            # Display assumption
+            st.write('Assuming your marketing is able to get customers to purchase from you ',estimated_frequency,' time every month.')
+            st.write('These are your predicted sales:')
+
+            # Display in millions
+            st.metric('Next Month Sales', f"${round(next_month_sales_millions, 2)} million")
+            st.metric('Next Quarter Sales', f"${round(next_quarter_sales_millions, 2)} million")
+            st.metric('Next Year Sales', f"${round(next_year_sales_millions, 2)} million")
+
 
 
     # # Metrics table
@@ -345,6 +364,14 @@ def main() -> None:
     # "text/csv",
     # key='download-csv'
     # )
+     # # Display output data
+            # st.write(sales_model_input)
+            # # Display next month sales
+            # st.metric('Next Month Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum(),2)}")
+            # # Display next quarter sales
+            # st.metric('Next Quarter Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*4,2)}")
+            # # Display next year sales
+            # st.metric('Next Year Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*12,2)}")
 
  
 ###########################
