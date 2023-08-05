@@ -20,7 +20,7 @@ def init_model():
     minmaxscaler = joblib.load(path + 'models/minmaxscaler.jbl')
     model = joblib.load(path + 'models/xgb_churn_model.jbl')
     
-    # customer demographic
+    # member demographic
     onehotencoder_cust_demo = joblib.load(path + 'models/cust_demographic_ohe.jbl')
     model_cust_demo = joblib.load(path + 'models/cust_demographic_model.jbl')
     
@@ -30,7 +30,7 @@ def init_model():
 def init_dataset():
     
     # display dataset
-    customer_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
+    member_data = pd.read_csv(path + 'datasets/relavent_original_dataset.csv')
     
     # for churn prediction proxy values
     df_before_scaling_sample = pd.read_csv(path + 'datasets/before_scaling_dataset.csv')
@@ -38,46 +38,46 @@ def init_dataset():
     # display cluster information
     cluster_information = pd.read_csv(path + 'datasets/cluster_information.csv')
     
-    return customer_data, df_before_scaling_sample, cluster_information
+    return member_data, df_before_scaling_sample, cluster_information
 
-# to search for a specific customer by first name, last name, or combination
-def search_customer(customer_data):
-    search_term = st.text_input("Search for a customer by First Name, Last Name, or combination:")
+# to search for a specific member by first name, last name, or combination
+def search_member(member_data):
+    search_term = st.text_input("Search for a member by First Name, Last Name, or combination:")
 
     if search_term:
-        # Filter the customer data based on the search term using partial matching 
-        selected_customer = customer_data[customer_data['FIRST_NAME'].str.contains(search_term, case=False, na=False) |
-                                        customer_data['LAST_NAME'].str.contains(search_term, case=False, na=False) |
-                                        customer_data.apply(lambda row: search_term in f"{row['FIRST_NAME']} {row['LAST_NAME']}".lower(), axis=1)]
+        # Filter the member data based on the search term using partial matching 
+        selected_member = member_data[member_data['FIRST_NAME'].str.contains(search_term, case=False, na=False) |
+                                        member_data['LAST_NAME'].str.contains(search_term, case=False, na=False) |
+                                        member_data.apply(lambda row: search_term in f"{row['FIRST_NAME']} {row['LAST_NAME']}".lower(), axis=1)]
 
         
-        if not selected_customer.empty:
-            st.subheader("Selected Customer Details")
-            st.dataframe(selected_customer)
+        if not selected_member.empty:
+            st.subheader("Selected Member Details")
+            st.dataframe(selected_member)
         else:
-            st.write("No matching customer found.")
+            st.write("No matching member found.")
 
 # get user input
-def user_input(customer_data):
+def user_input(member_data):
     
     # cast date columns to datetime
-    customer_data['SIGN_UP_DATE'] = pd.to_datetime(customer_data['SIGN_UP_DATE'])
-    customer_data['BIRTHDAY_DATE'] = pd.to_datetime(customer_data['BIRTHDAY_DATE'])
+    member_data['SIGN_UP_DATE'] = pd.to_datetime(member_data['SIGN_UP_DATE'])
+    member_data['BIRTHDAY_DATE'] = pd.to_datetime(member_data['BIRTHDAY_DATE'])
     
-    city = st.selectbox("City", np.sort(customer_data['CITY'].unique()))
-    gender = st.selectbox("Gender", np.sort(customer_data['GENDER'].unique()))
-    marital_status = st.selectbox("Marital Status", np.sort(customer_data['MARITAL_STATUS'].unique()), index = 1)
-    children_count = st.selectbox("Number of Children", np.sort(customer_data['CHILDREN_COUNT'].unique()), index = 2)
+    city = st.selectbox("City", np.sort(member_data['CITY'].unique()))
+    gender = st.selectbox("Gender", np.sort(member_data['GENDER'].unique()))
+    marital_status = st.selectbox("Marital Status", np.sort(member_data['MARITAL_STATUS'].unique()), index = 1)
+    children_count = st.selectbox("Number of Children", np.sort(member_data['CHILDREN_COUNT'].unique()), index = 2)
 
 
     sign_up_date = st.date_input("Select Sign Up Date", 
-                                min_value = customer_data['SIGN_UP_DATE'].min(), 
-                                max_value = customer_data['SIGN_UP_DATE'].max(),
-                                value = customer_data['SIGN_UP_DATE'].max()-pd.Timedelta(days=365*1))
+                                min_value = member_data['SIGN_UP_DATE'].min(), 
+                                max_value = member_data['SIGN_UP_DATE'].max(),
+                                value = member_data['SIGN_UP_DATE'].max()-pd.Timedelta(days=365*1))
     birthday_date = st.date_input("Select Birthday Date", 
-                                min_value = customer_data['BIRTHDAY_DATE'].min(), 
-                                max_value = customer_data['BIRTHDAY_DATE'].max(),
-                                value = customer_data['BIRTHDAY_DATE'].max()-pd.Timedelta(days=365*23))
+                                min_value = member_data['BIRTHDAY_DATE'].min(), 
+                                max_value = member_data['BIRTHDAY_DATE'].max(),
+                                value = member_data['BIRTHDAY_DATE'].max()-pd.Timedelta(days=365*23))
 
     # Sliders for days since last order, number of orders, and amount spent per order
     days_since_last_order = st.slider("Days Since Last Order:", 1, 40, 10)
@@ -183,8 +183,8 @@ def churn_preprocessing(df_user_input_churn_cleaned,yeojohnsontransformer,onehot
     
     return df_user_input_churn_cleaned
 
-# get similar customers as imputed
-def similar_customers_sales(df_user_input,df_before_scaling_sample):
+# get similar members as imputed
+def similar_members_sales(df_user_input,df_before_scaling_sample):
     df_user_input_counterfactual = df_user_input.copy()
     counterfactual_columns = ['RECENCY','FREQUENCY','AGE','LENGTH_OF_RELATIONSHIP']
     df_non_churned = df_before_scaling_sample[df_before_scaling_sample['CHURNED']==0]
@@ -212,8 +212,8 @@ def similar_customers_sales(df_user_input,df_before_scaling_sample):
     
     return lifetime_sales,monthly_sales
 
-# customer demographic data manupulation
-def customer_demographic_data_manupulation(df_user_input_cust_demo,churn_prediction):
+# member demographic data manupulation
+def member_demographic_data_manupulation(df_user_input_cust_demo,churn_prediction):
     # simplify children info
     df_user_input_cust_demo['CHILDREN_COUNT'] = df_user_input_cust_demo['CHILDREN_COUNT'].map({
     '0': "No",
@@ -250,57 +250,56 @@ def customer_demographic_data_manupulation(df_user_input_cust_demo,churn_predict
     
     return cust_seg_demo_df
 
-# show customer segment
-def get_customer_segment(segment,cluster_information):
-    st.write("Customer Type:", cluster_information['Title'].iloc[segment])
+# show member segment
+def get_member_segment(segment,cluster_information):
+    st.write("Member Type:", cluster_information['Title'].iloc[segment])
     st.write(cluster_information['Info'][segment])
 
 def main():
     # set page title and icon
-    st.set_page_config(page_title="Churn Prediction", page_icon="💀")
+    st.set_page_config(page_title="Churn Prediction", page_icon="😎")
 
     # Page Title
     st.title("Churn Prediction")
     
     # initalise dataset and model
-    customer_data, df_before_scaling_sample, cluster_information = init_dataset()
+    member_data, df_before_scaling_sample, cluster_information = init_dataset()
     yeojohnsontransformer, onehotencoder, minmaxscaler, model, onehotencoder_cust_demo, model_cust_demo = init_model()
     
     st.write("""
-            This page allows us to predict if a customer is likely to churn or not. 
+            This page allows us to predict if a member is likely to churn or not. 
             As explained in the Home page, to reach our goal of 25% YoY sales 
-            growth is to reduce churn. This in turn increases the number of repeat customers, contributing
+            growth is to reduce churn. This in turn increases the number of repeat members, contributing
             to the growth in sales.
              
-            By predicting if a customer is likely to churn, we can take action to retain the customer. 
-            This can be extrapolated to entire customer demographics, allowing us to direct attention to stop
-            groups of customers likely to churn from churning.
+            By predicting if a member is likely to churn, we can take action to retain the member. 
+            This can be extrapolated to entire member demographics, allowing us to direct attention to stop
+            groups of members likely to churn from churning.
              """)
     
-    # Show basic statistics about the customer data
-    st.header("Customer Data Overview")
-    st.write("Total number of Transactions:", "673M")
-    st.write("Total number of Transactions by Members:", "37M")
-    st.write('')
-    st.write("Number of Members:", "222K")
-    st.write("Number of Unique Data on Members:", str(len(customer_data.columns)))
-
-    # Display a sample of the customer data
-    st.subheader("Customer Data")
-    st.dataframe(customer_data)
+    # Show basic statistics about the member data
+    st.header("Member Data Overview")
+    st.info("Using the last updated data of the members in United States (October and beyond)")
+    st.markdown("Total number of Transactions:  **:blue[72M]**")
+    st.markdown("Total number of Transactions by Members: **:blue[7.5M]**")
+    st.markdown("Number of Members: **:blue[50K]**")
     
-    # allow for user to search for a customer
-    search_customer(customer_data)
+    # Display a sample of the member data
+    st.subheader("Member Data")
+    st.dataframe(member_data)
     
-    # Show insights on customer churn
-    st.header("Customer Churn Predictor")
-    st.write("Input a customer's details to predict if they are likely to churn or not")
+    # allow for user to search for a member
+    search_member(member_data)
+    
+    # Show insights on member churn
+    st.header("Member Churn Predictor")
+    st.write("Input a member's details to predict if they are likely to churn or not")
     
     # User Input for Dropdowns and Sliders
-    df_user_input = user_input(customer_data)
+    df_user_input = user_input(member_data)
     
     # Show the user input
-    st.subheader("Customer to Predict")
+    st.subheader("Member to Predict")
     st.write(df_user_input.rename(columns=str.lower).iloc[0])
 
     
@@ -312,14 +311,14 @@ def main():
         # perform prediction    
         churn_prediction = model.predict(df_churn_preprocessed)
         
-        # get similar customers as imputed
-        lifetime_sales,monthly_sales = similar_customers_sales(df_user_input,df_before_scaling_sample)
+        # get similar members as imputed
+        lifetime_sales,monthly_sales = similar_members_sales(df_user_input,df_before_scaling_sample)
         
-        cust_result_message_template = """This customer is **:blue[{}]** to churn.
-                            This means that the customer is **:blue[{}]** purchasing from the Tasty Bytes, 
-                            resulting in **:blue[{}]** the customer and potential sales. A customer similar to the input
-                            customer has an average sales generated of **:blue[${:.0f}]**, with a lifetime total of **:blue[${:.0f}]**. Tasty Bytes 
-                            can expect to **:blue[{}]** this amount of sales if this customer **:blue[{}]** churn."""
+        cust_result_message_template = """This member is **:blue[{}]** to churn.
+                            This means that the member is **:blue[{}]** purchasing from the Tasty Bytes, 
+                            resulting in **:blue[{}]** the member and potential sales. A member similar to the input
+                            member has an average sales generated of **:blue[${:.0f}]**, with a lifetime total of **:blue[${:.0f}]**. Tasty Bytes 
+                            can expect to **:blue[{}]** this amount of sales if this member **:blue[{}]** churn."""
                             
         # churn results
         st.header("Prediction Results")
@@ -328,28 +327,28 @@ def main():
         else:
             st.markdown(cust_result_message_template.format('unlikely', 'likely to continue', 'retaining', monthly_sales, lifetime_sales, 'gain', 'does not'))
         
-        # customer demographic data manupulation
-        cust_seg_demo_df = customer_demographic_data_manupulation(df_user_input,churn_prediction)
+        # member demographic data manupulation
+        cust_seg_demo_df = member_demographic_data_manupulation(df_user_input,churn_prediction)
         
         # perform one hot encoding
         cust_seg_demo_df_preprocessed = onehotencoder_cust_demo.transform(cust_seg_demo_df)
         
-        # perform customer demographic prediction
+        # perform member demographic prediction
         cust_demo_results = model_cust_demo.predict(cust_seg_demo_df_preprocessed)   
         
-        st.subheader('What type of customer is this?')
-        get_customer_segment(int(cust_demo_results),cluster_information)
+        st.subheader('What type of member is this?')
+        get_member_segment(int(cust_demo_results),cluster_information)
         
-        with st.expander("All Customer Types"):
+        with st.expander("All Member Types"):
             for i in range(len(cluster_information)):
-                get_customer_segment(i,cluster_information)
+                get_member_segment(i,cluster_information)
                 
         st.subheader('What next?')
         st.markdown("""
-                With the ability to predict **:blue[whether a customer will churn]**, and the customer type, 
-                we can now take **:blue[preventative action]** to retain the customer. By successfully foreseeing
-                which customers will churn and taking action to retain them, we **:blue[safeguard our existing customer base]**
-                from shrinkage whilst attracting new customers. This approach ensures a
+                With the ability to predict **:blue[whether a member will churn]**, and the member type, 
+                we can now take **:blue[preventative action]** to retain the member. By successfully foreseeing
+                which members will churn and taking action to retain them, we **:blue[safeguard our existing member base]**
+                from shrinkage whilst attracting new members. This approach ensures a
                 **:blue[sustained growth in sales]**, and enables us to achieve our overarching goals.
                  """)
         
