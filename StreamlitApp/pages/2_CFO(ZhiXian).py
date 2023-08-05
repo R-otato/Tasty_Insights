@@ -4,13 +4,13 @@
 #--Import statements--
 import streamlit as st
 import pandas as pd
-from xgboost import XGBClassifier
-import requests
+#from xgboost import XGBClassifier
+#import requests
 import numpy as np
 import joblib 
-import time
+#import time
 # from snowflake.snowpark import Session
-import json
+#import json
 # from snowflake.snowpark.functions import call_udf, col
 # import snowflake.snowpark.types as T
 from cachetools import cached
