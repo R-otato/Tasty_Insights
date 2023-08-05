@@ -410,8 +410,8 @@ with tab2:
     
     default_option = None
     
-    menu_table = retrieve_menu_table()
-    
+    menu_table_df = retrieve_menu_table()
+    menu_table = get_health_metrics_menu_table(menu_table_df)
     # get menu item options for users to choose
     menu_item_options = [
     f"({row['MENU_ITEM_ID']}) {row['MENU_ITEM_NAME']}"
@@ -445,11 +445,9 @@ with tab2:
         order_df['YEAR'] = order_df['YEAR'].astype(str).replace(',', '').astype(int)
         
         
-        # get the highest year and month
-        
+        # get the total qty sold over the years for a particular menu item
         total_qty_by_item_over_time = order_df[order_df["MENU_ITEM_ID"]==menu_item_id]
         
-        st.write(total_qty_by_item_over_time)
         
         # Plotly Line Chart
         ## create the line chart
@@ -460,8 +458,7 @@ with tab2:
                         xaxis_title='Year',
                         yaxis_title='Total Qty Sold')
 
-        ## show the plot in the Streamlit app 
-        st.plotly_chart(fig)
+
 
         # get one year after the latest year provided in the data
         year = total_qty_by_item_over_time["YEAR"].max() + 1
@@ -517,29 +514,27 @@ with tab2:
         # define the desired column order
         desired_columns = ['MENU_ITEM_ID', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'YEAR',
        'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
-       'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Poutine', 'MENU_TYPE_Gyros',
-       'MENU_TYPE_Vegetarian', 'MENU_TYPE_Chinese', 'MENU_TYPE_Crepes',
-       'MENU_TYPE_Ethiopian', 'MENU_TYPE_Tacos', 'MENU_TYPE_Ice Cream',
-       'MENU_TYPE_Ramen', 'MENU_TYPE_Indian', 'MENU_TYPE_Hot Dogs',
-       'MENU_TYPE_Sandwiches', 'MENU_TYPE_BBQ',
-       'TRUCK_BRAND_NAME_The Mega Melt',
-       'TRUCK_BRAND_NAME_Revenge of the Curds',
-       'TRUCK_BRAND_NAME_Cheeky Greek', 'TRUCK_BRAND_NAME_Plant Palace',
-       'TRUCK_BRAND_NAME_Peking Truck', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
-       'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Guac n\' Roll',
-       'TRUCK_BRAND_NAME_Freezing Point',
+       'MENU_TYPE_Ethiopian', 'MENU_TYPE_Ice Cream', 'MENU_TYPE_Chinese',
+       'MENU_TYPE_BBQ', 'MENU_TYPE_Hot Dogs', 'MENU_TYPE_Gyros',
+       'MENU_TYPE_Tacos', 'MENU_TYPE_Vegetarian', 'MENU_TYPE_Ramen',
+       'MENU_TYPE_Crepes', 'MENU_TYPE_Poutine', 'MENU_TYPE_Sandwiches',
+       'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Mac & Cheese',
+       'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Freezing Point',
+       'TRUCK_BRAND_NAME_Peking Truck', 'TRUCK_BRAND_NAME_Smoky BBQ',
+       'TRUCK_BRAND_NAME_Amped Up Franks', 'TRUCK_BRAND_NAME_Cheeky Greek',
+       'TRUCK_BRAND_NAME_Guac n\' Roll', 'TRUCK_BRAND_NAME_Plant Palace',
        'TRUCK_BRAND_NAME_Kitakata Ramen Bar',
-       'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Amped Up Franks',
-       'TRUCK_BRAND_NAME_Better Off Bread', 'TRUCK_BRAND_NAME_Smoky BBQ',
-       'ITEM_CATEGORY_Main', 'ITEM_CATEGORY_Beverage',
-       'ITEM_CATEGORY_Dessert']
+       'TRUCK_BRAND_NAME_Le Coin des Crêpes',
+       'TRUCK_BRAND_NAME_Revenge of the Curds',
+       'TRUCK_BRAND_NAME_Better Off Bread', 'TRUCK_BRAND_NAME_The Mega Melt',
+       'TRUCK_BRAND_NAME_The Mac Shack', 'ITEM_CATEGORY_Beverage',
+       'ITEM_CATEGORY_Dessert', 'ITEM_CATEGORY_Main']
 
         # drop columns not in the desired column list
         item_info_df = item_info_df[desired_columns]
 
         # convert SALE_PRICE_USD column value to float
         item_info_df["SALE_PRICE_USD"] = item_info_df["SALE_PRICE_USD"].astype(float)
-
 
         
         # retrieve min max scaler
@@ -569,7 +564,7 @@ with tab2:
         # Get previous year sales
         ## sort the DataFrame by 'YEAR' in descending order
         total_qty_by_item_over_time_sorted = total_qty_by_item_over_time.sort_values(by='YEAR', ascending=False)
-
+        
         ## keep only the first row for each 'MENU_ITEM_ID' which is the latest
         total_qty_by_item_over_time = total_qty_by_item_over_time_sorted.groupby('MENU_ITEM_ID').first().reset_index()
         
@@ -583,11 +578,31 @@ with tab2:
         # Get the percentage month to month change (latest to predicted)
         sales_change = (rounded_prediction*float(unit_price)) - sales_last_year
         
+        # get the percentage change in sales comparing previous year and predicted year
         percent_change = ((sales_change / sales_last_year)*100)
+
+
 
         # DISPLAY
         st.markdown("## Prediction:")
+
         st.markdown("### No. of {} sold next year: {}".format(menu_item_name, rounded_prediction))
         st.markdown("### Estimated sales next year: ${:.2f}".format(sales_next_year))
-        st.markdown("### Percentage change from last year: {:.2f}%".format(percent_change))
+        st.markdown("### Estimated Year on Year sales growth: {:.2f}%".format(percent_change))
+        
+        
+        # show historical qty sold over the years
+        total_qty_by_item_over_time_sorted = total_qty_by_item_over_time_sorted.sort_values(by='YEAR', ascending=True)
+        qty_sold_historic_year = total_qty_by_item_over_time_sorted.drop("MENU_ITEM_ID", axis=1)
+        
+        # convert the 'YEAR' column to string to remove ','
+        qty_sold_historic_year['YEAR'] = qty_sold_historic_year['YEAR'].astype(str).replace(',', '').astype(str)
+        
+        # display table
+        st.dataframe(qty_sold_historic_year, hide_index=True)
+        
+        
+        
+        # show the plot in the Streamlit app 
+        st.plotly_chart(fig)
         
