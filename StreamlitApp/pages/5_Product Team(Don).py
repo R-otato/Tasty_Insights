@@ -358,7 +358,7 @@ def prediction(user_input_df):
 #####################
 
 st.markdown("# Product Team")
-tab1, tab2, tab3 = st.tabs(['About', 'Model Prediction', 'New Model'])
+tab1, tab2 = st.tabs(['About', 'Model Prediction'])
 
 # TAB 1: About
 with tab1:
@@ -402,117 +402,15 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
     st.write("""The limitation to my model is that it assumes that all the time business is as usual. It does not take into account external factors such as
              changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to inaccurate
              insights and data driven decisions such as menu optimisation, marketing strategies and inventory management.""")
-    
-    
-    
-# TAB 2: Model Prediction   
+        
+
+# TAB 2: Model Prediction
 with tab2:
-    # Page Instructions (How to Use This Page)
-    with st.expander("How to Use This Page"):
-        # List of steps
-        st.write('1. Load you own dataset or Use the provided dataset')
-        st.write('2. View the model\'s predictions')
-        st.write('3. Analyse the visualisations below to gain insights on how to reduce customer churn from a product standpoint')
-
-    ## retrieve menu table with health metrics in different columns
-    menu_table_df = retrieve_menu_table()
-    menu_table = get_health_metrics_menu_table(menu_table_df)
-
-    # display current menu items
-    with st.expander("Current Menu Items"):
-        st.dataframe(menu_table, hide_index=True)
-
-
-    # PRODUCT PERFORMANCE PREDICTION
-    st.markdown("## Product Performance")
-    
-    user_input_df, sale_price, cost_of_goods, menu_type = user_inputs()
-        
-    # display dataframe
-    st.dataframe(user_input_df, hide_index=True)
-
-
-    # Check for null values in the user_input_df
-    has_null_values = user_input_df.isnull().any().any()
-
-    if has_null_values == False:
-        # display message if no null values are found
-        st.write("Proceed to make a prediction.")
-        
-        # Make a prediction
-        if st.button("Predict"):
-            total_product_details_df, new_product_details_df, rounded_prediction = prediction(user_input_df)
-            
-            order_data = retrieve_order_detail_table()
-            menu_table_required = menu_table[["MENU_ITEM_ID", "MENU_TYPE"]]
-            
-            # Merge the two DataFrames based on the 'MENU_ITEM_ID' column
-            required_data_df = pd.merge(order_data, menu_table_required, on='MENU_ITEM_ID')
-
-            # Group the data by 'MENU_TYPE' and calculate the total sales (sum of 'PRICE') for each menu type
-            total_sales_by_menu_type = required_data_df.groupby('MENU_TYPE')['PRICE'].sum().reset_index()
-            
-            total_sales_for_menu_type = total_sales_by_menu_type[total_sales_by_menu_type["MENU_TYPE"] == menu_type]
-
-            total_sales_for_menu_type = float(total_sales_for_menu_type['PRICE'])
-            
-            new_item_sales = total_product_details_df["TOTAL_SALES"]
-            new_item_sales = float(new_item_sales)
-
-            # Calculate the percentage increase in sales
-            percentage_increase = (new_item_sales / total_sales_for_menu_type) * 100
-                
-            st.markdown("### Prediction")
-            ## display the rounded prediction
-            st.markdown("##### Predicted Total Quantity Sold: {}".format(rounded_prediction))
-            st.markdown(f"##### Percentage Increase in Sales: {percentage_increase:.2f}%")
-            
-            # calculate the total sales after adding the new menu item
-            total_sales_for_menu_type_after = total_sales_for_menu_type + new_item_sales
-
-            # create a DataFrame to hold the data for the bar chart
-            data = {
-                'Sales': ['Without New Item', 'With New Item'],
-                'Total Sales': [total_sales_for_menu_type, total_sales_for_menu_type_after]
-            }
-            df = pd.DataFrame(data)
-
-            # create the Plotly bar chart
-            fig = go.Figure(data=[go.Bar(x=df['Sales'], y=df['Total Sales'])])
-
-            # set the title
-            fig.update_layout(title_text='Total Sales Before and After Adding New Menu Item', title_x=0.23)
-
-            # remove y-axis ticks and labels
-            fig.update_yaxes(showticklabels=False, showgrid=False)
-
-            # add data labels to the bars
-            fig.update_traces(texttemplate='%{y:.2f}', textposition='outside', textfont=dict(size=12))
-
-            # show the plot using Streamlit's st.plotly_chart function
-            st.plotly_chart(fig)
-            
-            
-            st.write('')
-            
-            st.markdown("##### Total Item Details:")
-            ## display the total_product_details_df DataFrame
-            st.dataframe(total_product_details_df, hide_index=True)
-            
-            # display current menu items
-            with st.expander("Unit Item Details"):
-                st.write("This table contains details specific to a single unit or item of the new product")
-                ## display the new_product_details_df DataFrame
-                st.dataframe(new_product_details_df, hide_index=True)
-    else:
-        st.error("Please fill in all required fields before proceeding with the prediction.")
-        
-
-# TAB 3: Model Prediction
-with tab3:
     st.markdown("## Menu Item Next Month Sales Prediction")
     
     default_option = None
+    
+    menu_table = retrieve_menu_table()
     
     # get menu item options for users to choose
     menu_item_options = [
