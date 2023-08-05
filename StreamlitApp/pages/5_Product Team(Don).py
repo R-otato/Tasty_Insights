@@ -590,19 +590,19 @@ with tab2:
         st.markdown("### Estimated sales next year: ${:.2f}".format(sales_next_year))
         st.markdown("### Estimated Year on Year sales growth: {:.2f}%".format(percent_change))
         
+        with st.expander("{} Historical Sales Data".format(menu_item_name)):
+            # show historical qty sold over the years
+            total_qty_by_item_over_time_sorted = total_qty_by_item_over_time_sorted.sort_values(by='YEAR', ascending=True)
+            qty_sold_historic_year = total_qty_by_item_over_time_sorted.drop("MENU_ITEM_ID", axis=1)
+            
+            # convert the 'YEAR' column to string to remove ','
+            qty_sold_historic_year['YEAR'] = qty_sold_historic_year['YEAR'].astype(str).replace(',', '').astype(str)
+            
+            # display table
+            st.dataframe(qty_sold_historic_year, hide_index=True)
         
-        # show historical qty sold over the years
-        total_qty_by_item_over_time_sorted = total_qty_by_item_over_time_sorted.sort_values(by='YEAR', ascending=True)
-        qty_sold_historic_year = total_qty_by_item_over_time_sorted.drop("MENU_ITEM_ID", axis=1)
-        
-        # convert the 'YEAR' column to string to remove ','
-        qty_sold_historic_year['YEAR'] = qty_sold_historic_year['YEAR'].astype(str).replace(',', '').astype(str)
-        
-        # display table
-        st.dataframe(qty_sold_historic_year, hide_index=True)
         
         
-        
-        # show the plot in the Streamlit app 
-        st.plotly_chart(fig)
+            # show the plot in the Streamlit app 
+            st.plotly_chart(fig)
         
