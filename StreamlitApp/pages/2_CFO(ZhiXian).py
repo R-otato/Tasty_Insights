@@ -19,11 +19,11 @@ import snowflake.connector
 
 def pipeline(data):
     # Load the necessary transformations
-    windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
-    windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
-    yjt = joblib.load("assets/yjt.jbl")
-    ohe_enc = joblib.load("assets/ohe_enc.jbl")
-    minMaxScaler = joblib.load("assets/minMaxScaler.jbl")
+    windsorizer_iqr = joblib.load("assets/models/windsorizer_iqr.jbl")
+    windsorizer_gau = joblib.load("assets/models/windsorizer_gau.jbl")
+    yjt = joblib.load("assets/models/yjt.jbl")
+    ohe_enc = joblib.load("assets/models/ohe_enc.jbl")
+    minMaxScaler = joblib.load("assets/models/minMaxScaler.jbl")
 
     # Apply the transformations to the data
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
@@ -64,7 +64,7 @@ def convert_df(df):
 
 # df = pd.read_csv('assets/Churn_to_Sales.csv')
 
-df_OTS = pd.read_csv('assets/latest_Order_Ts.csv')
+df_OTS = pd.read_csv('assets/datasets/latest_Order_Ts.csv')
 
 # df_cts = df.sort_values(by=["YEAR", "MONTH"])
 
@@ -103,14 +103,14 @@ st.markdown("# Sales Prediction")
 st.markdown("## CFO")
 st.write("""This page shows a prediction of next months sales, the inital churn percent value is an underestimate
          of the months actual churn value. Here we can see what our churn value can hit and while still achieving our goal of
-         25 percent growth in sales, as well as changing number of customers to see the effect on the sales change.""")
+         25 percent growth in sales, as well as changing number of members to see the effect on the sales change.""")
 
     # page guide
 with st.expander("Guide to Using Page"):
     st.write("""This page provides data to be used in the PowerBI visualiser.
-                 By inputing data regarding our customers based on their latest transactions we are able to make a
-                 prediction of the churn of customers (churn is a twin of customer recursion).
-                 The output data will contain the churn of each customer as well as some categorising information
+                 By inputing data regarding our members based on their latest transactions we are able to make a
+                 prediction of the churn of members (churn is a twin of member recursion).
+                 The output data will contain the churn of each member as well as some categorising information
                  to assist in visualising and showing areas of churn. This information will help to predict the effct
                  of churn on sales in different regions.
             """)
@@ -123,12 +123,12 @@ with st.expander("Page Disclaimer"):
     
 
 st.info("Using the last updated data of the members in United States (October and beyond).")
-history_data = pd.read_csv("assets/last_month_sales.csv")
+history_data = pd.read_csv("assets/datasets/last_month_sales.csv")
 st.write("This is last months sales")
 st.write(history_data)
 
 #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-df=pd.read_csv('assets/without_transformation.csv')
+df=pd.read_csv('assets/datasets/without_transformation.csv')
 df = df.merge(df_OTS)
 df = df[(df["MAX_ORDER_TS"]) > "2022-10-01"]
 # df = df[(df["MAX_ORDER_TS"]) <= "2022-10-31"]
@@ -151,7 +151,7 @@ df=pipeline(df)
 #         st.write("This is the data set after cleaning and transformation")
 #         st.write(df)
 
-model = load_model("assets/churn-prediction-model.jbl")
+model = load_model("assets/models/churn-prediction-model.jbl")
 predictions= pd.DataFrame(model.predict(df),columns=['CHURNED'])
 demo_df = pd.concat([demo_df, predictions], axis=1)
 beha_df = pd.concat([beha_df, predictions], axis=1)
@@ -174,8 +174,8 @@ st.download_button("Download Data", output, "file.csv", "text/csv", key='downloa
 
 # see potential sales
 # predicting next month sales and growth
-model2 = load_model("assets/nextMonth.jbl")
-# inputs: Churn rate, distinct customers, month of year, average cust age
+model2 = load_model("assets/models/nextMonth.jbl")
+# inputs: Churn rate, distinct members, month of year, average cust age
 
 # create button to select which cities and change the dataset accordingly
 city = st.selectbox(label="Select City", options=output_data["CITY"].unique())
@@ -187,7 +187,7 @@ churn_rate = using[['CHURNED']].sum()/using[['CHURNED']].count()
 
 # Presenting Churn Rate
 value = round(churn_rate.iloc[0] * 100, 2)
-st.metric('Existing Customers Predicted to Churn', f"{value}%")
+st.metric('Existing members Predicted to Churn', f"{value}%")
 
 
 input_data = pd.DataFrame()
@@ -211,14 +211,14 @@ lastMonthSales = history_data.loc[history_data["CITY"] == city]["SALES"].values
 change_sales = (pred_sales - lastMonthSales)/lastMonthSales * 100
 st.metric("Change in sales", f"{change_sales[0]:.2f}%")
 
-st.markdown("### Adjust churn and distinct customers to see effect on sales")
+st.markdown("### Adjust churn and distinct members to see effect on sales")
 new_churn = st.slider(label="Adjust Churn Rate", min_value=0, max_value=100)
-new_customers = st.slider(label="Adjust Distinct Customers", min_value=0, max_value=20000, value=len(using))
+new_members = st.slider(label="Adjust Distinct members", min_value=0, max_value=20000, value=len(using))
 
 # show adjusted sales
 input_data_new = input_data.copy()
 input_data_new["CHURN_RATE"] = new_churn/100
-input_data_new["DISTINCT_CUSTOMER"] = new_customers
+input_data_new["DISTINCT_CUSTOMER"] = new_members
 
 new_pred_sales = model2.predict(input_data_new)
 st.metric("Adjusted Predicted Sales", f"${new_pred_sales[0]:.2f}")
