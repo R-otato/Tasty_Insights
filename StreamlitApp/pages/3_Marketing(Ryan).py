@@ -27,14 +27,14 @@ def kmeans_pipeline(data):
     data=data.copy()
 
     ## Removing columns not used in transformation
-    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
+    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
     not_Involved=data[cols_Not_Involved]
     data.drop(cols_Not_Involved,axis=1,inplace=True,errors='ignore')
 
     # Load the necessary transformations
-    windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
-    windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
-    kmeansMinMaxScaler=joblib.load("assets/kmeans_scaling.jbl")
+    windsorizer_iqr = joblib.load("assets/models/windsorizer_iqr.jbl")
+    windsorizer_gau = joblib.load("assets/models/windsorizer_gau.jbl")
+    kmeansMinMaxScaler=joblib.load("assets/models/kmeans_scaling.jbl")
 
     # Apply the transformations to the data
     #Both models table transformation
@@ -54,16 +54,16 @@ def churn_pipeline(data):
     data=data.copy()
 
     ## Removing columns not used in transformation
-    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
+    cols_Not_Involved=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)']
     not_Involved=data[cols_Not_Involved]
     data.drop(cols_Not_Involved,axis=1,inplace=True,errors='ignore')
 
     # Load the necessary transformations
-    windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
-    windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
-    yjt = joblib.load("assets/yjt.jbl")
-    ohe_enc = joblib.load("assets/ohe_enc.jbl")
-    minMaxScaler = joblib.load("assets/minMaxScaler.jbl")
+    windsorizer_iqr = joblib.load("assets/models/windsorizer_iqr.jbl")
+    windsorizer_gau = joblib.load("assets/models/windsorizer_gau.jbl")
+    yjt = joblib.load("assets/models/yjt.jbl")
+    ohe_enc = joblib.load("assets/models/ohe_enc.jbl")
+    minMaxScaler = joblib.load("assets/models/minMaxScaler.jbl")
 
     # Apply the transformations to the data
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
@@ -83,13 +83,15 @@ def sales_pipeline(data):
     data=data.copy()
 
     ## Filter columns
-    data=data[['CUSTOMER_ID','MONETARY','FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']]
+    data=data[['CUSTOMER_ID','AVG_QUANTITY', 'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']]
 
     # Load the necessary transformations
-    minMaxScaler = joblib.load("assets/memb_sales_scale.jbl")
+    ohe_enc = joblib.load("assets/models/memb_sales_scale_ohe.jbl")
+    minMaxScaler = joblib.load("assets/models/memb_sales_scale.jbl")
 
     # Apply the transformations to the data
-    data[['FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']] = minMaxScaler.transform(data[['FREQUENCY','AVG_SALES_ORDER','TENURE_MONTHS']])  # Apply Min-Max Scaling
+    data[['AVG_QUANTITY', 'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']] = minMaxScaler.transform(data[['AVG_QUANTITY',
+     'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']])  # Apply Min-Max Scaling
 
     return data
 
@@ -118,6 +120,71 @@ def validate_integer_input(input_str):
         return int(input_str)
     except ValueError:
         return None
+
+
+def automate_sales_pred(current_date,data):
+    #Get dates
+    next_month_date = current_date + pd.DateOffset(months=1)
+    next_quarter_date = current_date + pd.DateOffset(months=3)
+    next_year_date = current_date + pd.DateOffset(years=1)
+
+    # Prepare input data for next month, quarter, and year predictions
+    next_month_pred=data.copy()
+    next_quarter_pred = data.copy()
+    next_year_pred = data.copy()
+    #Next Month
+    next_month_pred['DATE']=next_quarter_date
+    next_month_pred['YEAR'] = next_month_pred['DATE'].dt.year
+    next_month_pred['MONTH'] = next_month_pred['DATE'].dt.month
+    next_month_pred.drop('DATE',axis=1,inplace=True)
+    
+    #Next Quarter
+    next_quarter_pred = pd.DataFrame(pd.date_range(current_date, next_quarter_date , freq='MS'), columns=['DATE'])
+    next_quarter_pred['YEAR'] = next_quarter_pred['DATE'].dt.year
+    next_quarter_pred['MONTH'] = next_quarter_pred['DATE'].dt.month
+    next_quarter_pred.drop('DATE', axis=1, inplace=True)
+    # Combine data and next_year_pred
+    df_list = []
+    for year, month in zip(next_quarter_pred['YEAR'], next_quarter_pred['MONTH']):
+        for cluster in data['CLUSTER']:
+            row = {
+                'CLUSTER': cluster,
+                'NUMBER OF MEMBERS': data[data['CLUSTER'] == cluster]['NUMBER OF MEMBERS'].values[0],
+                'FREQUENCY': data[data['CLUSTER'] == cluster]['FREQUENCY'].values[0],
+                'YEAR': year,
+                'MONTH': month
+            }
+            df_list.append(row)
+
+    # Convert the list of rows to a DataFrame
+    next_quarter_df= pd.DataFrame(df_list)
+    
+    #Next Year
+    next_year_pred = pd.DataFrame(pd.date_range(current_date, next_year_date, freq='MS'), columns=['DATE'])
+    next_year_pred['YEAR'] = next_year_pred['DATE'].dt.year
+    next_year_pred['MONTH'] = next_year_pred['DATE'].dt.month
+    next_year_pred.drop('DATE', axis=1, inplace=True)
+    # Combine data and next_year_pred
+    df_list = []
+    for year, month in zip(next_year_pred['YEAR'], next_year_pred['MONTH']):
+        for cluster in data['CLUSTER']:
+            row = {
+                'CLUSTER': cluster,
+                'NUMBER OF MEMBERS': data[data['CLUSTER'] == cluster]['NUMBER OF MEMBERS'].values[0],
+                'FREQUENCY': data[data['CLUSTER'] == cluster]['FREQUENCY'].values[0],
+                'YEAR': year,
+                'MONTH': month
+            }
+            df_list.append(row)
+
+    # Convert the list of rows to a DataFrame
+    next_year_df= pd.DataFrame(df_list)
+
+    #Pipeline
+    st.write(next_quarter_df)
+    st.write(next_year_df)
+
+
 
 #################
 ### MAIN CODE ### 
@@ -189,7 +256,7 @@ def main() -> None:
         else:
             st.info("Using the last updated data of the members in United States. Upload a file above to use your own data!")
             #df=pd.read_csv('StreamlitApp/assets/without_transformation.csv')
-            df=pd.read_csv('assets/marketing.csv')
+            df=pd.read_csv('assets/datasets/marketing.csv')
 
         ## Display uploaded or defaul file
         with st.expander("Uploaded/Default Data"):
@@ -200,12 +267,13 @@ def main() -> None:
         kmeans_df=kmeans_pipeline(df)
 
         # Setup: Model loading
-        churn_model = load_model("assets/churn-prediction-model.jbl")
+        churn_model = load_model("assets/models/churn-prediction-model.jbl")
         seg_clf_model = load_model("assets/models/segment_classifier.jbl")
         sales_model=load_model("assets/models/memb_sales_pred.jbl")
 
         # Setup: Get predictions
-        cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_SALES_ORDER','TENURE_MONTHS']
+        cols_to_ignore=['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY','PROFIT','PROFIT_MARGIN(%)','AVG_QUANTITY', 
+                       'AVG_UNIT_PRICE', 'AVG_SALES','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']
         kmeans_cols=['RECENCY','FREQUENCY','MONETARY']
         churn_pred= pd.DataFrame(churn_model.predict(clean_df.drop(cols_to_ignore,axis=1,errors='ignore')),columns=['CHURNED'])
         cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df[kmeans_cols]),columns=['CLUSTER'])
@@ -237,7 +305,7 @@ def main() -> None:
         
         # Number of members of each cluster
         st.markdown("""### Member's Segments""")
-        cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='Number of Members')
+        cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='NUMBER OF MEMBERS')
         st.dataframe(cluster_counts, hide_index=True)
         with st.expander('Cluster terms'):
             st.write("""
@@ -266,49 +334,65 @@ def main() -> None:
         # Display churn analysis
         churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
         st.dataframe(churn_counts, hide_index=True)
+        with st.expander('Marketing Opportunities cont.'):
+            st.write("""
+            - **Win-Back Campaigns:** For the customers who churned (i.e., did not make a purchase in the last 14 days), design targeted win-back campaigns. Offer them personalized incentives, 
+
+            - **Customer Retention Programs:** Focus on retaining the existing customers who did not churn. Implement loyalty programs, offer rewards, and provide exceptional customer service to enhance their loyalty and encourage repeat purchases.
+            """)
         
 
         # Display forecasted sales
         st.write('### Member Forecasted Sales')
         # #Get user input
         # Get the input from the user
-        expected_purchases_input = st.text_input("Expected purchases in the next month:", "1")
+        expected_purchases_input = st.text_input("Expected number of orders in each month:", "1")
 
         # Validate the input
         estimated_frequency = validate_integer_input(expected_purchases_input)
 
         # Display error message if input is not an integer
         if estimated_frequency is None:
-            st.error("Please enter a valid integer for the expected purchases.")
+            st.error("Please enter a valid integer for the expected number of orders.")
         else:
-            #Setup data
-            sales_model_input = filtered_data[['CUSTOMER_ID', 'MONETARY','FREQUENCY', 'AVG_SALES_ORDER', 'TENURE_MONTHS']]
-            sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
-            #Transform data
-            sales_clean=sales_pipeline(sales_model_input)
-            monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1,errors='ignore')),columns=['NEXT_MONTH_MONETARY'])
-            #Prep output data
-            sales_model_input['NEXT_MONTH_MONETARY']=round(monetary_pred['NEXT_MONTH_MONETARY'],2)
-            sales_model_input['NEXT_MONTH_SALES']=round(sales_model_input['NEXT_MONTH_MONETARY']-sales_model_input['MONETARY'],2)
+            # Setup data
+            sales_model_input=cluster_counts.copy()
+            sales_model_input['FREQUENCY']=estimated_frequency
+            #Hardcode last date as Tasty Bytes data will not update
+            current_date=pd.to_datetime('2022-11-01')
+            automate_sales_pred(current_date,sales_model_input)
+    
 
-            # Calculate the next month, quarter, and year sales
-            next_month_sales = sales_model_input['NEXT_MONTH_SALES'].sum()
-            next_quarter_sales = next_month_sales * 4
-            next_year_sales = next_month_sales * 12
+            # sales_model_input = filtered_data[['CUSTOMER_ID','AVG_QUANTITY', 'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES','MONETARY']]
+            # sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
+            # #Add one month to tenure month
+            # # sales_model_input['TENURE_MONTHS']=sales_model_input['TENURE_MONTHS']+1
+            # #Transform data
+            # sales_clean=sales_pipeline(sales_model_input)
+            # monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1,errors='ignore')),columns=['NEXT_MONTH_MONETARY'])
+            # #Prep output data
+            # sales_model_input['NEXT_MONTH_MONETARY']=round(monetary_pred['NEXT_MONTH_MONETARY'],2)
+            # sales_model_input['NEXT_MONTH_SALES']=round(sales_model_input['NEXT_MONTH_MONETARY']-sales_model_input['MONETARY'],2)
+            # st.write(sales_model_input)
+            # # Calculate the next month, quarter, and year sales
+            # next_month_sales = sales_model_input['NEXT_MONTH_SALES'].sum()
+            # next_quarter_sales = next_month_sales * 4
+            # next_year_sales = next_month_sales * 12
 
-            # Convert to millions
-            next_month_sales_millions = next_month_sales / 10**6
-            next_quarter_sales_millions = next_quarter_sales / 10**6
-            next_year_sales_millions = next_year_sales / 10**6
+            # # Convert to millions
+            # next_month_sales_millions = next_month_sales / 10**6
+            # next_quarter_sales_millions = next_quarter_sales / 10**6
+            # next_year_sales_millions = next_year_sales / 10**6
+            # st.write(sales_model_input[sales_model_input['NEXT_MONTH_SALES']<0])
+            # # Display assumption
+            # st.write('Assuming your marketing is able to get customers to purchase from you ',estimated_frequency,' time every month.')
+            # st.write('These are your predicted sales:')
 
-            # Display assumption
-            st.write('Assuming your marketing is able to get customers to purchase from you ',estimated_frequency,' time every month.')
-            st.write('These are your predicted sales:')
+            # # Display in millions
+            # st.metric('Next Month Sales', f"${round(next_month_sales_millions, 2)} million")
+            # st.metric('Next Quarter Sales', f"${round(next_quarter_sales_millions, 2)} million")
+            # st.metric('Next Year Sales', f"${round(next_year_sales_millions, 2)} million")
 
-            # Display in millions
-            st.metric('Next Month Sales', f"${round(next_month_sales_millions, 2)} million")
-            st.metric('Next Quarter Sales', f"${round(next_quarter_sales_millions, 2)} million")
-            st.metric('Next Year Sales', f"${round(next_year_sales_millions, 2)} million")
 
 
 
@@ -364,14 +448,14 @@ def main() -> None:
     # "text/csv",
     # key='download-csv'
     # )
-     # # Display output data
-            # st.write(sales_model_input)
-            # # Display next month sales
-            # st.metric('Next Month Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum(),2)}")
-            # # Display next quarter sales
-            # st.metric('Next Quarter Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*4,2)}")
-            # # Display next year sales
-            # st.metric('Next Year Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*12,2)}")
+    #  # Display output data
+    #         st.write(sales_model_input)
+    #         # Display next month sales
+    #         st.metric('Next Month Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum(),2)}")
+    #         # Display next quarter sales
+    #         st.metric('Next Quarter Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*4,2)}")
+    #         # Display next year sales
+    #         st.metric('Next Year Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*12,2)}")
 
  
 ###########################
