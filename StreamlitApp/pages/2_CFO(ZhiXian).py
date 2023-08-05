@@ -23,7 +23,7 @@ def pipeline(data):
     windsorizer_gau = joblib.load("assets/models/windsorizer_gau.jbl")
     yjt = joblib.load("assets/models/yjt.jbl")
     ohe_enc = joblib.load("assets/models/ohe_enc.jbl")
-    minMaxScaler = joblib.load("assets/models/minMaxScaler.jbl")
+    minMaxScaler = joblib.load("assets/models/minmaxscaler.jbl")
 
     # Apply the transformations to the data
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
