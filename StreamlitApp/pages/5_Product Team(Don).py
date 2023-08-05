@@ -7,6 +7,7 @@ import ast
 import numpy as np
 from PIL import Image
 import plotly.graph_objects as go
+from snowflake.snowpark import Session
 
 #################
 ### FUNCTIONS ###
@@ -351,29 +352,6 @@ def prediction(user_input_df):
     
     return total_product_details_df, new_product_details_df, rounded_prediction
 
-# Function: retrieve_order_detail_table()
-# the purpose of this function is to retrieve the order details for USA from Snowflake to merge with the menu column to get total sales for a current menu type
-def retrieve_order_detail_table():
-    ## get connection to snowflake
-    my_cnx = snowflake.connector.connect(
-        user = "RLIAM",
-        password = "Cats2004",
-        account = "LGHJQKA-DJ92750",
-        role = "TASTY_BI",
-        warehouse = "TASTY_BI_WH",
-        database = "frostbyte_tasty_bytes",
-        schema = "analytics"
-    )
-
-    # retrieve menu table from snowflake
-    my_cur = my_cnx.cursor()
-    my_cur.execute("select MENU_ITEM_ID, PRICE, ORDER_TS, QUANTITY from ORDER_DETAILS_USA_MATCHED")
-    order_table = my_cur.fetchall()
-    
-    order_table_pandas = pd.DataFrame(order_table, columns=['MENU_ITEM_ID', 'PRICE', 'ORDER_TS', 'QUANTITY'])
-    
-    return order_table_pandas
-
 
 #####################
 ##### MAIN CODE #####
@@ -530,6 +508,7 @@ with tab2:
         st.error("Please fill in all required fields before proceeding with the prediction.")
         
 
+# TAB 3: Model Prediction
 with tab3:
     st.markdown("## Menu Item Next Month Sales Prediction")
     
@@ -561,50 +540,33 @@ with tab3:
         item_info_df = item_info_df.rename(columns={'UNIT_PRICE': 'SALE_PRICE_USD'})
         
         # retrieve year and month from order timestamp
-        order_df = retrieve_order_detail_table()
-        order_df['YEAR'] = order_df['ORDER_TS'].dt.year
-        order_df['MONTH'] = order_df['ORDER_TS'].dt.month
+        order_df = pd.read_csv('assets/total_qty_by_item.csv')
         
-        # Group order total to truck id
-        total_qty_by_item = order_df.groupby(['YEAR', 'MONTH', 'MENU_ITEM_ID'])['QUANTITY'].sum().reset_index()
-
-        # Renaming the 'ORDER_TOTAL' column to 'TOTAL_SALES_PER_MONTH'
-        total_qty_by_item = total_qty_by_item.rename(columns={'QUANTITY': 'TOTAL_QTY_SOLD_PER_MONTH'})
 
         # Convert the 'YEAR' column to numeric values
-        total_qty_by_item['YEAR'] = total_qty_by_item['YEAR'].astype(str).replace(',', '').astype(int)
+        order_df['YEAR'] = order_df['YEAR'].astype(str).replace(',', '').astype(int)
         
         
         # get the highest year and month
-        max_year_month = total_qty_by_item.groupby('MENU_ITEM_ID')[['YEAR', 'MONTH']].max().reset_index()
-
-        menu_item_max_year_month = max_year_month[max_year_month["MENU_ITEM_ID"]==menu_item_id]
-
-        total_qty_by_item_over_time = total_qty_by_item[total_qty_by_item["MENU_ITEM_ID"]==menu_item_id]
+        
+        total_qty_by_item_over_time = order_df[order_df["MENU_ITEM_ID"]==menu_item_id]
+        
+        st.write(total_qty_by_item_over_time)
         
         # Plotly Line Chart
         ## create the line chart
-        fig = go.Figure(data=go.Line(x=total_qty_by_item_over_time['MONTH'], y=total_qty_by_item_over_time['TOTAL_QTY_SOLD_PER_MONTH'], mode='lines+markers'))
+        fig = go.Figure(data=go.Line(x=total_qty_by_item_over_time['YEAR'], y=total_qty_by_item_over_time['TOTAL_QTY_SOLD_PER_YEAR'], mode='lines+markers'))
 
         ## update the layout
-        fig.update_layout(title='Total Quantity Sold per Month',
-                        xaxis_title='Month',
+        fig.update_layout(title='Total Quantity Sold per Year',
+                        xaxis_title='Year',
                         yaxis_title='Total Qty Sold')
 
         ## show the plot in the Streamlit app 
         st.plotly_chart(fig)
 
-
-        # Form month and year column for prediction
-        ## if month is less than or equal to 11 then plus 1
-        if int(menu_item_max_year_month["MONTH"])<=11:
-            month = int(menu_item_max_year_month["MONTH"]) + 1
-            year = int(menu_item_max_year_month["YEAR"])
-        ## if month is equal to 12 then month will be 1 and year plus 1
-        elif int(menu_item_max_year_month["MONTH"])== 12:
-            month = 1
-            year = int(menu_item_max_year_month["YEAR"]) + 1
-        
+        # get one year after the latest year provided in the data
+        year = total_qty_by_item_over_time["YEAR"].max() + 1
         
         
         # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
@@ -614,8 +576,16 @@ with tab3:
         
         # MANUAL ONT HOT ENCODING
         
+        # Define the mapping dictionary
+        temperature_mapping = {'Cold Option': 0, 'Warm Option': 1, 'Hot Option': 2}
+
+        # Apply the mapping to the 'ITEM_SUBCATEGORY' column in item_info_df
+        item_info_df['ITEM_SUBCATEGORY'] = item_info_df['ITEM_SUBCATEGORY'].map(temperature_mapping)
+
+        item_info_df.head()
+        
         ## state cat cols to carry out manual encoding on
-        categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
+        categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY"]
         
         ## loop through each categorical column
         for col in categorical_cols:
@@ -643,27 +613,28 @@ with tab3:
         
         
         
-        ## assign the columsn YEAR and MONTH with their respective values
+        ## assign the columsn YEAR with their respective values
         item_info_df['YEAR'] = year
-        item_info_df['MONTH'] = month
         
         # define the desired column order
-        desired_columns = ['MENU_ITEM_ID', 'SALE_PRICE_USD', 'YEAR', 'MONTH', 'DAIRY_FREE',
-                        'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE', 'MENU_TYPE_BBQ',
-                        'MENU_TYPE_Ramen', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Poutine',
-                        'MENU_TYPE_Ethiopian', 'MENU_TYPE_Mac & Cheese', 'MENU_TYPE_Sandwiches',
-                        'MENU_TYPE_Indian', 'MENU_TYPE_Gyros', 'MENU_TYPE_Hot Dogs',
-                        'MENU_TYPE_Tacos', 'MENU_TYPE_Chinese', 'MENU_TYPE_Crepes',
-                        'MENU_TYPE_Ice Cream', 'TRUCK_BRAND_NAME_Smoky BBQ',
-                        'TRUCK_BRAND_NAME_Kitakata Ramen Bar', 'TRUCK_BRAND_NAME_The Mega Melt',
-                        'TRUCK_BRAND_NAME_Revenge of the Curds', 'TRUCK_BRAND_NAME_Tasty Tibs',
-                        'TRUCK_BRAND_NAME_The Mac Shack', 'TRUCK_BRAND_NAME_Better Off Bread',
-                        'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Cheeky Greek',
-                        'TRUCK_BRAND_NAME_Amped Up Franks', 'TRUCK_BRAND_NAME_Guac n\' Roll',
-                        'TRUCK_BRAND_NAME_Peking Truck', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
-                        'TRUCK_BRAND_NAME_Freezing Point', 'ITEM_CATEGORY_Beverage',
-                        'ITEM_CATEGORY_Main', 'ITEM_CATEGORY_Snack',
-                        'ITEM_SUBCATEGORY_Cold Option', 'ITEM_SUBCATEGORY_Hot Option']
+        desired_columns = ['MENU_ITEM_ID', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'YEAR',
+       'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
+       'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Poutine', 'MENU_TYPE_Gyros',
+       'MENU_TYPE_Vegetarian', 'MENU_TYPE_Chinese', 'MENU_TYPE_Crepes',
+       'MENU_TYPE_Ethiopian', 'MENU_TYPE_Tacos', 'MENU_TYPE_Ice Cream',
+       'MENU_TYPE_Ramen', 'MENU_TYPE_Indian', 'MENU_TYPE_Hot Dogs',
+       'MENU_TYPE_Sandwiches', 'MENU_TYPE_BBQ',
+       'TRUCK_BRAND_NAME_The Mega Melt',
+       'TRUCK_BRAND_NAME_Revenge of the Curds',
+       'TRUCK_BRAND_NAME_Cheeky Greek', 'TRUCK_BRAND_NAME_Plant Palace',
+       'TRUCK_BRAND_NAME_Peking Truck', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
+       'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Guac n\' Roll',
+       'TRUCK_BRAND_NAME_Freezing Point',
+       'TRUCK_BRAND_NAME_Kitakata Ramen Bar',
+       'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Amped Up Franks',
+       'TRUCK_BRAND_NAME_Better Off Bread', 'TRUCK_BRAND_NAME_Smoky BBQ',
+       'ITEM_CATEGORY_Main', 'ITEM_CATEGORY_Beverage',
+       'ITEM_CATEGORY_Dessert']
 
         # drop columns not in the desired column list
         item_info_df = item_info_df[desired_columns]
@@ -671,10 +642,10 @@ with tab3:
         # convert SALE_PRICE_USD column value to float
         item_info_df["SALE_PRICE_USD"] = item_info_df["SALE_PRICE_USD"].astype(float)
 
-        
+
         
         # retrieve min max scaler
-        min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
+        min_max_scaler = joblib.load("assets/product_qty_year_min_max_scaler.joblib")
         
         min_max_scaler.fit(item_info_df)
         
@@ -682,39 +653,43 @@ with tab3:
         
         
         # retrieve regression model
-        product_qty_per_month_model = joblib.load("assets/product_qty_per_month_model.joblib")
+        product_qty_per_year_model = joblib.load("assets/product_qty_year_xgb_model.joblib")
         
-        model_prediction = product_qty_per_month_model.predict(item_info_df)
+        model_prediction = product_qty_per_year_model.predict(item_info_df)
         
         
         # Round off the prediction to the nearest whole number
         rounded_prediction = round(model_prediction[0])
         
+        # retrieve the unit price for selected item
         unit_price = menu_table.loc[menu_table['MENU_ITEM_ID'] == menu_item_id, 'UNIT_PRICE'].values[0]
-        sales_next_month = float(unit_price) * int(rounded_prediction)
         
-        # Get previous month sales
-        ## sort the DataFrame by 'MONTH' in descending order
-        total_qty_by_item_over_time_sorted = total_qty_by_item_over_time.sort_values(by='MONTH', ascending=False)
+        # get the total sales for the next year
+        sales_next_year = float(unit_price) * int(rounded_prediction)
+        
+        
+        # Get previous year sales
+        ## sort the DataFrame by 'YEAR' in descending order
+        total_qty_by_item_over_time_sorted = total_qty_by_item_over_time.sort_values(by='YEAR', ascending=False)
 
         ## keep only the first row for each 'MENU_ITEM_ID' which is the latest
         total_qty_by_item_over_time = total_qty_by_item_over_time_sorted.groupby('MENU_ITEM_ID').first().reset_index()
         
-        ## get the quantity sold for the latest month
-        qty_sold_last_month = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_MONTH"])
+        ## get the quantity sold for the latest year
+        qty_sold_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"])
         
-        ## get the total sales for the latest month
-        sales_last_month = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_MONTH"]) * float(unit_price)
+        ## get the total sales for the latest year
+        sales_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"]) * float(unit_price)
 
         
         # Get the percentage month to month change (latest to predicted)
-        sales_change = (rounded_prediction*float(unit_price)) - sales_last_month
+        sales_change = (rounded_prediction*float(unit_price)) - sales_last_year
         
-        percent_change = ((sales_change / sales_last_month)*100)
+        percent_change = ((sales_change / sales_last_year)*100)
 
         # DISPLAY
         st.markdown("## Prediction:")
-        st.markdown("### No. of {} sold next month: {}".format(menu_item_name, rounded_prediction))
-        st.markdown("### Estimated sales next month: ${:.2f}".format(sales_next_month))
-        st.markdown("### Percentage change from last month: {:.2f}%".format(percent_change))
+        st.markdown("### No. of {} sold next year: {}".format(menu_item_name, rounded_prediction))
+        st.markdown("### Estimated sales next year: ${:.2f}".format(sales_next_year))
+        st.markdown("### Percentage change from last year: {:.2f}%".format(percent_change))
         
