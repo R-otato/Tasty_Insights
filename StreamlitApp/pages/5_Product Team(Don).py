@@ -595,9 +595,12 @@ with tab2:
             total_qty_by_item_over_time_sorted = total_qty_by_item_over_time_sorted.sort_values(by='YEAR', ascending=True)
             qty_sold_historic_year = total_qty_by_item_over_time_sorted.drop("MENU_ITEM_ID", axis=1)
             
+            # Calculate the 'TOTAL_SALES' column by multiplying 'TOTAL_QTY_SOLD_PER_YEAR' with 'unit_price'
+            qty_sold_historic_year['TOTAL_SALES'] = qty_sold_historic_year['TOTAL_QTY_SOLD_PER_YEAR'].astype(float) * float(unit_price)
+            
             # convert the 'YEAR' column to string to remove ','
             qty_sold_historic_year['YEAR'] = qty_sold_historic_year['YEAR'].astype(str).replace(',', '').astype(str)
-            
+
             # display table
             st.dataframe(qty_sold_historic_year, hide_index=True)
         
