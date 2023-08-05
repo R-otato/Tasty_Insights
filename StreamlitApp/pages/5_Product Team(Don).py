@@ -364,7 +364,8 @@ tab1, tab2 = st.tabs(['About', 'Model Prediction'])
 with tab1:
     # High Level Goals Explanations
     st.markdown("# High Level Goals")
-    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a 25% YoY sales increase, from \$105M per year to \$320M per year. 
+    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a 25% YoY sales increase, from \$105M to \$320M over 5 years with 
+             the sucess metric being the increase of average quantity sold of all products by 25% YoY to achieve the high level goal.
 
 Combining the power of data analysis and machine learning, the page predicts the quantity sold for a specific menu item based on historical
                 data. Accurately forecasting the next month's quantity sold of a specific menu item can help Tasty Bytes can make informed decisions and 
@@ -385,15 +386,12 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
              menu items from the dropdown and view the model's predicted quantities sold for the next month.""")
     
     st.write("""
-             The model's prediction can provide insights on:
-             - Inventory Management: Enable the product team to optimize inventory levels for each menu item. Avoid overstocking or understocking, reducing
-             waste and minimizing carrying costs.
+             The model's prediction can provide insights and support the following:
+             - Inventory Management: Enable the product team to optimise inventory levels for each menu item. Avoid overstocking or understocking, reducing
+             waste and minimising carrying costs.
              - Marketing Strategies: Tailor marketing efforts and promotions to maximise the impact. Focus marketing campaigns on menu items that are 
-             predicted to perform well, driving customer interest and boosting sales.
-             - Optimised Menu Planning: Assess the potential success of introducing new menu items. Focus on items with projected to have higher sales and 
-             ensure that the menu aligns with customer preferences and demands.
-             - Menu Optimization: The predictions help the product team identify underperforming menu items. By analyzing the predicted sales for different
-             menu items, they can consider making adjustments to the menu, such as introducing new items or removing less popular ones.
+             predicted to perform well and to amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
+             - Faciliate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and budgeting purposes
              """)
 
     
@@ -401,7 +399,11 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
     st.markdown("# Limitations and assumptions the model makes")
     st.write("""The limitation to my model is that it assumes that all the time business is as usual. It does not take into account external factors such as
              changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to inaccurate
-             insights and data driven decisions such as menu optimisation, marketing strategies and inventory management.""")
+             insights and data driven decisions such as menu optimisation, marketing strategies and inventory management.
+             
+The assumption that my model makes is that the December 2022 quantity sold is the average of the past 11 months of 2022. The year on year percentage
+             increase could be slightly larger or smaller. However, this is only one month of assumption therefore, it should not impact the model to a large
+             extent.""")
         
 
 # TAB 2: Model Prediction
