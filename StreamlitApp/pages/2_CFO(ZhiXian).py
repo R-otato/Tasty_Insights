@@ -4,13 +4,13 @@
 #--Import statements--
 import streamlit as st
 import pandas as pd
-from xgboost import XGBClassifier
-import requests
+#from xgboost import XGBClassifier
+#import requests
 import numpy as np
 import joblib 
-import time
+#import time
 # from snowflake.snowpark import Session
-import json
+#import json
 # from snowflake.snowpark.functions import call_udf, col
 # import snowflake.snowpark.types as T
 from cachetools import cached
@@ -23,7 +23,7 @@ def pipeline(data):
     windsorizer_gau = joblib.load("assets/models/windsorizer_gau.jbl")
     yjt = joblib.load("assets/models/yjt.jbl")
     ohe_enc = joblib.load("assets/models/ohe_enc.jbl")
-    minMaxScaler = joblib.load("assets/models/minMaxScaler.jbl")
+    minMaxScaler = joblib.load("assets/models/minmaxscaler.jbl")
 
     # Apply the transformations to the data
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization

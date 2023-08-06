@@ -131,227 +131,6 @@ def get_health_metrics_menu_table(menu_table_df):
     
     return menu_table_df
 
-# Function: user_inputs()
-# the purpose of this function is to get the user's input for the new product item they would like to predict the total quantity sold for
-def user_inputs(): 
-    ## Option: truck brand name
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    truck_brand_name_options = np.sort(menu_table['TRUCK_BRAND_NAME'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_truck_brand_name = st.selectbox("Truck Brand Name: ", [default_option] + list(truck_brand_name_options))
-
-    # Filter the menu_table to find the menu type for the selected truck brand name
-    menu_type_filter = menu_table['TRUCK_BRAND_NAME'] == selected_truck_brand_name
-    if menu_type_filter.any():
-        selected_menu_type = menu_table.loc[menu_type_filter, 'MENU_TYPE'].values[0]
-    else:
-        selected_menu_type = None
-
-    ## Option: item category
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    item_cat_options = np.sort(menu_table['ITEM_CATEGORY'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_item_cat = st.selectbox("Item Category: ", [default_option] + list(item_cat_options))
-
-
-    ## Option: item subcategory
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    item_subcat_options = np.sort(menu_table['ITEM_SUBCATEGORY'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_item_subcat = st.selectbox("Item Subcategory: ", [default_option] + list(item_subcat_options))
-
-
-    ## Option: cost of goods
-    cost_of_goods = st.text_input("Enter cost of goods:")
-
-
-    ## Option: sale price
-    sale_price = st.text_input("Enter sale price:")
-
-
-    ## Option: healthy
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    healthy_options = np.sort(menu_table['HEALTHY'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_is_healthy = st.selectbox("Healthy: ", [default_option] + list(healthy_options))
-
-
-    ## Option: dairy free
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    dairy_free_options = np.sort(menu_table['DAIRY_FREE'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_is_dairy_free = st.selectbox("Dairy Free: ", [default_option] + list(dairy_free_options))
-
-
-    ## Option: gluten free
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    gluten_free_options = np.sort(menu_table['GLUTEN_FREE'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_is_gluten_free = st.selectbox("Gluten Free: ", [default_option] + list(gluten_free_options))
-
-
-    ## Option: nut free
-    ## add None as the default value (it won't be an actual selectable option)
-    default_option = None
-    nut_free_options = np.sort(menu_table['NUT_FREE'].unique())
-
-    ## use the updated list of options for the selectbox
-    selected_is_nut_free = st.selectbox("Nut Free: ", [default_option] + list(nut_free_options))
-
-    user_input_full = {
-        "MENU_TYPE": selected_menu_type, 
-        "TRUCK_BRAND_NAME": selected_truck_brand_name, 
-        "ITEM_CATEGORY": selected_item_cat, 
-        "ITEM_SUBCATEGORY": selected_item_subcat, 
-        "SALE_PRICE_USD": sale_price,
-        "HEALTHY": selected_is_healthy,
-        "DAIRY_FREE": selected_is_dairy_free, 
-        "GLUTEN_FREE": selected_is_gluten_free, 
-        "NUT_FREE": selected_is_nut_free
-    }
-
-    # create dataframe with all the user's inputs
-    user_input_df = pd.DataFrame(user_input_full, index=[1])
-
-    return user_input_df, sale_price, cost_of_goods, selected_menu_type
-
-# Function: prediction()
-# the purpose of this function is to carry out certain data transformations and create the 2 tables shown after prediction
-def prediction(user_input_df):
-    # replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
-    user_input_df = user_input_df.replace({"Yes": 1, "No":0})
-    
-    # MANUAL ENCODING
-    categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]
-
-    # Loop through each categorical column
-    for col in categorical_cols:
-        # Get the unique values in the column
-        unique_values = menu_table[col].unique()
-
-        # Loop through unique values in the column
-        for value in unique_values:
-            # Check if the value in the menu_table matches the corresponding value in user_input_df
-            if value == user_input_df[col].values[0]:
-                # Create a column with the name 'column_selected_value' and set its value to 1
-                menu_table[f'{col}_{value}'] = 1
-
-                # Add this column to the user_input_df
-                user_input_df[f'{col}_{value}'] = 1
-            else:
-                # Create a column with the name 'column_unique_value' and set its value to 0
-                menu_table[f'{col}_{value}'] = 0
-
-                # Add this column to the user_input_df
-                user_input_df[f'{col}_{value}'] = 0
-
-
-    # Drop the original categorical columns from user_input_df
-    user_input_df.drop(columns=categorical_cols, inplace=True)
-
-    user_input_df.drop(columns=["ITEM_SUBCATEGORY_Hot Option", "MENU_TYPE_Sandwiches", "TRUCK_BRAND_NAME_Better Off Bread", "ITEM_CATEGORY_Dessert"], inplace = True)
-
-    desired_order = ['SALE_PRICE_USD', 'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
-                'MENU_TYPE_Ethiopian', 'MENU_TYPE_Gyros', 'MENU_TYPE_Indian',
-                'MENU_TYPE_Hot Dogs', 'MENU_TYPE_Vegetarian', 'MENU_TYPE_Tacos',
-                'MENU_TYPE_BBQ', 'MENU_TYPE_Crepes', 'MENU_TYPE_Poutine',
-                'MENU_TYPE_Ice Cream', 'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Ramen',
-                'MENU_TYPE_Mac & Cheese', 'MENU_TYPE_Chinese',
-                'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Cheeky Greek',
-                'TRUCK_BRAND_NAME_Nani\'s Kitchen', 'TRUCK_BRAND_NAME_Amped Up Franks',
-                'TRUCK_BRAND_NAME_Plant Palace', 'TRUCK_BRAND_NAME_Guac n\' Roll',
-                'TRUCK_BRAND_NAME_Smoky BBQ', 'TRUCK_BRAND_NAME_Le Coin des Crêpes',
-                'TRUCK_BRAND_NAME_Revenge of the Curds',
-                'TRUCK_BRAND_NAME_Freezing Point', 'TRUCK_BRAND_NAME_The Mega Melt',
-                'TRUCK_BRAND_NAME_Kitakata Ramen Bar', 'TRUCK_BRAND_NAME_The Mac Shack',
-                'TRUCK_BRAND_NAME_Peking Truck', 'ITEM_CATEGORY_Main',
-                'ITEM_CATEGORY_Beverage', 'ITEM_CATEGORY_Snack',
-                'ITEM_SUBCATEGORY_Warm Option', 'ITEM_SUBCATEGORY_Cold Option']
-
-    user_input_df = user_input_df.reindex(columns=desired_order)
-    
-    # Convert 'SALE_PRICE_USD' column to numeric type
-    user_input_df['SALE_PRICE_USD'] = pd.to_numeric(user_input_df['SALE_PRICE_USD'])
-    
-    # retrieve min max scaler
-    min_max_scaler = joblib.load("assets/product_team_min_max_scaler.joblib")
-    
-    min_max_scaler.transform(user_input_df)
-    
-    # retrieve regression model
-    product_qty_model = joblib.load("assets/product_qty_regression.joblib")
-    
-    prediction = product_qty_model.predict(user_input_df)
-    
-    # Round off the prediction to the nearest whole number
-    rounded_prediction = round(prediction[0])
-
-    
-    # Show New Product Details Table
-    ## calculate UNIT_SALE_PRICE, UNIT_COST_PRICE, UNIT_PROFIT
-    unit_sale_price = float(sale_price)
-    unit_cost_price = float(cost_of_goods)
-    unit_profit = unit_sale_price - unit_cost_price
-
-    ## calculate UNIT_GROSS_PROFIT_MARGIN (%) and UNIT_NET_PROFIT_MARGIN (%)
-    unit_gross_profit_margin = (unit_profit / unit_sale_price) * 100
-    unit_net_profit_margin = (unit_profit / unit_sale_price) * 100
-
-    # Round the profit margin values to the nearest whole number
-    unit_gross_profit_margin = round(unit_gross_profit_margin)
-    unit_net_profit_margin = round(unit_net_profit_margin)
-
-    ## create the new_product_details_df DataFrame
-    data = {
-        'UNIT_SALE_PRICE': [unit_sale_price],
-        'UNIT_COST_PRICE': [unit_cost_price],
-        'UNIT_PROFIT': [unit_profit],
-        'UNIT_GROSS_PROFIT_MARGIN (%)': [unit_gross_profit_margin],
-        'UNIT_NET_PROFIT_MARGIN (%)': [unit_net_profit_margin]
-    }
-    ## convert to dataframe
-    new_product_details_df = pd.DataFrame(data)
-    
-    
-    # Prediction Total Details Table
-    ## calculate TOTAL_SALE_PRICE, TOTAL_COST_PRICE, TOTAL_PROFIT
-    total_sale_price = float(sale_price) * rounded_prediction
-    total_cost_price = float(cost_of_goods) * rounded_prediction
-    total_profit = total_sale_price - total_cost_price
-
-    ## calculate TOTAL_GROSS_PROFIT_MARGIN (%) and TOTAL_NET_PROFIT_MARGIN (%)
-    total_gross_profit_margin = (total_profit / total_sale_price) * 100
-    total_net_profit_margin = (total_profit / total_sale_price) * 100
-
-    ## round the profit margin values to the nearest whole number
-    total_gross_profit_margin = round(total_gross_profit_margin)
-    total_net_profit_margin = round(total_net_profit_margin)
-
-    ## create the total_product_details_df DataFrame
-    data = {
-        'TOTAL_SALES': [total_sale_price],
-        'TOTAL_COSTS': [total_cost_price],
-        'TOTAL_PROFIT': [total_profit],
-        'GROSS_PROFIT_MARGIN (%)': [total_gross_profit_margin],
-        'NET_PROFIT_MARGIN (%)': [total_net_profit_margin]
-    }
-
-    total_product_details_df = pd.DataFrame(data)
-    
-    return total_product_details_df, new_product_details_df, rounded_prediction
-
 
 #####################
 ##### MAIN CODE #####
@@ -390,20 +169,21 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
              - Inventory Management: Enable the product team to optimise inventory levels for each menu item. Avoid overstocking or understocking, reducing
              waste and minimising carrying costs.
              - Marketing Strategies: Tailor marketing efforts and promotions to maximise the impact. Focus marketing campaigns on menu items that are 
-             predicted to perform well and to amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
-             - Faciliate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and budgeting purposes
+             predicted to perform well and amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
+             - Facilitate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and 
+             budgeting purposes
              """)
 
     
     # Limitations and Assumptions the model makes
     st.markdown("# Limitations and assumptions the model makes")
-    st.write("""The limitation to my model is that it assumes that all the time business is as usual. It does not take into account external factors such as
-             changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to inaccurate
-             insights and data driven decisions such as menu optimisation, marketing strategies and inventory management.
+    st.write("""The limitation of my model is that it assumes that all the time business is as usual. It does not take into account external factors such 
+             as changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to 
+             inaccurate insights and data-driven decisions such as menu optimisation, marketing strategies and inventory management.
              
-The assumption that my model makes is that the December 2022 quantity sold is the average of the past 11 months of 2022. The year on year percentage
-             increase could be slightly larger or smaller. However, this is only one month of assumption therefore, it should not impact the model to a large
-             extent.""")
+The assumption that my model makes is that the December 2022 quantity sold is the average of the past 11 months of 2022. The year-on-year percentage 
+increase could be slightly larger or smaller. However, this is only one month of assumption therefore, it should not impact the model to a large extent.
+""")
         
 
 # TAB 2: Model Prediction
@@ -590,7 +370,7 @@ with tab2:
 
         st.markdown("### No. of {} sold next year: {}".format(menu_item_name, rounded_prediction))
         st.markdown("### Estimated sales next year: ${:.2f}".format(sales_next_year))
-        st.markdown("### Estimated Year on Year sales growth: {:.2f}%".format(percent_change))
+        st.markdown("### Estimated YoY sales growth: {:.2f}%".format(percent_change))
         
         with st.expander("{} Historical Sales Data".format(menu_item_name)):
             # show historical qty sold over the years
