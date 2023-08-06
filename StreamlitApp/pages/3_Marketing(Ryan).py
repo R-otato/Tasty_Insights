@@ -193,7 +193,6 @@ def get_sales_growth(sales_model_input,current_date):
     #Load sales csv
     seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
     seg_Sales=pd.merge(seg_Sales,right=sales_model_input['CLUSTER'],on=['CLUSTER'],how='inner')
-    st.write(seg_Sales)
 
     # Get the prev month, quarter, year from dataframe
     #Prev Month
