@@ -82,16 +82,12 @@ def sales_pipeline(data):
     ## Make a copy first
     data=data.copy()
 
-    ## Filter columns
-    data=data[['CUSTOMER_ID','AVG_QUANTITY', 'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']]
-
     # Load the necessary transformations
-    ohe_enc = joblib.load("assets/models/memb_sales_scale_ohe.jbl")
+    ohe_enc = joblib.load("assets/models/memb_sales_ohe.jbl")
     minMaxScaler = joblib.load("assets/models/memb_sales_scale.jbl")
-
     # Apply the transformations to the data
-    data[['AVG_QUANTITY', 'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']] = minMaxScaler.transform(data[['AVG_QUANTITY',
-     'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES']])  # Apply Min-Max Scaling
+    data = ohe_enc.transform(data)  # Apply One-Hot Encoding
+    data[data.columns] = minMaxScaler.transform(data[data.columns])  # Apply Min-Max Scaling
 
     return data
 
@@ -122,7 +118,7 @@ def validate_integer_input(input_str):
         return None
 
 
-def automate_sales_pred(current_date,data):
+def automate_sales_pred(current_date,data,sales_model):
     #Get dates
     next_month_date = current_date + pd.DateOffset(months=1)
     next_quarter_date = current_date + pd.DateOffset(months=3)
@@ -137,9 +133,11 @@ def automate_sales_pred(current_date,data):
     next_month_pred['YEAR'] = next_month_pred['DATE'].dt.year
     next_month_pred['MONTH'] = next_month_pred['DATE'].dt.month
     next_month_pred.drop('DATE',axis=1,inplace=True)
+    next_month_pred_df=sales_pipeline(next_month_pred)
+    next_month_pred['NEXT_MONTH_SALES']= pd.DataFrame(sales_model.predict(next_month_pred_df),columns=['NEXT_MONTH_SALES'])
     
     #Next Quarter
-    next_quarter_pred = pd.DataFrame(pd.date_range(current_date, next_quarter_date , freq='MS'), columns=['DATE'])
+    next_quarter_pred = pd.DataFrame(pd.date_range(current_date, next_quarter_date-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
     next_quarter_pred['YEAR'] = next_quarter_pred['DATE'].dt.year
     next_quarter_pred['MONTH'] = next_quarter_pred['DATE'].dt.month
     next_quarter_pred.drop('DATE', axis=1, inplace=True)
@@ -159,11 +157,15 @@ def automate_sales_pred(current_date,data):
     # Convert the list of rows to a DataFrame
     next_quarter_df= pd.DataFrame(df_list)
     
+    next_quarter_pred_df=sales_pipeline(next_quarter_df)
+    next_quarter_df['NEXT_QUARTER_SALES']= pd.DataFrame(sales_model.predict(next_quarter_pred_df),columns=['NEXT_QUARTER_SALES'])
+
     #Next Year
-    next_year_pred = pd.DataFrame(pd.date_range(current_date, next_year_date, freq='MS'), columns=['DATE'])
+    next_year_pred = pd.DataFrame(pd.date_range(current_date, next_year_date-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
     next_year_pred['YEAR'] = next_year_pred['DATE'].dt.year
     next_year_pred['MONTH'] = next_year_pred['DATE'].dt.month
     next_year_pred.drop('DATE', axis=1, inplace=True)
+
     # Combine data and next_year_pred
     df_list = []
     for year, month in zip(next_year_pred['YEAR'], next_year_pred['MONTH']):
@@ -176,13 +178,49 @@ def automate_sales_pred(current_date,data):
                 'MONTH': month
             }
             df_list.append(row)
-
+    
     # Convert the list of rows to a DataFrame
     next_year_df= pd.DataFrame(df_list)
+    next_year_pred_df=sales_pipeline(next_year_df)
+    next_year_df['NEXT_YEAR_SALES']= pd.DataFrame(sales_model.predict(next_year_pred_df),columns=['NEXT_YEAR_SALES'])
+    return next_month_pred, next_quarter_df, next_year_df
 
-    #Pipeline
-    st.write(next_quarter_df)
-    st.write(next_year_df)
+def get_sales_growth(sales_model_input,current_date):
+    #Get dates
+    prev_month_date = current_date - pd.DateOffset(months=1)
+    prev_quarter_date = current_date - pd.DateOffset(months=3)
+    prev_year_date = current_date - pd.DateOffset(years=1)
+    #Load sales csv
+    seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
+    seg_Sales=pd.merge(seg_Sales,right=sales_model_input['CLUSTER'],on=['CLUSTER'],how='inner')
+    st.write(seg_Sales)
+
+    # Get the prev month, quarter, year from dataframe
+    #Prev Month
+    prev_month = pd.DataFrame(pd.date_range(prev_month_date, current_date-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
+    prev_month['YEAR'] = prev_month['DATE'].dt.year
+    prev_month['MONTH'] = prev_month['DATE'].dt.month
+    prev_month.drop('DATE',axis=1,inplace=True)
+    prev_month_sales=seg_Sales.copy()
+    prev_month_sales=pd.merge(prev_month_sales,right=prev_month,on=['YEAR','MONTH'],how='inner')
+
+    #Prev Quarter
+    prev_quarter = pd.DataFrame(pd.date_range(prev_quarter_date, current_date-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
+    prev_quarter['YEAR'] = prev_quarter['DATE'].dt.year
+    prev_quarter['MONTH'] = prev_quarter['DATE'].dt.month
+    prev_quarter.drop('DATE',axis=1,inplace=True)
+    prev_quarter_sales=seg_Sales.copy()
+    prev_quarter_sales=pd.merge(prev_quarter_sales,right=prev_quarter,on=['YEAR','MONTH'],how='inner')
+
+    #Prev Year
+    prev_year = pd.DataFrame(pd.date_range(prev_year_date, current_date-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
+    prev_year['YEAR'] = prev_year['DATE'].dt.year
+    prev_year['MONTH'] = prev_year['DATE'].dt.month
+    prev_year.drop('DATE',axis=1,inplace=True)
+    prev_year_sales=seg_Sales.copy()
+    prev_year_sales=pd.merge(prev_year_sales,right=prev_year,on=['YEAR','MONTH'],how='inner')
+
+    return prev_month_sales,prev_quarter_sales,prev_year_sales
 
 
 
@@ -332,7 +370,7 @@ def main() -> None:
         # Display assumption
         st.write('*Note: Churn is defined by whether or not a member will purchase from us in the next 14 days')
         # Display churn analysis
-        churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='Number of Members')
+        churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='NUMBER OF MEMBERS')
         st.dataframe(churn_counts, hide_index=True)
         with st.expander('Marketing Opportunities cont.'):
             st.write("""
@@ -357,105 +395,34 @@ def main() -> None:
         else:
             # Setup data
             sales_model_input=cluster_counts.copy()
-            sales_model_input['FREQUENCY']=estimated_frequency
             #Hardcode last date as Tasty Bytes data will not update
             current_date=pd.to_datetime('2022-11-01')
-            automate_sales_pred(current_date,sales_model_input)
-    
-
-            # sales_model_input = filtered_data[['CUSTOMER_ID','AVG_QUANTITY', 'AVG_UNIT_PRICE', 'AVG_SALES', 'FREQUENCY','STD_QUANTITY', 'STD_UNIT_PRICE', 'STD_SALES','MONETARY']]
-            # sales_model_input['FREQUENCY'] = sales_model_input['FREQUENCY'] + estimated_frequency
-            # #Add one month to tenure month
-            # # sales_model_input['TENURE_MONTHS']=sales_model_input['TENURE_MONTHS']+1
-            # #Transform data
-            # sales_clean=sales_pipeline(sales_model_input)
-            # monetary_pred= pd.DataFrame(sales_model.predict(sales_clean.drop(['CUSTOMER_ID','MONETARY'],axis=1,errors='ignore')),columns=['NEXT_MONTH_MONETARY'])
-            # #Prep output data
-            # sales_model_input['NEXT_MONTH_MONETARY']=round(monetary_pred['NEXT_MONTH_MONETARY'],2)
-            # sales_model_input['NEXT_MONTH_SALES']=round(sales_model_input['NEXT_MONTH_MONETARY']-sales_model_input['MONETARY'],2)
-            # st.write(sales_model_input)
-            # # Calculate the next month, quarter, and year sales
-            # next_month_sales = sales_model_input['NEXT_MONTH_SALES'].sum()
-            # next_quarter_sales = next_month_sales * 4
-            # next_year_sales = next_month_sales * 12
-
-            # # Convert to millions
-            # next_month_sales_millions = next_month_sales / 10**6
-            # next_quarter_sales_millions = next_quarter_sales / 10**6
-            # next_year_sales_millions = next_year_sales / 10**6
-            # st.write(sales_model_input[sales_model_input['NEXT_MONTH_SALES']<0])
-            # # Display assumption
-            # st.write('Assuming your marketing is able to get customers to purchase from you ',estimated_frequency,' time every month.')
-            # st.write('These are your predicted sales:')
-
-            # # Display in millions
-            # st.metric('Next Month Sales', f"${round(next_month_sales_millions, 2)} million")
-            # st.metric('Next Quarter Sales', f"${round(next_quarter_sales_millions, 2)} million")
-            # st.metric('Next Year Sales', f"${round(next_year_sales_millions, 2)} million")
-
-
-
-
-    # # Metrics table
-    # st.markdown("### Member's Metric")
-    # ## Display table
-    # metric_df=filtered_data[['CUSTOMER_ID','RECENCY','FREQUENCY','MONETARY','LENGTH_OF_RELATIONSHIP','PROFIT','PROFIT_MARGIN(%)']]
-    # st.dataframe(metric_df, hide_index=True)
-
-
-    # # Demographic table
-    # st.markdown("### Member's Demographic")
-    # ## Clean up columns
-    # filtered_data['CHILDREN_COUNT'] = filtered_data['CHILDREN_COUNT'].map({
-    # '0': "No",
-    # '1': "Yes",
-    # '2': "Yes",
-    # '3': "Yes",
-    # '4': "Yes",
-    # '5+': "Yes",
-    # 'Undisclosed':'Undisclosed'})
-    # filtered_data.rename({'CHILDREN_COUNT':'HAVE_CHILDREN'},inplace=True,errors='ignore',axis=1)
-    # ## Display table
-    # demo_df=filtered_data[['CUSTOMER_ID','GENDER','MARITAL_STATUS','CITY','HAVE_CHILDREN','AGE']]
-    # st.dataframe(demo_df, hide_index=True)
-
-    # # Behavioral table
-    # st.markdown("### Member's Behaviour")
-    
-    # ## Clean up columns
-    # # # Convert 'LENGTH_OF_RELATIONSHIP' from days to years (with decimal point)
-    # # filtered_data['LENGTH_OF_RELATIONSHIP_YEARS'] = filtered_data['LENGTH_OF_RELATIONSHIP'] / 365.25
-
-    # # # Rename the new column to indicate it represents relationship duration in decimal years
-    # # filtered_data.rename(columns={'LENGTH_OF_RELATIONSHIP': 'LENGTH_OF_RELATIONSHIP_DAYS'}, inplace=True)
-
-    # ## Display table
-    # beha_df=filtered_data[['CUSTOMER_ID','FREQUENT_MENU_ITEMS','FREQUENT_MENU_TYPE','FREQUENT_TRUCK_BRAND','PREFERRED_TIME_OF_DAY']]
-    # st.dataframe(beha_df, hide_index=True)
-
-    # # Overall Table
-    # st.markdown("### Overall Table")
-    # st.dataframe(filtered_data, hide_index=True)
-
-    # #Allow user to download dataframe for further analysis
-    # st.header('**Export results ✨**')
-    # st.write("_Finally you can export the resulting table after Clustering and Churn Prediction._")
-    # csv = convert_df(filtered_data)
-    # st.download_button(
-    # "Press to Download",
-    # csv,
-    # "marketing.csv",
-    # "text/csv",
-    # key='download-csv'
-    # )
-    #  # Display output data
-    #         st.write(sales_model_input)
-    #         # Display next month sales
-    #         st.metric('Next Month Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum(),2)}")
-    #         # Display next quarter sales
-    #         st.metric('Next Quarter Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*4,2)}")
-    #         # Display next year sales
-    #         st.metric('Next Year Sales', f"${round(sales_model_input['NEXT_MONTH_SALES'].sum()*12,2)}")
+            #Update frequency
+            sales_model_input['FREQUENCY']=estimated_frequency*sales_model_input['NUMBER OF MEMBERS']
+            #Get predictions
+            next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
+            
+            #Total Sales by month,quarter,year
+            next_month_sales=next_month_pred['NEXT_MONTH_SALES'].sum()/ 10**6
+            next_quarter_sales=next_quarter_df['NEXT_QUARTER_SALES'].sum()/ 10**6
+            next_year_sales=next_year_df['NEXT_YEAR_SALES'].sum()/ 10**6
+            # Get MoM,QoQ,YoY growth
+            prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date)
+            mom_sales=(next_month_pred['NEXT_MONTH_SALES'].sum()-prev_month_sales['SALES'].sum())/prev_month_sales['SALES'].sum()*100
+            qoq_sales=(next_quarter_df['NEXT_QUARTER_SALES'].sum()-prev_quarter_sales['SALES'].sum())/prev_quarter_sales['SALES'].sum()*100
+            yoy_sales=(next_year_df['NEXT_YEAR_SALES'].sum()-prev_year_sales['SALES'].sum())/prev_year_sales['SALES'].sum()*100
+          
+            # Display assumption
+            st.write('Assuming you are able to get customers to purchase from you ',estimated_frequency,' time every month.')
+            st.write('These are your predicted sales:')
+            # Display metrics
+            col1,col2,col3=st.columns(3)
+            col1.metric('Next Month Sales', f"${round(next_month_sales, 2)}M")
+            col2.metric('Next Quarter Sales', f"${round(next_quarter_sales, 2)}M")
+            col3.metric('Next Year Sales', f"${round(next_year_sales, 2)}M")
+            col1.metric('Month-over-month', f"{round(mom_sales, 2)}%")
+            col2.metric('Quarter-over-quarter', f"{round(qoq_sales, 2)}%")
+            col3.metric('Year-over-year', f"{round(yoy_sales, 2)}%")
 
  
 ###########################
