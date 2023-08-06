@@ -169,8 +169,9 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
              - Inventory Management: Enable the product team to optimise inventory levels for each menu item. Avoid overstocking or understocking, reducing
              waste and minimising carrying costs.
              - Marketing Strategies: Tailor marketing efforts and promotions to maximise the impact. Focus marketing campaigns on menu items that are 
-             predicted to perform well and to amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
-             - Faciliate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and budgeting purposes
+             predicted to perform well and amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
+             - Facilitate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and 
+             budgeting purposes
              """)
 
     
