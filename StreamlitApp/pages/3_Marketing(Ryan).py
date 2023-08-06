@@ -412,7 +412,7 @@ def main() -> None:
             yoy_sales=(next_year_df['NEXT_YEAR_SALES'].sum()-prev_year_sales['SALES'].sum())/prev_year_sales['SALES'].sum()*100
           
             # Display assumption
-            st.write('Assuming you are able to get customers to purchase from you ',estimated_frequency,' time every month.')
+            st.write('Assuming you are able to get each customers to purchase from you ',estimated_frequency,' time every month.')
             st.write('These are your predicted sales:')
             # Display metrics
             col1,col2,col3=st.columns(3)
