@@ -13,6 +13,8 @@ import json
 from snowflake.snowpark.functions import call_udf, col
 import snowflake.snowpark.types as T
 from cachetools import cached
+from dateutil.relativedelta import relativedelta
+import plotly.graph_objects as go
 
 import snowflake.connector
 
@@ -95,10 +97,66 @@ def retrieve_location_table():
 
 
 
-# Function: retrieve order_header table
-# the purpose of this function is to retrieve the order_header table from snowflake containing all the details of the order_header items
-def retrieve_order_header():
-    # RETRIEVE order_header TABLE FROM SNOWFLAKE
+# # Function: retrieve order_header table
+# # the purpose of this function is to retrieve the order_header table from snowflake containing all the details of the order_header items
+# def retrieve_order_header():
+#     # RETRIEVE order_header TABLE FROM SNOWFLAKE
+#     ## get connection to snowflake
+#     my_cnx = snowflake.connector.connect(
+#         user = "RLIAM",
+#         password = "Cats2004",
+#         account = "LGHJQKA-DJ92750",
+#         role = "TASTY_BI",
+#         warehouse = "TASTY_BI_WH",
+#         database = "frostbyte_tasty_bytes",
+#         schema = "raw_pos"
+#     )
+
+#     ## retrieve order_header table from snowflake
+#     my_cur = my_cnx.cursor()
+    
+#     # Retrieve the list of customer IDs from the 'data' table
+#     customer_ids = data['CUSTOMER_ID'].tolist()
+
+#     # Split the list into smaller chunks of 1,000 customer IDs
+#     chunk_size = 1000
+#     customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
+
+#     # Execute queries for each customer ID chunk
+#     order_details = []
+#     for chunk in customer_id_chunks:
+#         # Create a comma-separated string of the customer IDs in the current chunk
+#         customer_ids_str = ','.join(map(str, chunk))
+
+#         # Construct the SQL query for the current chunk
+#         query = f"SELECT TRUCK_ID, LOCATION_ID, CUSTOMER_ID, ORDER_AMOUNT, ORDER_TOTAL, ORDER_CURRENCY from order_header WHERE CUSTOMER_ID IN ({customer_ids_str})"
+
+#         # Execute the SQL query for the current chunk
+#         my_cur.execute(query)
+
+#         # Fetch the result for the current chunk
+#         chunk_result = my_cur.fetchall()
+
+#         # Append the chunk result to the overall result
+#         order_details.extend(chunk_result)
+
+#     # Create a DataFrame from the fetched result
+#     order_header_df = pd.DataFrame(order_details, columns=['TRUCK_ID', 'LOCATION_ID', 'CUSTOMER_ID', 'ORDER_AMOUNT', 'ORDER_TOTAL', 'ORDER_CURRENCY'])
+
+#     # Convert ORDER_ID to string and then remove commas
+#     #order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
+
+#     # Format ORDER_TOTAL and PRODUCT_TOTAL_PRICE columns to 2 decimal places
+#     order_header_df['ORDER_TOTAL'] = order_header_df['ORDER_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
+
+#     order_header_df = order_header_df.sort_values(by='CUSTOMER_ID')
+
+#     return order_header_df
+
+
+# Function: retrieve_order_header_table()
+# the purpose of this function is to retrieve the header details for USA from Snowflake to merge with the menu column to get total sales for a current menu type
+def retrieve_order_header_table():
     ## get connection to snowflake
     my_cnx = snowflake.connector.connect(
         user = "RLIAM",
@@ -110,46 +168,14 @@ def retrieve_order_header():
         schema = "raw_pos"
     )
 
-    ## retrieve order_header table from snowflake
+    # retrieve menu table from snowflake
     my_cur = my_cnx.cursor()
+    my_cur.execute("select TRUCK_ID, ORDER_TS, ORDER_TOTAL, ORDER_CURRENCY from ORDER_HEADER where ORDER_CURRENCY = 'USD'")
+    order_table = my_cur.fetchall()
     
-    # Retrieve the list of customer IDs from the 'data' table
-    customer_ids = data['CUSTOMER_ID'].tolist()
-
-    # Split the list into smaller chunks of 1,000 customer IDs
-    chunk_size = 1000
-    customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
-
-    # Execute queries for each customer ID chunk
-    order_details = []
-    for chunk in customer_id_chunks:
-        # Create a comma-separated string of the customer IDs in the current chunk
-        customer_ids_str = ','.join(map(str, chunk))
-
-        # Construct the SQL query for the current chunk
-        query = f"SELECT TRUCK_ID, LOCATION_ID, CUSTOMER_ID, ORDER_AMOUNT, ORDER_TOTAL, ORDER_CURRENCY from order_header WHERE CUSTOMER_ID IN ({customer_ids_str})"
-
-        # Execute the SQL query for the current chunk
-        my_cur.execute(query)
-
-        # Fetch the result for the current chunk
-        chunk_result = my_cur.fetchall()
-
-        # Append the chunk result to the overall result
-        order_details.extend(chunk_result)
-
-    # Create a DataFrame from the fetched result
-    order_header_df = pd.DataFrame(order_details, columns=['TRUCK_ID', 'LOCATION_ID', 'CUSTOMER_ID', 'ORDER_AMOUNT', 'ORDER_TOTAL', 'ORDER_CURRENCY'])
-
-    # Convert ORDER_ID to string and then remove commas
-    #order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
-
-    # Format ORDER_TOTAL and PRODUCT_TOTAL_PRICE columns to 2 decimal places
-    order_header_df['ORDER_TOTAL'] = order_header_df['ORDER_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
-
-    order_header_df = order_header_df.sort_values(by='CUSTOMER_ID')
-
-    return order_header_df
+    order_table_df = pd.DataFrame(order_table, columns=['TRUCK_ID', 'ORDER_TS', 'ORDER_TOTAL', 'ORDER_CURRENCY'])
+    
+    return order_table_df
 
 
 # Function: get_overall_truck_table
@@ -294,7 +320,7 @@ def user_inputs():
     default_option = None
     truck_id_options = np.sort(truck_table['TRUCK_ID'].unique())
 
-    ## use the updated list of options for the selectbox
+    # ## use the updated list of options for the selectbox
     selected_truck_id = st.selectbox("Truck Id: ", [default_option] + list(truck_id_options))
 
 
@@ -306,17 +332,75 @@ def user_inputs():
     ## use the updated list of options for the selectbox
     selected_menu_type = st.selectbox("Menu Type: ", [default_option] + list(menu_type_options))
 
+    
+    ######################################
+    #               TEST                 #
+    # retrieve year and month from order timestamp
+    # order_header_df = retrieve_order_header_table()
+    # order_header_df['YEAR'] = order_header_df['ORDER_TS'].dt.year
+    # order_header_df['MONTH'] = order_header_df['ORDER_TS'].dt.month
+        
+    # # Group order total to truck id
+    # SUM_SALES_CITY = order_header_df.groupby(['YEAR', 'MONTH', 'TRUCK_ID'])['ORDER_TOTAL'].sum().reset_index()
+
+    # # Renaming the 'ORDER_TOTAL' column to 'TOTAL_SALES_PER_MONTH'
+    # SUM_SALES_CITY = SUM_SALES_CITY.rename(columns={'ORDER_TOTAL': 'TOTAL_SALES_PER_MONTH'})
+
+    # # Convert the 'YEAR' column to numeric values
+    # SUM_SALES_CITY['YEAR'] = SUM_SALES_CITY['YEAR'].astype(str).replace(',', '').astype(int)
+    
+    
+    # # get the highest year and month
+    # max_year_month = SUM_SALES_CITY.groupby('TRUCK_ID')[['YEAR', 'MONTH']].max().reset_index()
+
+    # truck_max_year_month = max_year_month[max_year_month["TRUCK_ID"]==truck_id]
+
+    # total_sales_by_truck = SUM_SALES_CITY[SUM_SALES_CITY["TRUCK_ID"]==truck_id]
+    
+    # # Plotly Line Chart
+    # ## create the line chart
+    # fig = go.Figure(data=go.Line(x=total_sales_by_truck['MONTH'], y=total_sales_by_truck['TOTAL_SALES_PER_MONTH'], mode='lines+markers'))
+
+    # ## update the layout
+    # fig.update_layout(title='Monthly Sales by Truck',
+    #                 xaxis_title='Month',
+    #                 yaxis_title='Total Sales')
+
+    # ## show the plot in the Streamlit app 
+    # st.plotly_chart(fig)
+
+
+    # # Form month and year column for prediction
+    # ## if month is less than or equal to 11 then plus 1
+    # if int(truck_max_year_month["MONTH"])<=11:
+    #     month = int(truck_max_year_month["MONTH"]) + 1
+    #     year = int(truck_max_year_month["YEAR"])
+    # ## if month is equal to 12 then month will be 1 and year plus 1
+    # elif int(truck_max_year_month["MONTH"])== 12:
+    #     month = 1
+    #     year = int(truck_max_year_month["YEAR"]) + 1
+    
+    
+    
+    
     # Use current date for model predictions
     current_year = pd.Timestamp.now().year
     current_month = pd.Timestamp.now().month
+    
+    # Add one month using relativedelta
+    next_date = pd.Timestamp(year=current_year, month=current_month, day=1) + relativedelta(months=1)
+
+    # Extract the year and month from the next date
+    next_year = next_date.year
+    next_month = next_date.month
 
     user_input_full = {
         #"TRUCK": selected_truck,
         "PRIMARY_CITY": selected_primary_city_name,
         "TRUCK_ID": selected_truck_id, 
         "MENU_TYPE_ID": selected_menu_type,
-        'YEAR': current_year,
-        'MONTH': current_month
+        'YEAR': next_year,
+        'MONTH': next_month
     }
     
     # # Create a dictionary with the current year and month
@@ -442,7 +526,7 @@ def filter(selected_options,column,data):
 st.set_page_config(page_title="Truck Prediction", page_icon="📈")
 
 st.markdown("# Truck Prediction")
-tab1, tab2 = st.tabs(['Explore', 'Prediction'])
+tab1, tab2, tab3 = st.tabs(['Explore', 'Prediction', 'TEST'])
 
 # Explore page 
 with tab1:
@@ -606,6 +690,14 @@ with tab2:
         st.error("Please fill in all required fields before proceeding with the prediction.")
     ###########################################################
     
+    # Benefits
+    st.markdown("## How it helps Tasty Bytes towards its high level goal of 25% YoY Sales")
+    st.markdown("My ultimate goal in predicting future sales of food trucks is to increase Tasty Bytes sales by 5 percent, \
+                contributing significantly to achieving a remarkable 25% YoY sales increase.  \
+                By accurately forecasting sales for each food truck, \
+                Tasty Bytes can optimize their inventory, and streamline their operations.")
+    
+    
     # # ORDER HEADER TABLE #
     # ## retrieve order_header table
     # order_details_df = retrieve_order_header()
@@ -628,4 +720,253 @@ with tab2:
     # #st.dataframe(overall_truck_df_grouped, width=0, hide_index=True) 
     
 
+
+
+
+    ############# TESTING ###########
+with tab3:
+    st.markdown("## Next Year Sales Prediction by Truck")
     
+    default = None
+    
+    #truck_table = retrieve_truck_table()
+    ## get connection to snowflake
+    my_cnx = snowflake.connector.connect(
+        user = "RLIAM",
+        password = "Cats2004",
+        account = "LGHJQKA-DJ92750",
+        role = "TASTY_BI",
+        warehouse = "TASTY_BI_WH",
+        database = "frostbyte_tasty_bytes",
+        schema = "raw_pos"
+    )
+
+    ## retrieve truck table from snowflake
+    my_cur = my_cnx.cursor()
+    # select united states
+    my_cur.execute("select TRUCK_ID, PRIMARY_CITY, REGION, COUNTRY, FRANCHISE_ID, MENU_TYPE_ID from truck where COUNTRY = 'United States'")
+    truck_table = my_cur.fetchall()
+    
+    ## create a DataFrame from the fetched result
+    truck_table = pd.DataFrame(truck_table, columns=['TRUCK_ID', 'PRIMARY_CITY', 'REGION', 'COUNTRY', 'FRANCHISE_ID', 'MENU_TYPE_ID'])
+
+    # get truck id options for users to choose
+    # truck_id_opt = [
+    # f"{row['TRUCK_ID']}"
+    # for _, row in truck_table.iterrows()
+    # ]
+
+    # use the updated list of options for the selectbox
+    # user can select the truck they want to predict next month sales for
+    # selected_truck_id = st.selectbox("Truck Id: ", [default_option] + list(truck_id_options))
+    
+    truck_id_opt = np.sort(truck_table['TRUCK_ID'].unique())
+
+    ## use the updated list of options for the selectbox
+    selected_truck = st.selectbox("Truck Id: ", [default] + list(truck_id_opt), key="unique_truck_selector")
+    
+    
+    # # Using a for loop to create multiple selectboxes with unique keys
+    # for i, truck_id in enumerate(truck_id_options):
+    #     # Using f-string to create a unique key based on the truck_id
+    #     unique_key = f"truck_select_{i}"
+    #     selected_truck_id = st.selectbox("Truck Id: ", [default_option] + list(truck_id_options), key=unique_key)
+    
+    
+    if selected_truck == None:
+        st.error("Please fill in the required field to get a prediction")
+    
+    else:
+        # extract TRUCK_ID from the option string
+        truck_id = int(selected_truck)
+        
+        item_info_df = truck_table[truck_table["TRUCK_ID"] == truck_id]
+        
+        
+        # retrieve year and month from order timestamp
+        order_header_df = pd.read_csv('assets/total_sales_by_truck.csv')
+        
+         # Convert the 'YEAR' column to numeric values
+        order_header_df['YEAR'] = order_header_df['YEAR'].astype(str).replace(',', '').astype(int)
+        
+        
+        # get the total sales by truck over the years
+        total_sales_by_truck_over_time = order_header_df[order_header_df["TRUCK_ID"]==truck_id]
+        
+        
+        # Plotly Line Chart
+        ## create the line chart
+        fig = go.Figure(data=go.Line(x=total_sales_by_truck_over_time['YEAR'], y=total_sales_by_truck_over_time['TOTAL_SALES_PER_YEAR'], mode='lines+markers'))
+
+        ## update the layout
+        fig.update_layout(title='Total Sales by Truck',
+                        xaxis_title='Year',
+                        yaxis_title='Total Sales')
+
+
+
+        # get one year after the latest year provided in the data
+        year = total_sales_by_truck_over_time["YEAR"].max() + 1
+    
+        
+        
+        # order_header_df = retrieve_order_header_table()
+        # order_header_df['YEAR'] = order_header_df['ORDER_TS'].dt.year
+        # order_header_df['MONTH'] = order_header_df['ORDER_TS'].dt.month
+        
+        # # Group order total to truck id
+        # SUM_SALES_CITY = order_header_df.groupby(['YEAR', 'MONTH', 'TRUCK_ID'])['ORDER_TOTAL'].sum().reset_index()
+
+        # # Renaming the 'ORDER_TOTAL' column to 'TOTAL_SALES_PER_MONTH'
+        # SUM_SALES_CITY = SUM_SALES_CITY.rename(columns={'ORDER_TOTAL': 'TOTAL_SALES_PER_MONTH'})
+
+        # # Convert the 'YEAR' column to numeric values
+        # SUM_SALES_CITY['YEAR'] = SUM_SALES_CITY['YEAR'].astype(str).replace(',', '').astype(int)
+        
+        
+        # # get the highest year and month
+        # max_year_month = SUM_SALES_CITY.groupby('TRUCK_ID')[['YEAR', 'MONTH']].max().reset_index()
+
+        # truck_max_year_month = max_year_month[max_year_month["TRUCK_ID"]==truck_id]
+
+        # total_sales_by_truck = SUM_SALES_CITY[SUM_SALES_CITY["TRUCK_ID"]==truck_id]
+        
+        # # Plotly Line Chart
+        # ## create the line chart
+        # fig = go.Figure(data=go.Line(x=total_sales_by_truck['MONTH'], y=total_sales_by_truck['TOTAL_SALES_PER_MONTH'], mode='lines+markers'))
+
+        # ## update the layout
+        # fig.update_layout(title='Monthly Sales by Truck',
+        #                 xaxis_title='Month',
+        #                 yaxis_title='Total Sales')
+
+        # ## show the plot in the Streamlit app 
+        # st.plotly_chart(fig)
+
+
+        # # Form month and year column for prediction
+        # ## if month is less than or equal to 11 then plus 1
+        # if int(truck_max_year_month["MONTH"])<=11:
+        #     month = int(truck_max_year_month["MONTH"]) + 1
+        #     year = int(truck_max_year_month["YEAR"])
+        # ## if month is equal to 12 then month will be 1 and year plus 1
+        # elif int(truck_max_year_month["MONTH"])== 12:
+        #     month = 1
+        #     year = int(truck_max_year_month["YEAR"]) + 1
+        
+        
+        
+        # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+        item_info_df = item_info_df.replace({'Yes': 1, 'No': 0})
+        
+        ###############################################################################
+        
+        # MANUAL ENCODING
+        categorical_cols = ["PRIMARY_CITY"]
+        
+        # Loop through each categorical column
+        for col in categorical_cols:
+            # Get the unique values in the column
+            unique_values = truck_table[col].unique()
+
+            # Loop through unique values in the column
+            for value in unique_values:
+                # Check if the value in the truck_table table matches the corresponding value in user_input_df
+                if value == item_info_df[col].values[0]:
+                    # Create a column with the name 'column_selected_value' and set its value to 1
+                    truck_table[f'{col}_{value}'] = 1
+
+                    # Add this column to the item_info_df
+                    item_info_df[f'{col}_{value}'] = 1
+                else:
+                    # Create a column with the name 'column_unique_value' and set its value to 0
+                    truck_table[f'{col}_{value}'] = 0
+
+                    # Add this column to the item_info_df
+                    item_info_df[f'{col}_{value}'] = 0
+
+
+        # Drop the original categorical columns from user_input_df
+        item_info_df.drop(columns=categorical_cols, inplace=True)
+
+        ## assign the columns YEAR and MONTH with their respective values
+        item_info_df['YEAR'] = year
+        #item_info_df['MONTH'] = month
+            
+        #user_input_df.drop(columns=["ITEM_SUBCATEGORY_Hot Option", "MENU_TYPE_Sandwiches", "TRUCK_BRAND_NAME_Better Off Bread", "ITEM_CATEGORY_Dessert"], inplace = True)
+
+        desired_order = ['TRUCK_ID', 'MENU_TYPE_ID', 'YEAR', 
+                    'PRIMARY_CITY_Denver', 'PRIMARY_CITY_San Mateo', 'PRIMARY_CITY_Boston',
+                    'PRIMARY_CITY_New York City']
+
+        item_info_df = item_info_df.reindex(columns=desired_order)
+            
+
+        
+        
+        # retrieve min max scaler
+        min_max_scaler = joblib.load("assets/truck_min_max_scaler.joblib")
+        
+        min_max_scaler.fit(item_info_df)
+        
+        min_max_scaler.transform(item_info_df)
+        
+        
+        # retrieve regression model
+        truck_sales_per_month_model = joblib.load("assets/truck_xgb_improved.joblib")
+        
+        model_prediction = truck_sales_per_month_model.predict(item_info_df)
+        
+        # # Assuming model_prediction is a numpy ndarray with only one element
+        # model_prediction = model_prediction.item()
+        
+        # sales_next_year = float(model_prediction)
+        
+        
+        
+        # # Replace 'SELECTED_TRUCK_ID' with the ID of the specific food truck you want to predict for
+        # selected_truck_id = truck_id
+
+        # # Filter item_info_df for the selected truck ID
+        # selected_truck_df = item_info_df[item_info_df['TRUCK_ID'] == selected_truck_id]
+
+        # # Predict sales for the selected truck using the model
+        # model_prediction = truck_sales_per_month_model.predict(selected_truck_df)
+
+        # # Assuming model_prediction is a numpy ndarray with only one element
+        # model_prediction = model_prediction.item()
+
+        # Convert the prediction to a float
+        sales_prediction = float(model_prediction)
+                
+        
+        
+        # # Round off the prediction to the nearest whole number
+        # rounded_prediction = round(model_prediction[0])
+        
+        # unit_price = menu_table.loc[menu_table['MENU_ITEM_ID'] == menu_item_id, 'UNIT_PRICE'].values[0]
+        # sales_next_month = float(unit_price) * int(rounded_prediction)
+        
+        # Get previous month sales
+        ## sort the DataFrame by 'Year' in descending order
+        total_sales_by_truck_sorted = total_sales_by_truck_over_time.sort_values(by='YEAR', ascending=False)
+
+        ## keep only the first row for each 'TRUCK_ID' which is the latest
+        total_sales_by_truck_over_time = total_sales_by_truck_sorted.groupby('TRUCK_ID').first().reset_index()
+    
+        ## get the total sales for the latest year
+        sales_last_year = int(total_sales_by_truck_over_time["TOTAL_SALES_PER_YEAR"])
+
+        # chnage in sales by year
+        sales_change = (float(model_prediction)) - sales_last_year
+        
+        percent_change = ((sales_change / sales_last_year)*100)
+
+        # DISPLAY
+        st.markdown("## Prediction:")
+        
+        # show the plot in the Streamlit app 
+        st.plotly_chart(fig)
+        
+        st.markdown("### Estimated sales next year: ${:.2f}".format(sales_prediction))
+        st.markdown("### Percentage change from last year: {:.2f}%".format(percent_change))
