@@ -367,7 +367,7 @@ with tab2:
 
         # DISPLAY
         st.markdown("## Prediction:")
-
+        
         st.markdown("### No. of {} sold next year: {}".format(menu_item_name, rounded_prediction))
         st.markdown("### Estimated sales next year: ${:.2f}".format(sales_next_year))
         st.markdown("### Estimated YoY sales growth: {:.2f}%".format(percent_change))
