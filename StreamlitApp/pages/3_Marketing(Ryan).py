@@ -433,6 +433,5 @@ if __name__ == "__main__":
         "Tasty Bytes Marketing by Ryan Liam",
         "📊",
         #initial_sidebar_state="expanded",
-        layout="wide",
     )
     main()
