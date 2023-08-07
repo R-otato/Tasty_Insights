@@ -212,6 +212,7 @@ change_sales = (pred_sales - lastMonthSales)/lastMonthSales * 100
 st.metric("Change in sales", f"{change_sales[0]:.2f}%")
 
 st.markdown("### Adjust churn and distinct members to see effect on sales")
+st.write("Adjust the sliders to find a 2% growth in sales for a more realistic view of the upcoming month")
 new_churn = st.slider(label="Adjust Churn Rate", min_value=0, max_value=100)
 new_members = st.slider(label="Adjust Distinct members", min_value=0, max_value=20000, value=len(using))
 
