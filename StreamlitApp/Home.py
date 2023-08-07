@@ -19,7 +19,7 @@ import os
 import pandas as pd
 
 # loading data
-df_CTS = pd.read_csv('assets/CTS.csv')
+df_CTS = pd.read_csv('assets/datasets/CTS.csv')
 df_CTS = df_CTS.sort_values(by=["YEAR", "MONTH"])
 
 # --Page 1--
@@ -28,12 +28,12 @@ st.set_page_config(
     page_icon="👋",
 )
 
-st.image(Image.open('assets/Logo.png'))
+st.image(Image.open('assets/images/Logo.png'))
 st.write("# Welcome to Tasty Insights! 👋")
 
 st.write("## What Problem we're Tying to Solve?")
 
-st.image(Image.open('assets/tasty_byte_goals.jpg'))
+st.image(Image.open('assets/images/tasty_byte_goals.jpg'))
 
 st.write("""  Tasty bytes goals over the next 5 years are to improve its sales, 25% YOY expecting to grow
   from \$105M/Year to $320M/Year.

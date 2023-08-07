@@ -267,7 +267,7 @@ def main():
     yeojohnsontransformer, onehotencoder, minmaxscaler, model, onehotencoder_cust_demo, model_cust_demo = init_model()
     
     st.write("""
-            This page allows us to predict if a member is likely to churn or not. 
+            This page allows us to predict if a member is likely to churn. 
             As explained in the Home page, to reach our goal of 25% YoY sales 
             growth is to reduce churn. This in turn increases the number of repeat members, contributing
             to the growth in sales.
@@ -282,7 +282,7 @@ def main():
     st.info("Using the last updated data of the members in United States (October and beyond)")
     st.markdown("Total number of Transactions:  **:blue[72M]**")
     st.markdown("Total number of Transactions by Members: **:blue[7.5M]**")
-    st.markdown("Number of Members: **:blue[50K]**")
+    st.markdown("Number of Members: **:blue[46K]**")
     
     # Display a sample of the member data
     st.subheader("Member Data")
