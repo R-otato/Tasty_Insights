@@ -361,14 +361,86 @@ is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
     menu_table = get_health_metrics_menu_table(menu_table_df)
     
     with st.expander("Menu Item Categories"):
-        st.dataframe(menu_table_df[["MENU_ITEM_ID", "MENU_ITEM_NAME", "MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]], hide_index=True)
+        menu_categories_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]]
+        # Checkbox to enable/disable filtering
+        add_filters = st.checkbox("Add Filters")
+        
+        if add_filters:
+            # Show checkboxes for each column to filter
+            for column in menu_categories_table.columns:
+                filter_values = menu_categories_table[column].unique()
+                selected_values = st.multiselect(f"Select {column}", filter_values)
+                
+                # Filter data based on selected values
+                if selected_values:
+                    menu_categories_table = menu_categories_table[menu_categories_table[column].isin(selected_values)]
+        
+        st.dataframe(menu_categories_table, hide_index=True)
     
     with st.expander("Menu Item Unit Metrics"):
-        st.dataframe(menu_table_df[["MENU_ITEM_ID", "MENU_ITEM_NAME", "UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]], hide_index=True)
+        menu_pricing_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]]
+        
+        menu_pricing_table[["UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]] = menu_pricing_table[["UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]].astype(float)
+        
+        menu_pricing_table["MENU_ITEM_ID"] = menu_pricing_table["MENU_ITEM_ID"].astype(int)
+        
+        # Checkbox to enable/disable filtering
+        add_filters = st.checkbox("Add Filters", key="add_filters_pricing")
+        
+        if add_filters:
+            # Show filters for each column
+            for column in menu_pricing_table.columns:
+                if column == "MENU_ITEM_NAME":
+                    filter_values = menu_pricing_table[column].unique()
+                    selected_values = st.multiselect(f"Select {column}", filter_values, key="pricing_item_name")
+                    
+                    # Filter data based on selected values
+                    if selected_values:
+                        menu_pricing_table = menu_pricing_table[menu_pricing_table[column].isin(selected_values)]
+                elif column == "MENU_ITEM_ID":
+                    min_id = int(menu_pricing_table["MENU_ITEM_ID"].min())
+                    max_id = int(menu_pricing_table["MENU_ITEM_ID"].max())
+                    selected_id_min, selected_id_max = st.slider(f"Select {column} range", min_value=min_id, max_value=max_id, value=(min_id, max_id), key=f"slider_{column}")
+                    
+                    # Filter data based on selected range
+                    menu_pricing_table = menu_pricing_table[(menu_pricing_table[column] >= selected_id_min) & (menu_pricing_table[column] <= selected_id_max)]
+                else:
+                    min_value = float(menu_pricing_table[column].min())
+                    max_value = float(menu_pricing_table[column].max())
+                    selected_min, selected_max = st.slider(f"Select range for {column}", min_value=min_value, max_value=max_value, value=(min_value, max_value), key=f"slider_{column}")
+                    
+                    # Filter data based on selected range
+                    menu_pricing_table = menu_pricing_table[(menu_pricing_table[column] >= selected_min) & (menu_pricing_table[column] <= selected_max)]
+        
+        # Display filtered table
+        st.dataframe(menu_pricing_table, hide_index=True)
     
     with st.expander("Menu Items Health Metrics"):
-        st.dataframe(menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "HEALTHY", "GLUTEN_FREE", "DAIRY_FREE", "NUT_FREE"]], hide_index=True)
-    
+        menu_health_metrics_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "HEALTHY", "GLUTEN_FREE", "DAIRY_FREE", "NUT_FREE"]]
+        
+        menu_pricing_table["MENU_ITEM_ID"] = menu_pricing_table["MENU_ITEM_ID"].astype(int)
+        
+        # Checkbox to enable/disable filtering
+        add_filters = st.checkbox("Add Filters", key="add_filters_health_metrics")
+
+        if add_filters:
+            # Filter for MENU_ITEM_ID using a slider
+            min_id = int(menu_health_metrics_table["MENU_ITEM_ID"].min())
+            max_id = int(menu_health_metrics_table["MENU_ITEM_ID"].max())
+            selected_id_min, selected_id_max = st.slider("Select MENU_ITEM_ID range", min_value=min_id, max_value=max_id, value=(min_id, max_id), key="menu_item_id_slider")
+            menu_health_metrics_table = menu_health_metrics_table[(menu_health_metrics_table["MENU_ITEM_ID"] >= selected_id_min) & (menu_health_metrics_table["MENU_ITEM_ID"] <= selected_id_max)]
+            
+            # Filter for other columns using drop-downs
+            for column in menu_health_metrics_table.columns:
+                if column != "MENU_ITEM_ID":
+                    filter_values = menu_health_metrics_table[column].unique()
+                    selected_values = st.multiselect(f"Select {column}", filter_values, key=f"{column}_multiselect")
+                    
+                    # Filter data based on selected values
+                    if selected_values:
+                        menu_health_metrics_table = menu_health_metrics_table[menu_health_metrics_table[column].isin(selected_values)]
+                        
+        st.dataframe(menu_health_metrics_table, hide_index=True)
     
     # Model Prediction
     st.markdown("### Menu Item Sales Predictor")
