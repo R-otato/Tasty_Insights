@@ -144,9 +144,10 @@ def automate_sales_pred(current_date,data,sales_model):
     # Combine data and next_year_pred
     df_list = []
     for year, month in zip(next_quarter_pred['YEAR'], next_quarter_pred['MONTH']):
-        for cluster in data['CLUSTER']:
+        for cluster, city in zip(data['CLUSTER'], data['CITY']):
             row = {
                 'CLUSTER': cluster,
+                'CITY': city,
                 'NUMBER OF MEMBERS': data[data['CLUSTER'] == cluster]['NUMBER OF MEMBERS'].values[0],
                 'FREQUENCY': data[data['CLUSTER'] == cluster]['FREQUENCY'].values[0],
                 'YEAR': year,
@@ -156,7 +157,6 @@ def automate_sales_pred(current_date,data,sales_model):
 
     # Convert the list of rows to a DataFrame
     next_quarter_df= pd.DataFrame(df_list)
-    
     next_quarter_pred_df=sales_pipeline(next_quarter_df)
     next_quarter_df['NEXT_QUARTER_SALES']= pd.DataFrame(sales_model.predict(next_quarter_pred_df),columns=['NEXT_QUARTER_SALES'])
 
@@ -169,9 +169,10 @@ def automate_sales_pred(current_date,data,sales_model):
     # Combine data and next_year_pred
     df_list = []
     for year, month in zip(next_year_pred['YEAR'], next_year_pred['MONTH']):
-        for cluster in data['CLUSTER']:
+        for cluster, city in zip(data['CLUSTER'], data['CITY']):
             row = {
                 'CLUSTER': cluster,
+                'CITY': city,
                 'NUMBER OF MEMBERS': data[data['CLUSTER'] == cluster]['NUMBER OF MEMBERS'].values[0],
                 'FREQUENCY': data[data['CLUSTER'] == cluster]['FREQUENCY'].values[0],
                 'YEAR': year,
@@ -192,7 +193,7 @@ def get_sales_growth(sales_model_input,current_date):
     prev_year_date = current_date - pd.DateOffset(years=1)
     #Load sales csv
     seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
-    seg_Sales=pd.merge(seg_Sales,right=sales_model_input['CLUSTER'],on=['CLUSTER'],how='inner')
+    seg_Sales=pd.merge(seg_Sales,right=sales_model_input[['CLUSTER','CITY']],on=['CLUSTER','CITY'],how='inner')
 
     # Get the prev month, quarter, year from dataframe
     #Prev Month
@@ -202,7 +203,7 @@ def get_sales_growth(sales_model_input,current_date):
     prev_month.drop('DATE',axis=1,inplace=True)
     prev_month_sales=seg_Sales.copy()
     prev_month_sales=pd.merge(prev_month_sales,right=prev_month,on=['YEAR','MONTH'],how='inner')
-
+   
     #Prev Quarter
     prev_quarter = pd.DataFrame(pd.date_range(prev_quarter_date, current_date-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
     prev_quarter['YEAR'] = prev_quarter['DATE'].dt.year
@@ -218,7 +219,6 @@ def get_sales_growth(sales_model_input,current_date):
     prev_year.drop('DATE',axis=1,inplace=True)
     prev_year_sales=seg_Sales.copy()
     prev_year_sales=pd.merge(prev_year_sales,right=prev_year,on=['YEAR','MONTH'],how='inner')
-
     return prev_month_sales,prev_quarter_sales,prev_year_sales
 
 
@@ -393,7 +393,7 @@ def main() -> None:
             st.error("Please enter a valid integer for the expected number of orders.")
         else:
             # Setup data
-            sales_model_input=cluster_counts.copy()
+            sales_model_input=filtered_data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
             #Hardcode last date as Tasty Bytes data will not update
             current_date=pd.to_datetime('2022-11-01')
             #Update frequency

@@ -1,232 +1,976 @@
-YEAR,MONTH,CLUSTER,SALES,FREQUENCY,NUMBER OF MEMBERS
-2019,1,Active Low-Spending Members,5942.5,306,298
-2019,1,Active Moderate-Value Members,1267.0,58,57
-2019,1,Engaged Moderate-Value Members,116.5,7,6
-2019,1,Inactive Low-Spending Members,600.5,29,29
-2019,2,Active Low-Spending Members,12383.5,656,635
-2019,2,Active Moderate-Value Members,2854.0,144,137
-2019,2,Engaged Moderate-Value Members,464.0,18,18
-2019,2,High-Value Loyal Members,55.0,4,3
-2019,2,Inactive Low-Spending Members,1043.0,55,52
-2019,3,Active Low-Spending Members,22388.5,1172,1108
-2019,3,Active Moderate-Value Members,5758.5,288,268
-2019,3,Engaged Moderate-Value Members,306.5,17,16
-2019,3,High-Value Loyal Members,34.0,1,1
-2019,3,Inactive Low-Spending Members,2140.5,109,103
-2019,4,Active Low-Spending Members,26034.0,1307,1219
-2019,4,Active Moderate-Value Members,21101.0,753,700
-2019,4,Engaged Moderate-Value Members,2876.5,105,95
-2019,4,High-Value Loyal Members,40147.0,1203,1084
-2019,4,Inactive Low-Spending Members,2472.5,130,121
-2019,5,Active Low-Spending Members,31363.5,1636,1506
-2019,5,Active Moderate-Value Members,32100.5,1170,1060
-2019,5,Engaged Moderate-Value Members,3771.5,120,109
-2019,5,High-Value Loyal Members,61913.0,1811,1555
-2019,5,Inactive Low-Spending Members,3084.0,155,144
-2019,6,Active Low-Spending Members,23449.0,1222,1131
-2019,6,Active Moderate-Value Members,29896.0,1069,965
-2019,6,Engaged Moderate-Value Members,3913.0,133,115
-2019,6,High-Value Loyal Members,58534.5,1738,1526
-2019,6,Inactive Low-Spending Members,2789.5,129,119
-2019,7,Active Low-Spending Members,37987.5,1879,1690
-2019,7,Active Moderate-Value Members,36228.0,1283,1136
-2019,7,Engaged Moderate-Value Members,4219.0,146,134
-2019,7,High-Value Loyal Members,62137.5,1823,1567
-2019,7,Inactive Low-Spending Members,3349.5,173,148
-2019,8,Active Low-Spending Members,39765.0,1963,1760
-2019,8,Active Moderate-Value Members,50181.5,1768,1465
-2019,8,Engaged Moderate-Value Members,6895.0,225,186
-2019,8,High-Value Loyal Members,98911.0,2943,2325
-2019,8,Inactive Low-Spending Members,3559.5,169,148
-2019,9,Active Low-Spending Members,38473.5,1858,1680
-2019,9,Active Moderate-Value Members,46591.5,1615,1362
-2019,9,Engaged Moderate-Value Members,5894.0,190,154
-2019,9,High-Value Loyal Members,86178.0,2572,2059
-2019,9,Inactive Low-Spending Members,4038.0,185,166
-2019,10,Active Low-Spending Members,46590.0,2228,1957
-2019,10,Active Moderate-Value Members,149898.5,4386,3420
-2019,10,Engaged Moderate-Value Members,19154.0,529,398
-2019,10,High-Value Loyal Members,221411.0,6107,4417
-2019,10,Inactive Low-Spending Members,5114.5,221,195
-2019,11,Active Low-Spending Members,43160.0,2099,1850
-2019,11,Active Moderate-Value Members,140809.5,4080,3242
-2019,11,Engaged Moderate-Value Members,16562.0,476,369
-2019,11,High-Value Loyal Members,200408.5,5503,4135
-2019,11,Inactive Low-Spending Members,4180.0,186,168
-2019,12,Active Low-Spending Members,38452.5,1794,1620
-2019,12,Active Moderate-Value Members,146939.0,4236,3314
-2019,12,Engaged Moderate-Value Members,18869.5,502,390
-2019,12,High-Value Loyal Members,215466.5,5920,4329
-2019,12,Inactive Low-Spending Members,4496.0,206,170
-2020,1,Active Low-Spending Members,95808.0,3393,2837
-2020,1,Active Moderate-Value Members,433362.0,13912,10040
-2020,1,Engaged Moderate-Value Members,49652.5,1541,1052
-2020,1,High-Value Loyal Members,430385.0,12428,8298
-2020,1,Inactive Low-Spending Members,11039.0,390,326
-2020,2,Active Low-Spending Members,95548.5,3317,2827
-2020,2,Active Moderate-Value Members,387470.0,12641,9445
-2020,2,Engaged Moderate-Value Members,45266.0,1437,1041
-2020,2,High-Value Loyal Members,392448.5,11354,7837
-2020,2,Inactive Low-Spending Members,10269.5,375,298
-2020,3,Active Low-Spending Members,108694.5,3711,3055
-2020,3,Active Moderate-Value Members,477714.5,15262,10656
-2020,3,Engaged Moderate-Value Members,54015.5,1703,1163
-2020,3,High-Value Loyal Members,464889.0,13597,8855
-2020,3,Inactive Low-Spending Members,12047.0,427,351
-2020,4,Active Low-Spending Members,112347.0,3964,3197
-2020,4,Active Moderate-Value Members,514638.5,16336,11140
-2020,4,Engaged Moderate-Value Members,56681.0,1760,1166
-2020,4,High-Value Loyal Members,447617.5,13060,8534
-2020,4,Inactive Low-Spending Members,14271.0,487,378
-2020,5,Active Low-Spending Members,112317.0,3962,3138
-2020,5,Active Moderate-Value Members,546651.0,17575,11576
-2020,5,Engaged Moderate-Value Members,65618.5,2040,1289
-2020,5,High-Value Loyal Members,550160.0,15808,9611
-2020,5,Inactive Low-Spending Members,14004.0,481,369
-2020,6,Active Low-Spending Members,106883.0,3830,3145
-2020,6,Active Moderate-Value Members,516731.5,16222,11101
-2020,6,Engaged Moderate-Value Members,59085.0,1814,1210
-2020,6,High-Value Loyal Members,499956.5,14260,9050
-2020,6,Inactive Low-Spending Members,12865.0,440,341
-2020,7,Active Low-Spending Members,205640.5,6018,4497
-2020,7,Active Moderate-Value Members,774325.75,21278,13111
-2020,7,Engaged Moderate-Value Members,91950.5,2424,1469
-2020,7,High-Value Loyal Members,716961.0,18599,10373
-2020,7,Inactive Low-Spending Members,25616.75,732,529
-2020,8,Active Low-Spending Members,205081.0,6011,4473
-2020,8,Active Moderate-Value Members,765552.75,21156,12991
-2020,8,Engaged Moderate-Value Members,86418.5,2302,1381
-2020,8,High-Value Loyal Members,714058.25,18706,10467
-2020,8,Inactive Low-Spending Members,23596.25,664,479
-2020,9,Active Low-Spending Members,193423.25,5655,4312
-2020,9,Active Moderate-Value Members,765704.75,20897,12982
-2020,9,Engaged Moderate-Value Members,89556.0,2384,1417
-2020,9,High-Value Loyal Members,726054.5,18885,10533
-2020,9,Inactive Low-Spending Members,24161.25,681,479
-2020,10,Active Low-Spending Members,262062.5,6847,4925
-2020,10,Active Moderate-Value Members,880394.0,21918,13400
-2020,10,Engaged Moderate-Value Members,104767.0,2550,1476
-2020,10,High-Value Loyal Members,838217.25,19689,10720
-2020,10,Inactive Low-Spending Members,32484.5,790,531
-2020,11,Active Low-Spending Members,248934.75,6552,4794
-2020,11,Active Moderate-Value Members,907216.0,22771,13472
-2020,11,Engaged Moderate-Value Members,105633.25,2582,1465
-2020,11,High-Value Loyal Members,810487.25,19012,10499
-2020,11,Inactive Low-Spending Members,29928.25,779,528
-2020,12,Active Low-Spending Members,237552.0,6377,4675
-2020,12,Active Moderate-Value Members,947423.0,23673,13826
-2020,12,Engaged Moderate-Value Members,115487.5,2821,1536
-2020,12,High-Value Loyal Members,936574.5,21829,11234
-2020,12,Inactive Low-Spending Members,26255.0,696,486
-2021,1,Active Low-Spending Members,363704.0,9950,6336
-2021,1,Active Moderate-Value Members,978838.25,26132,14617
-2021,1,Engaged Moderate-Value Members,107670.0,2884,1559
-2021,1,High-Value Loyal Members,913203.25,22740,11373
-2021,1,Inactive Low-Spending Members,40431.5,1086,670
-2021,2,Active Low-Spending Members,353915.0,9537,6209
-2021,2,Active Moderate-Value Members,945580.5,25191,14419
-2021,2,Engaged Moderate-Value Members,109699.25,2804,1536
-2021,2,High-Value Loyal Members,850494.75,21235,11040
-2021,2,Inactive Low-Spending Members,38746.0,1048,635
-2021,3,Active Low-Spending Members,373942.5,10095,6363
-2021,3,Active Moderate-Value Members,977696.75,26527,14772
-2021,3,Engaged Moderate-Value Members,114453.75,2976,1557
-2021,3,High-Value Loyal Members,898070.75,22469,11348
-2021,3,Inactive Low-Spending Members,40471.25,1091,683
-2021,4,Active Low-Spending Members,452275.75,11936,7021
-2021,4,Active Moderate-Value Members,1046747.25,27840,15127
-2021,4,Engaged Moderate-Value Members,121413.25,3172,1637
-2021,4,High-Value Loyal Members,946027.25,23639,11598
-2021,4,Inactive Low-Spending Members,50797.5,1299,742
-2021,5,Active Low-Spending Members,407015.25,10773,6620
-2021,5,Active Moderate-Value Members,1127966.0,29999,15653
-2021,5,Engaged Moderate-Value Members,129750.0,3413,1705
-2021,5,High-Value Loyal Members,1061683.0,26525,12051
-2021,5,Inactive Low-Spending Members,43943.25,1148,668
-2021,6,Active Low-Spending Members,437893.75,11583,6959
-2021,6,Active Moderate-Value Members,1151036.25,30522,15730
-2021,6,Engaged Moderate-Value Members,134017.5,3476,1686
-2021,6,High-Value Loyal Members,1078790.75,26702,12037
-2021,6,Inactive Low-Spending Members,47305.0,1221,710
-2021,7,Active Low-Spending Members,454595.75,12081,7016
-2021,7,Active Moderate-Value Members,1244207.25,32360,15948
-2021,7,Engaged Moderate-Value Members,148181.75,3715,1718
-2021,7,High-Value Loyal Members,1168846.75,28493,12308
-2021,7,Inactive Low-Spending Members,51624.25,1343,740
-2021,8,Active Low-Spending Members,474531.0,12663,7167
-2021,8,Active Moderate-Value Members,1299570.5,33905,16340
-2021,8,Engaged Moderate-Value Members,148389.25,3778,1736
-2021,8,High-Value Loyal Members,1217627.25,29839,12448
-2021,8,Inactive Low-Spending Members,50862.25,1365,732
-2021,9,Active Low-Spending Members,482586.25,12853,7278
-2021,9,Active Moderate-Value Members,1383951.0,36261,16683
-2021,9,Engaged Moderate-Value Members,156155.75,3959,1755
-2021,9,High-Value Loyal Members,1202837.75,29629,12417
-2021,9,Inactive Low-Spending Members,52260.75,1391,753
-2021,10,Active Low-Spending Members,504701.5,13548,7497
-2021,10,Active Moderate-Value Members,1393783.25,35884,16747
-2021,10,Engaged Moderate-Value Members,159328.75,4062,1761
-2021,10,High-Value Loyal Members,1295607.5,31308,12666
-2021,10,Inactive Low-Spending Members,56075.25,1465,753
-2021,11,Active Low-Spending Members,489971.5,12978,7252
-2021,11,Active Moderate-Value Members,1460790.5,37848,16971
-2021,11,Engaged Moderate-Value Members,166827.0,4245,1791
-2021,11,High-Value Loyal Members,1317987.75,32075,12686
-2021,11,Inactive Low-Spending Members,55208.75,1446,752
-2021,12,Active Low-Spending Members,551896.0,14521,7746
-2021,12,Active Moderate-Value Members,1412476.5,36464,16753
-2021,12,Engaged Moderate-Value Members,159997.75,4025,1766
-2021,12,High-Value Loyal Members,1289644.5,31253,12648
-2021,12,Inactive Low-Spending Members,56131.0,1496,791
-2022,1,Active Low-Spending Members,563041.25,14798,7764
-2022,1,Active Moderate-Value Members,1569976.25,39829,17254
-2022,1,Engaged Moderate-Value Members,178724.5,4424,1824
-2022,1,High-Value Loyal Members,1444036.0,34526,12940
-2022,1,Inactive Low-Spending Members,59150.0,1572,794
-2022,2,Active Low-Spending Members,500538.0,13260,7428
-2022,2,Active Moderate-Value Members,1355934.5,34449,16468
-2022,2,Engaged Moderate-Value Members,156247.25,3881,1749
-2022,2,High-Value Loyal Members,1157308.0,27522,12123
-2022,2,Inactive Low-Spending Members,54251.25,1428,742
-2022,3,Active Low-Spending Members,526545.5,13847,7542
-2022,3,Active Moderate-Value Members,1607312.25,40939,17259
-2022,3,Engaged Moderate-Value Members,183643.0,4614,1853
-2022,3,High-Value Loyal Members,1369532.0,32659,12716
-2022,3,Inactive Low-Spending Members,58523.5,1505,777
-2022,4,Active Low-Spending Members,648267.0,16461,8133
-2022,4,Active Moderate-Value Members,1619482.75,40889,17460
-2022,4,Engaged Moderate-Value Members,187955.5,4669,1830
-2022,4,High-Value Loyal Members,1362572.25,32992,12750
-2022,4,Inactive Low-Spending Members,72105.0,1798,836
-2022,5,Active Low-Spending Members,678183.75,17224,8228
-2022,5,Active Moderate-Value Members,1744188.0,44010,17709
-2022,5,Engaged Moderate-Value Members,197884.25,4870,1864
-2022,5,High-Value Loyal Members,1544057.75,37542,13135
-2022,5,Inactive Low-Spending Members,74975.25,1866,835
-2022,6,Active Low-Spending Members,626198.5,16064,8002
-2022,6,Active Moderate-Value Members,1658255.25,41943,17559
-2022,6,Engaged Moderate-Value Members,192412.25,4699,1859
-2022,6,High-Value Loyal Members,1493856.5,36174,13056
-2022,6,Inactive Low-Spending Members,68217.5,1715,811
-2022,7,Active Low-Spending Members,628186.25,15909,7965
-2022,7,Active Moderate-Value Members,1855045.5,46808,17925
-2022,7,Engaged Moderate-Value Members,212594.25,5265,1898
-2022,7,High-Value Loyal Members,1654646.0,39981,13272
-2022,7,Inactive Low-Spending Members,70351.25,1756,833
-2022,8,Active Low-Spending Members,733244.25,18720,8520
-2022,8,Active Moderate-Value Members,1925483.5,48458,18188
-2022,8,Engaged Moderate-Value Members,225218.25,5492,1919
-2022,8,High-Value Loyal Members,1689235.0,40883,13351
-2022,8,Inactive Low-Spending Members,82733.25,2091,863
-2022,9,Active Low-Spending Members,671699.0,17070,8202
-2022,9,Active Moderate-Value Members,1580039.75,39880,17309
-2022,9,Engaged Moderate-Value Members,186811.0,4599,1889
-2022,9,High-Value Loyal Members,1437719.75,34738,12959
-2022,9,Inactive Low-Spending Members,43562.75,1123,654
-2022,10,Active Low-Spending Members,777605.75,19830,9217
-2022,10,Active Moderate-Value Members,2160893.0,54832,19430
-2022,10,Engaged Moderate-Value Members,27682.25,721,620
-2022,10,High-Value Loyal Members,1871088.25,45470,13832
-2022,11,Active Low-Spending Members,18720.25,485,485
-2022,11,Active Moderate-Value Members,55949.75,1451,1451
-2022,11,High-Value Loyal Members,45922.5,1141,1141
+YEAR,MONTH,CLUSTER,CITY,SALES,FREQUENCY,NUMBER OF MEMBERS
+2019,1,Active Low-Spending Members,San Mateo,5942.5,306,298
+2019,1,Active Moderate-Value Members,San Mateo,1267.0,58,57
+2019,1,Engaged Moderate-Value Members,San Mateo,116.5,7,6
+2019,1,Inactive Low-Spending Members,San Mateo,600.5,29,29
+2019,2,Active Low-Spending Members,San Mateo,12383.5,656,635
+2019,2,Active Moderate-Value Members,San Mateo,2854.0,144,137
+2019,2,Engaged Moderate-Value Members,San Mateo,464.0,18,18
+2019,2,High-Value Loyal Members,San Mateo,55.0,4,3
+2019,2,Inactive Low-Spending Members,San Mateo,1043.0,55,52
+2019,3,Active Low-Spending Members,San Mateo,22388.5,1172,1108
+2019,3,Active Moderate-Value Members,San Mateo,5758.5,288,268
+2019,3,Engaged Moderate-Value Members,San Mateo,306.5,17,16
+2019,3,High-Value Loyal Members,San Mateo,34.0,1,1
+2019,3,Inactive Low-Spending Members,San Mateo,2140.5,109,103
+2019,4,Active Low-Spending Members,Denver,633.0,16,16
+2019,4,Active Low-Spending Members,San Mateo,25401.0,1291,1203
+2019,4,Active Moderate-Value Members,Denver,14381.0,433,402
+2019,4,Active Moderate-Value Members,San Mateo,6720.0,320,298
+2019,4,Engaged Moderate-Value Members,Denver,2403.0,80,70
+2019,4,Engaged Moderate-Value Members,San Mateo,473.5,25,25
+2019,4,High-Value Loyal Members,Denver,40147.0,1203,1084
+2019,4,Inactive Low-Spending Members,Denver,93.0,4,4
+2019,4,Inactive Low-Spending Members,San Mateo,2379.5,126,117
+2019,5,Active Low-Spending Members,Denver,531.0,22,19
+2019,5,Active Low-Spending Members,San Mateo,30832.5,1614,1487
+2019,5,Active Moderate-Value Members,Denver,23225.0,735,665
+2019,5,Active Moderate-Value Members,San Mateo,8875.5,435,395
+2019,5,Engaged Moderate-Value Members,Denver,3393.0,94,85
+2019,5,Engaged Moderate-Value Members,San Mateo,378.5,26,24
+2019,5,High-Value Loyal Members,Denver,61774.0,1804,1550
+2019,5,High-Value Loyal Members,San Mateo,139.0,7,5
+2019,5,Inactive Low-Spending Members,Denver,90.0,5,5
+2019,5,Inactive Low-Spending Members,San Mateo,2994.0,150,139
+2019,6,Active Low-Spending Members,Denver,573.0,22,20
+2019,6,Active Low-Spending Members,San Mateo,22876.0,1200,1111
+2019,6,Active Moderate-Value Members,Denver,23499.0,735,659
+2019,6,Active Moderate-Value Members,San Mateo,6397.0,334,306
+2019,6,Engaged Moderate-Value Members,Denver,3470.0,111,94
+2019,6,Engaged Moderate-Value Members,San Mateo,443.0,22,21
+2019,6,High-Value Loyal Members,Denver,58472.0,1736,1525
+2019,6,High-Value Loyal Members,San Mateo,62.5,2,1
+2019,6,Inactive Low-Spending Members,Denver,178.0,6,4
+2019,6,Inactive Low-Spending Members,San Mateo,2611.5,123,115
+2019,7,Active Low-Spending Members,Denver,742.0,25,20
+2019,7,Active Low-Spending Members,San Mateo,37245.5,1854,1670
+2019,7,Active Moderate-Value Members,Denver,26899.0,833,735
+2019,7,Active Moderate-Value Members,San Mateo,9329.0,450,401
+2019,7,Engaged Moderate-Value Members,Denver,3527.0,110,100
+2019,7,Engaged Moderate-Value Members,San Mateo,692.0,36,34
+2019,7,High-Value Loyal Members,Denver,61985.0,1819,1564
+2019,7,High-Value Loyal Members,San Mateo,152.5,4,3
+2019,7,Inactive Low-Spending Members,Denver,114.0,5,3
+2019,7,Inactive Low-Spending Members,San Mateo,3235.5,168,145
+2019,8,Active Low-Spending Members,Denver,703.0,25,22
+2019,8,Active Low-Spending Members,San Mateo,39062.0,1938,1738
+2019,8,Active Moderate-Value Members,Denver,40546.0,1314,1076
+2019,8,Active Moderate-Value Members,San Mateo,9635.5,454,389
+2019,8,Engaged Moderate-Value Members,Denver,5985.0,187,151
+2019,8,Engaged Moderate-Value Members,San Mateo,910.0,38,35
+2019,8,High-Value Loyal Members,Denver,98883.0,2940,2323
+2019,8,High-Value Loyal Members,San Mateo,28.0,3,2
+2019,8,Inactive Low-Spending Members,Denver,381.0,15,10
+2019,8,Inactive Low-Spending Members,San Mateo,3178.5,154,138
+2019,9,Active Low-Spending Members,Denver,1083.0,38,30
+2019,9,Active Low-Spending Members,San Mateo,37390.5,1820,1650
+2019,9,Active Moderate-Value Members,Denver,36397.0,1147,955
+2019,9,Active Moderate-Value Members,San Mateo,10194.5,468,407
+2019,9,Engaged Moderate-Value Members,Denver,5469.0,166,133
+2019,9,Engaged Moderate-Value Members,San Mateo,425.0,24,21
+2019,9,High-Value Loyal Members,Denver,86139.0,2570,2057
+2019,9,High-Value Loyal Members,San Mateo,39.0,2,2
+2019,9,Inactive Low-Spending Members,Denver,163.0,7,5
+2019,9,Inactive Low-Spending Members,San Mateo,3875.0,178,161
+2019,10,Active Low-Spending Members,Denver,853.0,37,30
+2019,10,Active Low-Spending Members,San Mateo,41565.5,2081,1843
+2019,10,Active Low-Spending Members,Seattle,4171.5,110,84
+2019,10,Active Moderate-Value Members,Denver,52839.0,1669,1323
+2019,10,Active Moderate-Value Members,San Mateo,11446.0,542,470
+2019,10,Active Moderate-Value Members,Seattle,85613.5,2175,1627
+2019,10,Engaged Moderate-Value Members,Denver,7897.0,253,189
+2019,10,Engaged Moderate-Value Members,San Mateo,856.0,42,39
+2019,10,Engaged Moderate-Value Members,Seattle,10401.0,234,170
+2019,10,High-Value Loyal Members,Denver,130882.0,3896,2842
+2019,10,High-Value Loyal Members,San Mateo,141.0,5,4
+2019,10,High-Value Loyal Members,Seattle,90388.0,2206,1571
+2019,10,Inactive Low-Spending Members,Denver,95.0,5,3
+2019,10,Inactive Low-Spending Members,San Mateo,4154.0,194,175
+2019,10,Inactive Low-Spending Members,Seattle,865.5,22,17
+2019,11,Active Low-Spending Members,Denver,1327.0,53,42
+2019,11,Active Low-Spending Members,San Mateo,38743.5,1960,1736
+2019,11,Active Low-Spending Members,Seattle,3089.5,86,72
+2019,11,Active Moderate-Value Members,Denver,50945.0,1592,1257
+2019,11,Active Moderate-Value Members,San Mateo,10526.0,480,428
+2019,11,Active Moderate-Value Members,Seattle,79338.5,2008,1557
+2019,11,Engaged Moderate-Value Members,Denver,7994.0,239,181
+2019,11,Engaged Moderate-Value Members,San Mateo,778.0,36,34
+2019,11,Engaged Moderate-Value Members,Seattle,7790.0,201,154
+2019,11,High-Value Loyal Members,Denver,118855.0,3535,2669
+2019,11,High-Value Loyal Members,San Mateo,88.0,7,5
+2019,11,High-Value Loyal Members,Seattle,81465.5,1961,1461
+2019,11,Inactive Low-Spending Members,Denver,611.0,15,12
+2019,11,Inactive Low-Spending Members,San Mateo,3102.5,156,144
+2019,11,Inactive Low-Spending Members,Seattle,466.5,15,12
+2019,12,Active Low-Spending Members,Denver,1345.0,46,40
+2019,12,Active Low-Spending Members,San Mateo,34083.0,1668,1508
+2019,12,Active Low-Spending Members,Seattle,3024.5,80,72
+2019,12,Active Moderate-Value Members,Denver,53896.0,1722,1324
+2019,12,Active Moderate-Value Members,San Mateo,9226.0,440,396
+2019,12,Active Moderate-Value Members,Seattle,83817.0,2074,1594
+2019,12,Engaged Moderate-Value Members,Denver,9151.0,263,202
+2019,12,Engaged Moderate-Value Members,San Mateo,539.0,26,26
+2019,12,Engaged Moderate-Value Members,Seattle,9179.5,213,162
+2019,12,High-Value Loyal Members,Denver,129791.0,3862,2812
+2019,12,High-Value Loyal Members,San Mateo,77.5,2,2
+2019,12,High-Value Loyal Members,Seattle,85598.0,2056,1515
+2019,12,Inactive Low-Spending Members,Denver,484.0,15,10
+2019,12,Inactive Low-Spending Members,San Mateo,3412.5,173,147
+2019,12,Inactive Low-Spending Members,Seattle,599.5,18,13
+2020,1,Active Low-Spending Members,Boston,16608.0,607,463
+2020,1,Active Low-Spending Members,Denver,2073.0,58,48
+2020,1,Active Low-Spending Members,New York City,9662.0,283,204
+2020,1,Active Low-Spending Members,San Mateo,63582.0,2315,2019
+2020,1,Active Low-Spending Members,Seattle,3883.0,130,103
+2020,1,Active Moderate-Value Members,Boston,106321.0,3983,2894
+2020,1,Active Moderate-Value Members,Denver,67546.5,1885,1419
+2020,1,Active Moderate-Value Members,New York City,156534.0,4541,3173
+2020,1,Active Moderate-Value Members,San Mateo,17446.5,593,525
+2020,1,Active Moderate-Value Members,Seattle,85514.0,2910,2029
+2020,1,Engaged Moderate-Value Members,Boston,13969.0,508,344
+2020,1,Engaged Moderate-Value Members,Denver,10666.0,286,211
+2020,1,Engaged Moderate-Value Members,New York City,14688.0,414,270
+2020,1,Engaged Moderate-Value Members,San Mateo,1842.0,45,39
+2020,1,Engaged Moderate-Value Members,Seattle,8487.5,288,188
+2020,1,High-Value Loyal Members,Boston,42799.0,1540,1056
+2020,1,High-Value Loyal Members,Denver,168761.0,4405,3082
+2020,1,High-Value Loyal Members,New York City,128265.0,3588,2260
+2020,1,High-Value Loyal Members,San Mateo,178.0,4,3
+2020,1,High-Value Loyal Members,Seattle,90382.0,2891,1897
+2020,1,Inactive Low-Spending Members,Boston,2368.0,90,73
+2020,1,Inactive Low-Spending Members,Denver,456.0,12,9
+2020,1,Inactive Low-Spending Members,New York City,1575.0,47,32
+2020,1,Inactive Low-Spending Members,San Mateo,5889.5,212,193
+2020,1,Inactive Low-Spending Members,Seattle,750.5,29,19
+2020,2,Active Low-Spending Members,Boston,13339.0,504,394
+2020,2,Active Low-Spending Members,Denver,2128.5,58,42
+2020,2,Active Low-Spending Members,New York City,9454.0,265,212
+2020,2,Active Low-Spending Members,San Mateo,67301.5,2366,2083
+2020,2,Active Low-Spending Members,Seattle,3325.5,124,96
+2020,2,Active Moderate-Value Members,Boston,94606.0,3610,2727
+2020,2,Active Moderate-Value Members,Denver,70041.0,2041,1519
+2020,2,Active Moderate-Value Members,New York City,128782.0,3825,2795
+2020,2,Active Moderate-Value Members,San Mateo,17417.0,591,506
+2020,2,Active Moderate-Value Members,Seattle,76624.0,2574,1898
+2020,2,Engaged Moderate-Value Members,Boston,11648.0,434,319
+2020,2,Engaged Moderate-Value Members,Denver,11342.0,314,222
+2020,2,Engaged Moderate-Value Members,New York City,13588.0,390,271
+2020,2,Engaged Moderate-Value Members,San Mateo,1094.0,45,38
+2020,2,Engaged Moderate-Value Members,Seattle,7594.0,254,191
+2020,2,High-Value Loyal Members,Boston,36961.0,1350,996
+2020,2,High-Value Loyal Members,Denver,173536.5,4533,3135
+2020,2,High-Value Loyal Members,New York City,104604.0,2949,1993
+2020,2,High-Value Loyal Members,San Mateo,26.0,2,2
+2020,2,High-Value Loyal Members,Seattle,77321.0,2520,1711
+2020,2,Inactive Low-Spending Members,Boston,2204.0,94,75
+2020,2,Inactive Low-Spending Members,Denver,335.5,9,5
+2020,2,Inactive Low-Spending Members,New York City,1330.0,43,31
+2020,2,Inactive Low-Spending Members,San Mateo,5812.0,206,175
+2020,2,Inactive Low-Spending Members,Seattle,588.0,23,12
+2020,3,Active Low-Spending Members,Boston,16213.0,642,493
+2020,3,Active Low-Spending Members,Denver,1966.5,53,38
+2020,3,Active Low-Spending Members,New York City,10931.0,311,233
+2020,3,Active Low-Spending Members,San Mateo,74894.5,2540,2177
+2020,3,Active Low-Spending Members,Seattle,4689.5,165,114
+2020,3,Active Moderate-Value Members,Boston,115410.0,4349,3069
+2020,3,Active Moderate-Value Members,Denver,89737.0,2469,1698
+2020,3,Active Moderate-Value Members,New York City,161461.0,4659,3182
+2020,3,Active Moderate-Value Members,San Mateo,18962.0,628,537
+2020,3,Active Moderate-Value Members,Seattle,92144.5,3157,2170
+2020,3,Engaged Moderate-Value Members,Boston,14840.0,532,368
+2020,3,Engaged Moderate-Value Members,Denver,14079.0,375,244
+2020,3,Engaged Moderate-Value Members,New York City,14043.0,419,291
+2020,3,Engaged Moderate-Value Members,San Mateo,1317.5,41,34
+2020,3,Engaged Moderate-Value Members,Seattle,9736.0,336,226
+2020,3,High-Value Loyal Members,Boston,44262.0,1610,1108
+2020,3,High-Value Loyal Members,Denver,207908.0,5505,3574
+2020,3,High-Value Loyal Members,New York City,122391.0,3434,2223
+2020,3,High-Value Loyal Members,San Mateo,179.0,3,3
+2020,3,High-Value Loyal Members,Seattle,90149.0,3045,1947
+2020,3,Inactive Low-Spending Members,Boston,3321.0,120,87
+2020,3,Inactive Low-Spending Members,Denver,415.0,10,9
+2020,3,Inactive Low-Spending Members,New York City,1763.0,56,40
+2020,3,Inactive Low-Spending Members,San Mateo,5936.0,223,200
+2020,3,Inactive Low-Spending Members,Seattle,612.0,18,15
+2020,4,Active Low-Spending Members,Boston,20381.0,783,540
+2020,4,Active Low-Spending Members,Denver,2368.0,66,50
+2020,4,Active Low-Spending Members,New York City,9888.0,333,237
+2020,4,Active Low-Spending Members,San Mateo,75198.0,2637,2260
+2020,4,Active Low-Spending Members,Seattle,4512.0,145,110
+2020,4,Active Moderate-Value Members,Boston,143167.0,5369,3513
+2020,4,Active Moderate-Value Members,Denver,73697.0,2080,1536
+2020,4,Active Moderate-Value Members,New York City,166030.0,4853,3285
+2020,4,Active Moderate-Value Members,San Mateo,20556.5,710,570
+2020,4,Active Moderate-Value Members,Seattle,111188.0,3324,2236
+2020,4,Engaged Moderate-Value Members,Boston,18454.0,691,428
+2020,4,Engaged Moderate-Value Members,Denver,11884.5,296,209
+2020,4,Engaged Moderate-Value Members,New York City,13902.0,384,264
+2020,4,Engaged Moderate-Value Members,San Mateo,1530.5,49,41
+2020,4,Engaged Moderate-Value Members,Seattle,10910.0,340,224
+2020,4,High-Value Loyal Members,Boston,54475.0,2030,1233
+2020,4,High-Value Loyal Members,Denver,166073.0,4413,3103
+2020,4,High-Value Loyal Members,New York City,124624.0,3581,2273
+2020,4,High-Value Loyal Members,San Mateo,134.0,3,2
+2020,4,High-Value Loyal Members,Seattle,102311.5,3033,1923
+2020,4,Inactive Low-Spending Members,Boston,3800.0,141,94
+2020,4,Inactive Low-Spending Members,Denver,639.0,15,10
+2020,4,Inactive Low-Spending Members,New York City,1347.0,44,33
+2020,4,Inactive Low-Spending Members,San Mateo,7367.0,260,222
+2020,4,Inactive Low-Spending Members,Seattle,1118.0,27,19
+2020,5,Active Low-Spending Members,Boston,22863.0,885,565
+2020,5,Active Low-Spending Members,Denver,2883.5,91,59
+2020,5,Active Low-Spending Members,New York City,11638.0,359,258
+2020,5,Active Low-Spending Members,San Mateo,69916.5,2473,2143
+2020,5,Active Low-Spending Members,Seattle,5016.0,154,113
+2020,5,Active Moderate-Value Members,Boston,153816.0,5805,3654
+2020,5,Active Moderate-Value Members,Denver,99124.5,2813,1826
+2020,5,Active Moderate-Value Members,New York City,177210.0,5247,3430
+2020,5,Active Moderate-Value Members,San Mateo,19949.0,688,577
+2020,5,Active Moderate-Value Members,Seattle,96551.5,3022,2089
+2020,5,Engaged Moderate-Value Members,Boston,20250.0,739,456
+2020,5,Engaged Moderate-Value Members,Denver,15884.0,415,251
+2020,5,Engaged Moderate-Value Members,New York City,17505.0,502,312
+2020,5,Engaged Moderate-Value Members,San Mateo,1155.5,41,34
+2020,5,Engaged Moderate-Value Members,Seattle,10824.0,343,236
+2020,5,High-Value Loyal Members,Boston,61901.0,2259,1322
+2020,5,High-Value Loyal Members,Denver,245080.0,6559,3958
+2020,5,High-Value Loyal Members,New York City,140513.0,3984,2417
+2020,5,High-Value Loyal Members,San Mateo,380.0,12,7
+2020,5,High-Value Loyal Members,Seattle,102286.0,2994,1907
+2020,5,Inactive Low-Spending Members,Boston,3984.0,159,107
+2020,5,Inactive Low-Spending Members,Denver,588.5,17,11
+2020,5,Inactive Low-Spending Members,New York City,1609.0,49,33
+2020,5,Inactive Low-Spending Members,San Mateo,7190.0,237,204
+2020,5,Inactive Low-Spending Members,Seattle,632.5,19,14
+2020,6,Active Low-Spending Members,Boston,16952.0,655,475
+2020,6,Active Low-Spending Members,Denver,1464.5,47,38
+2020,6,Active Low-Spending Members,New York City,11893.0,365,257
+2020,6,Active Low-Spending Members,San Mateo,72454.5,2633,2277
+2020,6,Active Low-Spending Members,Seattle,4119.0,130,98
+2020,6,Active Moderate-Value Members,Boston,121572.0,4562,3193
+2020,6,Active Moderate-Value Members,Denver,83442.0,2326,1639
+2020,6,Active Moderate-Value Members,New York City,181736.0,5275,3459
+2020,6,Active Moderate-Value Members,San Mateo,21149.5,681,562
+2020,6,Active Moderate-Value Members,Seattle,108832.0,3378,2248
+2020,6,Engaged Moderate-Value Members,Boston,16044.0,587,389
+2020,6,Engaged Moderate-Value Members,Denver,13100.0,341,241
+2020,6,Engaged Moderate-Value Members,New York City,16163.0,465,299
+2020,6,Engaged Moderate-Value Members,San Mateo,1247.5,43,39
+2020,6,Engaged Moderate-Value Members,Seattle,12530.5,378,242
+2020,6,High-Value Loyal Members,Boston,47281.0,1765,1133
+2020,6,High-Value Loyal Members,Denver,202413.0,5272,3478
+2020,6,High-Value Loyal Members,New York City,138549.0,3937,2405
+2020,6,High-Value Loyal Members,San Mateo,243.5,8,6
+2020,6,High-Value Loyal Members,Seattle,111470.0,3278,2028
+2020,6,Inactive Low-Spending Members,Boston,2663.0,109,80
+2020,6,Inactive Low-Spending Members,Denver,597.0,14,11
+2020,6,Inactive Low-Spending Members,New York City,1731.0,53,38
+2020,6,Inactive Low-Spending Members,San Mateo,7302.5,244,199
+2020,6,Inactive Low-Spending Members,Seattle,571.5,20,13
+2020,7,Active Low-Spending Members,Boston,34100.5,896,583
+2020,7,Active Low-Spending Members,Denver,2770.5,76,52
+2020,7,Active Low-Spending Members,New York City,14215.0,439,299
+2020,7,Active Low-Spending Members,San Mateo,147692.0,4408,3435
+2020,7,Active Low-Spending Members,Seattle,6862.5,199,128
+2020,7,Active Moderate-Value Members,Boston,253105.25,6442,3884
+2020,7,Active Moderate-Value Members,Denver,117814.5,3085,1990
+2020,7,Active Moderate-Value Members,New York City,220600.0,6392,3814
+2020,7,Active Moderate-Value Members,San Mateo,40766.0,1142,861
+2020,7,Active Moderate-Value Members,Seattle,142040.0,4217,2562
+2020,7,Engaged Moderate-Value Members,Boston,33545.0,807,498
+2020,7,Engaged Moderate-Value Members,Denver,19119.5,495,299
+2020,7,Engaged Moderate-Value Members,New York City,20374.0,555,330
+2020,7,Engaged Moderate-Value Members,San Mateo,3728.0,103,68
+2020,7,Engaged Moderate-Value Members,Seattle,15184.0,464,274
+2020,7,High-Value Loyal Members,Boston,110505.0,2572,1397
+2020,7,High-Value Loyal Members,Denver,289999.0,7125,4097
+2020,7,High-Value Loyal Members,New York City,175122.0,4808,2641
+2020,7,High-Value Loyal Members,San Mateo,279.0,5,5
+2020,7,High-Value Loyal Members,Seattle,141056.0,4089,2233
+2020,7,Inactive Low-Spending Members,Boston,6842.75,185,117
+2020,7,Inactive Low-Spending Members,Denver,655.0,18,9
+2020,7,Inactive Low-Spending Members,New York City,2450.0,67,41
+2020,7,Inactive Low-Spending Members,San Mateo,14684.5,438,347
+2020,7,Inactive Low-Spending Members,Seattle,984.5,24,15
+2020,8,Active Low-Spending Members,Boston,29267.0,788,550
+2020,8,Active Low-Spending Members,Denver,2764.5,74,57
+2020,8,Active Low-Spending Members,New York City,14466.0,434,283
+2020,8,Active Low-Spending Members,San Mateo,151676.0,4514,3454
+2020,8,Active Low-Spending Members,Seattle,6907.5,201,129
+2020,8,Active Moderate-Value Members,Boston,236885.25,6010,3762
+2020,8,Active Moderate-Value Members,Denver,121801.0,3236,1994
+2020,8,Active Moderate-Value Members,New York City,217822.0,6340,3802
+2020,8,Active Moderate-Value Members,San Mateo,41823.0,1190,863
+2020,8,Active Moderate-Value Members,Seattle,147221.5,4380,2570
+2020,8,Engaged Moderate-Value Members,Boston,29607.5,746,448
+2020,8,Engaged Moderate-Value Members,Denver,17295.0,438,266
+2020,8,Engaged Moderate-Value Members,New York City,20190.0,575,342
+2020,8,Engaged Moderate-Value Members,San Mateo,2690.0,77,55
+2020,8,Engaged Moderate-Value Members,Seattle,16636.0,466,270
+2020,8,High-Value Loyal Members,Boston,99335.25,2444,1376
+2020,8,High-Value Loyal Members,Denver,292866.5,7209,4137
+2020,8,High-Value Loyal Members,New York City,169165.0,4773,2622
+2020,8,High-Value Loyal Members,San Mateo,298.5,10,7
+2020,8,High-Value Loyal Members,Seattle,152393.0,4270,2325
+2020,8,Inactive Low-Spending Members,Boston,6030.25,160,107
+2020,8,Inactive Low-Spending Members,Denver,581.5,18,10
+2020,8,Inactive Low-Spending Members,New York City,2516.0,80,44
+2020,8,Inactive Low-Spending Members,San Mateo,13684.5,381,300
+2020,8,Inactive Low-Spending Members,Seattle,784.0,25,18
+2020,9,Active Low-Spending Members,Boston,32471.75,858,573
+2020,9,Active Low-Spending Members,Denver,2224.0,59,45
+2020,9,Active Low-Spending Members,New York City,13974.0,413,284
+2020,9,Active Low-Spending Members,San Mateo,138990.0,4122,3269
+2020,9,Active Low-Spending Members,Seattle,5763.5,203,141
+2020,9,Active Moderate-Value Members,Boston,249039.25,6218,3825
+2020,9,Active Moderate-Value Members,Denver,121095.5,3119,1939
+2020,9,Active Moderate-Value Members,New York City,202361.0,5908,3700
+2020,9,Active Moderate-Value Members,San Mateo,38305.0,1094,831
+2020,9,Active Moderate-Value Members,Seattle,154904.0,4558,2687
+2020,9,Engaged Moderate-Value Members,Boston,32051.0,802,485
+2020,9,Engaged Moderate-Value Members,Denver,18950.0,470,285
+2020,9,Engaged Moderate-Value Members,New York City,19447.0,547,322
+2020,9,Engaged Moderate-Value Members,San Mateo,2959.5,72,50
+2020,9,Engaged Moderate-Value Members,Seattle,16148.5,493,275
+2020,9,High-Value Loyal Members,Boston,106239.0,2459,1367
+2020,9,High-Value Loyal Members,Denver,304004.5,7540,4246
+2020,9,High-Value Loyal Members,New York City,154850.0,4419,2582
+2020,9,High-Value Loyal Members,San Mateo,164.0,7,5
+2020,9,High-Value Loyal Members,Seattle,160797.0,4460,2333
+2020,9,Inactive Low-Spending Members,Boston,7183.75,178,105
+2020,9,Inactive Low-Spending Members,Denver,768.5,18,13
+2020,9,Inactive Low-Spending Members,New York City,2445.0,79,47
+2020,9,Inactive Low-Spending Members,San Mateo,12686.0,372,294
+2020,9,Inactive Low-Spending Members,Seattle,1078.0,34,20
+2020,10,Active Low-Spending Members,Boston,33402.0,870,576
+2020,10,Active Low-Spending Members,Denver,4688.5,94,62
+2020,10,Active Low-Spending Members,New York City,19015.0,446,296
+2020,10,Active Low-Spending Members,San Mateo,196805.0,5210,3847
+2020,10,Active Low-Spending Members,Seattle,8152.0,227,144
+2020,10,Active Moderate-Value Members,Boston,242676.0,6198,3824
+2020,10,Active Moderate-Value Members,Denver,150093.0,3637,2158
+2020,10,Active Moderate-Value Members,New York City,266076.0,6325,3842
+2020,10,Active Moderate-Value Members,San Mateo,57509.5,1407,973
+2020,10,Active Moderate-Value Members,Seattle,164039.5,4351,2603
+2020,10,Engaged Moderate-Value Members,Boston,30195.0,776,471
+2020,10,Engaged Moderate-Value Members,Denver,26064.5,573,306
+2020,10,Engaged Moderate-Value Members,New York City,25273.0,615,341
+2020,10,Engaged Moderate-Value Members,San Mateo,4791.0,110,78
+2020,10,Engaged Moderate-Value Members,Seattle,18443.5,476,280
+2020,10,High-Value Loyal Members,Boston,99683.25,2384,1356
+2020,10,High-Value Loyal Members,Denver,370397.0,8477,4413
+2020,10,High-Value Loyal Members,New York City,205984.0,4583,2614
+2020,10,High-Value Loyal Members,San Mateo,532.0,14,8
+2020,10,High-Value Loyal Members,Seattle,161621.0,4231,2329
+2020,10,Inactive Low-Spending Members,Boston,7637.0,163,105
+2020,10,Inactive Low-Spending Members,Denver,569.0,11,7
+2020,10,Inactive Low-Spending Members,New York City,2982.0,79,43
+2020,10,Inactive Low-Spending Members,San Mateo,19494.0,489,352
+2020,10,Inactive Low-Spending Members,Seattle,1802.5,48,24
+2020,11,Active Low-Spending Members,Boston,42811.75,1134,693
+2020,11,Active Low-Spending Members,Denver,3380.0,86,57
+2020,11,Active Low-Spending Members,New York City,18770.0,438,283
+2020,11,Active Low-Spending Members,San Mateo,177901.0,4715,3638
+2020,11,Active Low-Spending Members,Seattle,6072.0,179,123
+2020,11,Active Moderate-Value Members,Boston,310501.5,8009,4328
+2020,11,Active Moderate-Value Members,Denver,121000.5,2967,1889
+2020,11,Active Moderate-Value Members,New York City,267854.0,6324,3790
+2020,11,Active Moderate-Value Members,San Mateo,52297.5,1259,901
+2020,11,Active Moderate-Value Members,Seattle,155562.5,4212,2564
+2020,11,Engaged Moderate-Value Members,Boston,39418.25,1004,524
+2020,11,Engaged Moderate-Value Members,Denver,21029.0,465,281
+2020,11,Engaged Moderate-Value Members,New York City,25294.0,572,335
+2020,11,Engaged Moderate-Value Members,San Mateo,3421.0,93,63
+2020,11,Engaged Moderate-Value Members,Seattle,16471.0,448,262
+2020,11,High-Value Loyal Members,Boston,130414.25,3065,1514
+2020,11,High-Value Loyal Members,Denver,305450.5,6999,4043
+2020,11,High-Value Loyal Members,New York City,211138.0,4715,2645
+2020,11,High-Value Loyal Members,San Mateo,440.0,7,6
+2020,11,High-Value Loyal Members,Seattle,163044.5,4226,2291
+2020,11,Inactive Low-Spending Members,Boston,8839.75,233,130
+2020,11,Inactive Low-Spending Members,Denver,645.0,14,10
+2020,11,Inactive Low-Spending Members,New York City,2857.0,76,47
+2020,11,Inactive Low-Spending Members,San Mateo,16459.5,428,324
+2020,11,Inactive Low-Spending Members,Seattle,1127.0,28,17
+2020,12,Active Low-Spending Members,Boston,37272.5,1041,640
+2020,12,Active Low-Spending Members,Denver,3952.0,108,64
+2020,12,Active Low-Spending Members,New York City,17267.0,424,279
+2020,12,Active Low-Spending Members,San Mateo,171405.0,4573,3546
+2020,12,Active Low-Spending Members,Seattle,7655.5,231,146
+2020,12,Active Moderate-Value Members,Boston,276591.5,7127,4105
+2020,12,Active Moderate-Value Members,Denver,168458.5,4034,2243
+2020,12,Active Moderate-Value Members,New York City,270566.0,6369,3821
+2020,12,Active Moderate-Value Members,San Mateo,48157.5,1209,862
+2020,12,Active Moderate-Value Members,Seattle,183649.5,4934,2795
+2020,12,Engaged Moderate-Value Members,Boston,35732.5,925,501
+2020,12,Engaged Moderate-Value Members,Denver,28292.0,634,332
+2020,12,Engaged Moderate-Value Members,New York City,26944.0,608,346
+2020,12,Engaged Moderate-Value Members,San Mateo,3594.0,92,67
+2020,12,Engaged Moderate-Value Members,Seattle,20925.0,562,290
+2020,12,High-Value Loyal Members,Boston,119306.5,2822,1480
+2020,12,High-Value Loyal Members,Denver,409272.0,9343,4680
+2020,12,High-Value Loyal Members,New York City,215692.0,4870,2636
+2020,12,High-Value Loyal Members,San Mateo,278.0,11,8
+2020,12,High-Value Loyal Members,Seattle,192026.0,4783,2430
+2020,12,Inactive Low-Spending Members,Boston,6659.0,164,103
+2020,12,Inactive Low-Spending Members,Denver,783.5,21,13
+2020,12,Inactive Low-Spending Members,New York City,2222.0,57,36
+2020,12,Inactive Low-Spending Members,San Mateo,15286.0,423,315
+2020,12,Inactive Low-Spending Members,Seattle,1304.5,31,19
+2021,1,Active Low-Spending Members,Boston,31452.0,922,600
+2021,1,Active Low-Spending Members,Denver,4003.5,103,68
+2021,1,Active Low-Spending Members,New York City,19834.5,562,323
+2021,1,Active Low-Spending Members,San Mateo,299871.5,8099,5198
+2021,1,Active Low-Spending Members,Seattle,8542.5,264,147
+2021,1,Active Moderate-Value Members,Boston,238884.25,6553,3920
+2021,1,Active Moderate-Value Members,Denver,154738.5,3809,2192
+2021,1,Active Moderate-Value Members,New York City,295025.0,7985,4336
+2021,1,Active Moderate-Value Members,San Mateo,88064.5,2202,1249
+2021,1,Active Moderate-Value Members,Seattle,202126.0,5583,2920
+2021,1,Engaged Moderate-Value Members,Boston,31013.0,808,475
+2021,1,Engaged Moderate-Value Members,Denver,23375.0,575,311
+2021,1,Engaged Moderate-Value Members,New York City,26841.5,746,388
+2021,1,Engaged Moderate-Value Members,San Mateo,4920.5,141,83
+2021,1,Engaged Moderate-Value Members,Seattle,21520.0,614,302
+2021,1,High-Value Loyal Members,Boston,104978.25,2677,1422
+2021,1,High-Value Loyal Members,Denver,379054.5,8903,4536
+2021,1,High-Value Loyal Members,New York City,230185.5,5922,2892
+2021,1,High-Value Loyal Members,San Mateo,413.5,11,7
+2021,1,High-Value Loyal Members,Seattle,198571.5,5227,2516
+2021,1,Inactive Low-Spending Members,Boston,6638.0,179,107
+2021,1,Inactive Low-Spending Members,Denver,714.0,20,13
+2021,1,Inactive Low-Spending Members,New York City,3534.5,87,48
+2021,1,Inactive Low-Spending Members,San Mateo,28173.5,764,481
+2021,1,Inactive Low-Spending Members,Seattle,1371.5,36,21
+2021,2,Active Low-Spending Members,Boston,39903.5,1171,687
+2021,2,Active Low-Spending Members,Denver,3912.0,97,65
+2021,2,Active Low-Spending Members,New York City,15044.5,447,292
+2021,2,Active Low-Spending Members,San Mateo,287855.0,7608,5029
+2021,2,Active Low-Spending Members,Seattle,7200.0,214,136
+2021,2,Active Moderate-Value Members,Boston,294428.0,7995,4358
+2021,2,Active Moderate-Value Members,Denver,141484.0,3501,2118
+2021,2,Active Moderate-Value Members,New York City,253854.0,6826,3984
+2021,2,Active Moderate-Value Members,San Mateo,81823.5,2003,1172
+2021,2,Active Moderate-Value Members,Seattle,173991.0,4866,2787
+2021,2,Engaged Moderate-Value Members,Boston,37502.25,962,514
+2021,2,Engaged Moderate-Value Members,Denver,23718.5,560,310
+2021,2,Engaged Moderate-Value Members,New York City,23423.5,598,347
+2021,2,Engaged Moderate-Value Members,San Mateo,6329.5,162,88
+2021,2,Engaged Moderate-Value Members,Seattle,18725.5,522,277
+2021,2,High-Value Loyal Members,Boston,118336.75,3123,1520
+2021,2,High-Value Loyal Members,Denver,353801.0,8322,4399
+2021,2,High-Value Loyal Members,New York City,201089.5,5163,2720
+2021,2,High-Value Loyal Members,San Mateo,651.0,14,9
+2021,2,High-Value Loyal Members,Seattle,176616.5,4613,2392
+2021,2,Inactive Low-Spending Members,Boston,8091.0,214,117
+2021,2,Inactive Low-Spending Members,Denver,632.0,21,11
+2021,2,Inactive Low-Spending Members,New York City,2413.5,63,41
+2021,2,Inactive Low-Spending Members,San Mateo,26161.0,705,442
+2021,2,Inactive Low-Spending Members,Seattle,1448.5,45,24
+2021,3,Active Low-Spending Members,Boston,36508.5,1077,652
+2021,3,Active Low-Spending Members,Denver,3308.0,92,59
+2021,3,Active Low-Spending Members,New York City,18897.5,524,322
+2021,3,Active Low-Spending Members,San Mateo,307162.0,8174,5186
+2021,3,Active Low-Spending Members,Seattle,8066.5,228,144
+2021,3,Active Moderate-Value Members,Boston,284333.75,7887,4330
+2021,3,Active Moderate-Value Members,Denver,149420.0,3792,2168
+2021,3,Active Moderate-Value Members,New York City,269350.5,7412,4189
+2021,3,Active Moderate-Value Members,San Mateo,84953.0,2149,1240
+2021,3,Active Moderate-Value Members,Seattle,189639.5,5287,2845
+2021,3,Engaged Moderate-Value Members,Boston,34318.25,945,498
+2021,3,Engaged Moderate-Value Members,Denver,22900.0,555,312
+2021,3,Engaged Moderate-Value Members,New York City,26500.5,703,356
+2021,3,Engaged Moderate-Value Members,San Mateo,6411.5,157,83
+2021,3,Engaged Moderate-Value Members,Seattle,24323.5,616,308
+2021,3,High-Value Loyal Members,Boston,120306.25,3054,1498
+2021,3,High-Value Loyal Members,Denver,364095.5,8602,4497
+2021,3,High-Value Loyal Members,New York City,218423.5,5655,2851
+2021,3,High-Value Loyal Members,San Mateo,765.0,14,8
+2021,3,High-Value Loyal Members,Seattle,194480.5,5144,2494
+2021,3,Inactive Low-Spending Members,Boston,7992.25,209,128
+2021,3,Inactive Low-Spending Members,Denver,665.0,26,15
+2021,3,Inactive Low-Spending Members,New York City,2943.5,84,51
+2021,3,Inactive Low-Spending Members,San Mateo,27367.5,731,470
+2021,3,Inactive Low-Spending Members,Seattle,1503.0,41,19
+2021,4,Active Low-Spending Members,Boston,38645.25,1095,673
+2021,4,Active Low-Spending Members,Denver,4013.5,107,67
+2021,4,Active Low-Spending Members,New York City,18427.5,509,312
+2021,4,Active Low-Spending Members,San Mateo,383082.5,9975,5821
+2021,4,Active Low-Spending Members,Seattle,8107.0,250,148
+2021,4,Active Moderate-Value Members,Boston,287799.25,7891,4364
+2021,4,Active Moderate-Value Members,Denver,160518.0,3973,2198
+2021,4,Active Moderate-Value Members,New York City,292210.5,7752,4287
+2021,4,Active Moderate-Value Members,San Mateo,107941.0,2636,1333
+2021,4,Active Moderate-Value Members,Seattle,198278.5,5588,2945
+2021,4,Engaged Moderate-Value Members,Boston,37687.25,1018,539
+2021,4,Engaged Moderate-Value Members,Denver,24735.5,615,314
+2021,4,Engaged Moderate-Value Members,New York City,27502.0,711,372
+2021,4,Engaged Moderate-Value Members,San Mateo,8885.0,201,103
+2021,4,Engaged Moderate-Value Members,Seattle,22603.5,627,309
+2021,4,High-Value Loyal Members,Boston,126098.75,3251,1549
+2021,4,High-Value Loyal Members,Denver,390059.5,9120,4591
+2021,4,High-Value Loyal Members,New York City,232117.0,5845,2891
+2021,4,High-Value Loyal Members,San Mateo,905.0,20,9
+2021,4,High-Value Loyal Members,Seattle,196847.0,5403,2558
+2021,4,Inactive Low-Spending Members,Boston,6985.0,194,116
+2021,4,Inactive Low-Spending Members,Denver,630.0,18,11
+2021,4,Inactive Low-Spending Members,New York City,3437.0,83,42
+2021,4,Inactive Low-Spending Members,San Mateo,37798.0,959,548
+2021,4,Inactive Low-Spending Members,Seattle,1947.5,45,25
+2021,5,Active Low-Spending Members,Boston,41207.75,1148,684
+2021,5,Active Low-Spending Members,Denver,5535.5,137,80
+2021,5,Active Low-Spending Members,New York City,18478.5,538,313
+2021,5,Active Low-Spending Members,San Mateo,333160.0,8678,5387
+2021,5,Active Low-Spending Members,Seattle,8633.5,272,156
+2021,5,Active Moderate-Value Members,Boston,304000.0,8173,4443
+2021,5,Active Moderate-Value Members,Denver,197168.5,4817,2459
+2021,5,Active Moderate-Value Members,New York City,309354.0,8300,4382
+2021,5,Active Moderate-Value Members,San Mateo,97224.5,2388,1290
+2021,5,Active Moderate-Value Members,Seattle,220219.0,6321,3079
+2021,5,Engaged Moderate-Value Members,Boston,40394.0,1088,561
+2021,5,Engaged Moderate-Value Members,Denver,29184.5,699,346
+2021,5,Engaged Moderate-Value Members,New York City,28965.5,791,396
+2021,5,Engaged Moderate-Value Members,San Mateo,7457.0,176,91
+2021,5,Engaged Moderate-Value Members,Seattle,23749.0,659,311
+2021,5,High-Value Loyal Members,Boston,122833.0,3155,1536
+2021,5,High-Value Loyal Members,Denver,468282.5,11060,4903
+2021,5,High-Value Loyal Members,New York City,247571.5,6219,2947
+2021,5,High-Value Loyal Members,San Mateo,674.0,18,9
+2021,5,High-Value Loyal Members,Seattle,222322.0,6073,2656
+2021,5,Inactive Low-Spending Members,Boston,7884.75,204,117
+2021,5,Inactive Low-Spending Members,Denver,1195.0,35,15
+2021,5,Inactive Low-Spending Members,New York City,3403.0,91,48
+2021,5,Inactive Low-Spending Members,San Mateo,30118.0,777,466
+2021,5,Inactive Low-Spending Members,Seattle,1342.5,41,22
+2021,6,Active Low-Spending Members,Boston,38114.75,1069,668
+2021,6,Active Low-Spending Members,Denver,4451.5,115,69
+2021,6,Active Low-Spending Members,New York City,21258.0,601,358
+2021,6,Active Low-Spending Members,San Mateo,364043.5,9495,5700
+2021,6,Active Low-Spending Members,Seattle,10026.0,303,164
+2021,6,Active Moderate-Value Members,Boston,309429.25,8327,4451
+2021,6,Active Moderate-Value Members,Denver,181974.0,4451,2357
+2021,6,Active Moderate-Value Members,New York City,325841.0,8660,4471
+2021,6,Active Moderate-Value Members,San Mateo,99027.0,2411,1301
+2021,6,Active Moderate-Value Members,Seattle,234765.0,6673,3150
+2021,6,Engaged Moderate-Value Members,Boston,39459.0,1032,530
+2021,6,Engaged Moderate-Value Members,Denver,27942.0,672,339
+2021,6,Engaged Moderate-Value Members,New York City,30783.5,796,393
+2021,6,Engaged Moderate-Value Members,San Mateo,8252.5,200,95
+2021,6,Engaged Moderate-Value Members,Seattle,27580.5,776,329
+2021,6,High-Value Loyal Members,Boston,126365.75,3194,1520
+2021,6,High-Value Loyal Members,Denver,451996.5,10470,4803
+2021,6,High-Value Loyal Members,New York City,265738.0,6687,3024
+2021,6,High-Value Loyal Members,San Mateo,833.0,23,10
+2021,6,High-Value Loyal Members,Seattle,233857.5,6328,2680
+2021,6,Inactive Low-Spending Members,Boston,7751.5,224,125
+2021,6,Inactive Low-Spending Members,Denver,941.5,23,12
+2021,6,Inactive Low-Spending Members,New York City,2994.0,90,48
+2021,6,Inactive Low-Spending Members,San Mateo,34073.5,835,503
+2021,6,Inactive Low-Spending Members,Seattle,1544.5,49,22
+2021,7,Active Low-Spending Members,Boston,45418.5,1286,722
+2021,7,Active Low-Spending Members,Denver,5637.25,147,85
+2021,7,Active Low-Spending Members,New York City,22332.5,605,342
+2021,7,Active Low-Spending Members,San Mateo,372474.0,9780,5715
+2021,7,Active Low-Spending Members,Seattle,8733.5,263,152
+2021,7,Active Moderate-Value Members,Boston,355770.25,9483,4689
+2021,7,Active Moderate-Value Members,Denver,229106.5,5604,2561
+2021,7,Active Moderate-Value Members,New York City,370003.5,9635,4610
+2021,7,Active Moderate-Value Members,San Mateo,110209.5,2658,1344
+2021,7,Active Moderate-Value Members,Seattle,179117.5,4980,2744
+2021,7,Engaged Moderate-Value Members,Boston,46689.25,1214,568
+2021,7,Engaged Moderate-Value Members,Denver,34674.5,811,350
+2021,7,Engaged Moderate-Value Members,New York City,36175.0,894,404
+2021,7,Engaged Moderate-Value Members,San Mateo,9055.5,208,99
+2021,7,Engaged Moderate-Value Members,Seattle,21587.5,588,297
+2021,7,High-Value Loyal Members,Boston,143676.5,3619,1634
+2021,7,High-Value Loyal Members,Denver,543571.75,12670,5101
+2021,7,High-Value Loyal Members,New York City,293128.5,7243,3101
+2021,7,High-Value Loyal Members,San Mateo,564.0,17,8
+2021,7,High-Value Loyal Members,Seattle,187906.0,4944,2464
+2021,7,Inactive Low-Spending Members,Boston,9512.0,248,125
+2021,7,Inactive Low-Spending Members,Denver,1690.75,35,17
+2021,7,Inactive Low-Spending Members,New York City,3764.0,94,53
+2021,7,Inactive Low-Spending Members,San Mateo,35740.5,936,525
+2021,7,Inactive Low-Spending Members,Seattle,917.0,30,20
+2021,8,Active Low-Spending Members,Boston,48997.25,1394,736
+2021,8,Active Low-Spending Members,Denver,5016.75,130,77
+2021,8,Active Low-Spending Members,New York City,22758.5,651,359
+2021,8,Active Low-Spending Members,San Mateo,387880.5,10208,5836
+2021,8,Active Low-Spending Members,Seattle,9878.0,280,159
+2021,8,Active Moderate-Value Members,Boston,376979.75,9949,4746
+2021,8,Active Moderate-Value Members,Denver,227767.75,5554,2546
+2021,8,Active Moderate-Value Members,New York City,359534.5,9429,4643
+2021,8,Active Moderate-Value Members,San Mateo,113359.5,2784,1377
+2021,8,Active Moderate-Value Members,Seattle,221929.0,6189,3028
+2021,8,Engaged Moderate-Value Members,Boston,46245.0,1191,569
+2021,8,Engaged Moderate-Value Members,Denver,34799.75,843,353
+2021,8,Engaged Moderate-Value Members,New York City,32826.5,844,399
+2021,8,Engaged Moderate-Value Members,San Mateo,8142.0,195,97
+2021,8,Engaged Moderate-Value Members,Seattle,26376.0,705,318
+2021,8,High-Value Loyal Members,Boston,161267.25,4040,1644
+2021,8,High-Value Loyal Members,Denver,541259.5,12710,5085
+2021,8,High-Value Loyal Members,New York City,293032.0,7156,3079
+2021,8,High-Value Loyal Members,San Mateo,767.0,21,9
+2021,8,High-Value Loyal Members,Seattle,221301.5,5912,2631
+2021,8,Inactive Low-Spending Members,Boston,9224.25,265,134
+2021,8,Inactive Low-Spending Members,Denver,1108.5,24,11
+2021,8,Inactive Low-Spending Members,New York City,3366.5,106,52
+2021,8,Inactive Low-Spending Members,San Mateo,35495.5,923,511
+2021,8,Inactive Low-Spending Members,Seattle,1667.5,47,24
+2021,9,Active Low-Spending Members,Boston,52005.25,1472,751
+2021,9,Active Low-Spending Members,Denver,4960.0,132,71
+2021,9,Active Low-Spending Members,New York City,27525.5,776,393
+2021,9,Active Low-Spending Members,San Mateo,388126.5,10183,5900
+2021,9,Active Low-Spending Members,Seattle,9969.0,290,163
+2021,9,Active Moderate-Value Members,Boston,408485.25,10787,4903
+2021,9,Active Moderate-Value Members,Denver,184692.75,4519,2359
+2021,9,Active Moderate-Value Members,New York City,446393.5,11666,4927
+2021,9,Active Moderate-Value Members,San Mateo,109187.0,2680,1366
+2021,9,Active Moderate-Value Members,Seattle,235192.5,6609,3128
+2021,9,Engaged Moderate-Value Members,Boston,52487.75,1357,581
+2021,9,Engaged Moderate-Value Members,Denver,28469.0,660,333
+2021,9,Engaged Moderate-Value Members,New York City,40439.5,1037,424
+2021,9,Engaged Moderate-Value Members,San Mateo,8591.5,215,101
+2021,9,Engaged Moderate-Value Members,Seattle,26168.0,690,316
+2021,9,High-Value Loyal Members,Boston,165259.0,4188,1697
+2021,9,High-Value Loyal Members,Denver,449819.25,10420,4792
+2021,9,High-Value Loyal Members,New York City,351633.5,8783,3247
+2021,9,High-Value Loyal Members,San Mateo,1007.5,24,10
+2021,9,High-Value Loyal Members,Seattle,235118.5,6214,2671
+2021,9,Inactive Low-Spending Members,Boston,9108.75,255,129
+2021,9,Inactive Low-Spending Members,Denver,959.5,29,14
+2021,9,Inactive Low-Spending Members,New York City,4102.5,116,52
+2021,9,Inactive Low-Spending Members,San Mateo,36680.5,950,538
+2021,9,Inactive Low-Spending Members,Seattle,1409.5,41,20
+2021,10,Active Low-Spending Members,Boston,50195.0,1367,743
+2021,10,Active Low-Spending Members,Denver,5987.5,167,85
+2021,10,Active Low-Spending Members,New York City,24794.5,696,371
+2021,10,Active Low-Spending Members,San Mateo,413508.5,11024,6135
+2021,10,Active Low-Spending Members,Seattle,10216.0,294,163
+2021,10,Active Moderate-Value Members,Boston,391218.25,10270,4841
+2021,10,Active Moderate-Value Members,Denver,237406.0,5765,2586
+2021,10,Active Moderate-Value Members,New York City,399816.5,10299,4789
+2021,10,Active Moderate-Value Members,San Mateo,118259.0,2937,1420
+2021,10,Active Moderate-Value Members,Seattle,247083.5,6613,3111
+2021,10,Engaged Moderate-Value Members,Boston,50313.5,1290,577
+2021,10,Engaged Moderate-Value Members,Denver,35795.25,854,350
+2021,10,Engaged Moderate-Value Members,New York City,36964.0,940,416
+2021,10,Engaged Moderate-Value Members,San Mateo,8555.5,223,101
+2021,10,Engaged Moderate-Value Members,Seattle,27700.5,755,317
+2021,10,High-Value Loyal Members,Boston,163378.5,4079,1660
+2021,10,High-Value Loyal Members,Denver,576307.5,13376,5190
+2021,10,High-Value Loyal Members,New York City,308795.5,7628,3143
+2021,10,High-Value Loyal Members,San Mateo,1184.0,26,10
+2021,10,High-Value Loyal Members,Seattle,245942.0,6199,2663
+2021,10,Inactive Low-Spending Members,Boston,10825.0,263,132
+2021,10,Inactive Low-Spending Members,Denver,1310.25,37,15
+2021,10,Inactive Low-Spending Members,New York City,3594.0,87,46
+2021,10,Inactive Low-Spending Members,San Mateo,38520.0,1034,538
+2021,10,Inactive Low-Spending Members,Seattle,1826.0,44,22
+2021,11,Active Low-Spending Members,Boston,61489.25,1674,800
+2021,11,Active Low-Spending Members,Denver,5996.25,152,80
+2021,11,Active Low-Spending Members,New York City,26804.5,711,369
+2021,11,Active Low-Spending Members,San Mateo,383039.0,10106,5831
+2021,11,Active Low-Spending Members,Seattle,12642.5,335,172
+2021,11,Active Moderate-Value Members,Boston,460282.25,11923,5066
+2021,11,Active Moderate-Value Members,Denver,214666.75,5304,2528
+2021,11,Active Moderate-Value Members,New York City,403279.5,10523,4776
+2021,11,Active Moderate-Value Members,San Mateo,105401.0,2648,1341
+2021,11,Active Moderate-Value Members,Seattle,277161.0,7450,3260
+2021,11,Engaged Moderate-Value Members,Boston,56680.0,1486,598
+2021,11,Engaged Moderate-Value Members,Denver,33289.0,785,357
+2021,11,Engaged Moderate-Value Members,New York City,39286.5,1011,415
+2021,11,Engaged Moderate-Value Members,San Mateo,7701.0,195,99
+2021,11,Engaged Moderate-Value Members,Seattle,29870.5,768,322
+2021,11,High-Value Loyal Members,Boston,184360.0,4580,1716
+2021,11,High-Value Loyal Members,Denver,530434.75,12384,5047
+2021,11,High-Value Loyal Members,New York City,326274.0,7982,3166
+2021,11,High-Value Loyal Members,San Mateo,1194.0,23,9
+2021,11,High-Value Loyal Members,Seattle,275725.0,7106,2748
+2021,11,Inactive Low-Spending Members,Boston,12354.75,312,140
+2021,11,Inactive Low-Spending Members,Denver,1559.0,37,16
+2021,11,Inactive Low-Spending Members,New York City,3821.5,111,55
+2021,11,Inactive Low-Spending Members,San Mateo,35456.0,932,516
+2021,11,Inactive Low-Spending Members,Seattle,2017.5,54,25
+2021,12,Active Low-Spending Members,Boston,50850.0,1355,765
+2021,12,Active Low-Spending Members,Denver,5334.5,137,76
+2021,12,Active Low-Spending Members,New York City,23702.0,658,355
+2021,12,Active Low-Spending Members,San Mateo,461902.0,12075,6388
+2021,12,Active Low-Spending Members,Seattle,10107.5,296,162
+2021,12,Active Moderate-Value Members,Boston,397858.0,10455,4823
+2021,12,Active Moderate-Value Members,Denver,230475.5,5644,2568
+2021,12,Active Moderate-Value Members,New York City,409107.5,10628,4817
+2021,12,Active Moderate-Value Members,San Mateo,128269.0,3194,1427
+2021,12,Active Moderate-Value Members,Seattle,246766.5,6543,3118
+2021,12,Engaged Moderate-Value Members,Boston,49096.0,1260,563
+2021,12,Engaged Moderate-Value Members,Denver,36949.75,872,367
+2021,12,Engaged Moderate-Value Members,New York City,35452.0,932,415
+2021,12,Engaged Moderate-Value Members,San Mateo,9258.0,245,105
+2021,12,Engaged Moderate-Value Members,Seattle,29242.0,716,316
+2021,12,High-Value Loyal Members,Boston,156043.5,3918,1632
+2021,12,High-Value Loyal Members,Denver,559995.5,12995,5146
+2021,12,High-Value Loyal Members,New York City,323649.0,7976,3188
+2021,12,High-Value Loyal Members,San Mateo,1043.0,23,10
+2021,12,High-Value Loyal Members,Seattle,248913.5,6341,2672
+2021,12,Inactive Low-Spending Members,Boston,8931.25,263,133
+2021,12,Inactive Low-Spending Members,Denver,1095.25,22,15
+2021,12,Inactive Low-Spending Members,New York City,4215.5,115,52
+2021,12,Inactive Low-Spending Members,San Mateo,40081.0,1052,568
+2021,12,Inactive Low-Spending Members,Seattle,1808.0,44,23
+2022,1,Active Low-Spending Members,Boston,53657.25,1495,772
+2022,1,Active Low-Spending Members,Denver,6045.25,162,83
+2022,1,Active Low-Spending Members,New York City,30552.5,800,394
+2022,1,Active Low-Spending Members,San Mateo,459395.5,11994,6342
+2022,1,Active Low-Spending Members,Seattle,13390.75,347,173
+2022,1,Active Moderate-Value Members,Boston,414943.0,10896,4898
+2022,1,Active Moderate-Value Members,Denver,242765.0,6013,2630
+2022,1,Active Moderate-Value Members,New York City,493970.25,12253,5038
+2022,1,Active Moderate-Value Members,San Mateo,124782.0,3107,1425
+2022,1,Active Moderate-Value Members,Seattle,293516.0,7560,3263
+2022,1,Engaged Moderate-Value Members,Boston,52269.25,1389,595
+2022,1,Engaged Moderate-Value Members,Denver,35720.5,858,354
+2022,1,Engaged Moderate-Value Members,New York City,47266.5,1125,430
+2022,1,Engaged Moderate-Value Members,San Mateo,9101.0,220,106
+2022,1,Engaged Moderate-Value Members,Seattle,34367.25,832,339
+2022,1,High-Value Loyal Members,Boston,166208.5,4169,1669
+2022,1,High-Value Loyal Members,Denver,581036.75,13769,5216
+2022,1,High-Value Loyal Members,New York City,390329.25,9209,3261
+2022,1,High-Value Loyal Members,San Mateo,1177.5,23,10
+2022,1,High-Value Loyal Members,Seattle,305284.0,7356,2784
+2022,1,Inactive Low-Spending Members,Boston,10648.0,275,131
+2022,1,Inactive Low-Spending Members,Denver,1748.25,45,18
+2022,1,Inactive Low-Spending Members,New York City,4711.75,126,57
+2022,1,Inactive Low-Spending Members,San Mateo,40532.5,1078,566
+2022,1,Inactive Low-Spending Members,Seattle,1509.5,48,22
+2022,2,Active Low-Spending Members,Boston,54704.75,1509,772
+2022,2,Active Low-Spending Members,Denver,4239.5,123,74
+2022,2,Active Low-Spending Members,New York City,26579.25,685,359
+2022,2,Active Low-Spending Members,San Mateo,405883.0,10696,6070
+2022,2,Active Low-Spending Members,Seattle,9131.5,247,153
+2022,2,Active Moderate-Value Members,Boston,420066.5,11008,4933
+2022,2,Active Moderate-Value Members,Denver,178118.75,4519,2364
+2022,2,Active Moderate-Value Members,New York City,411330.75,10190,4768
+2022,2,Active Moderate-Value Members,San Mateo,113707.0,2866,1410
+2022,2,Active Moderate-Value Members,Seattle,232711.5,5866,2993
+2022,2,Engaged Moderate-Value Members,Boston,52603.75,1355,594
+2022,2,Engaged Moderate-Value Members,Denver,30375.75,699,331
+2022,2,Engaged Moderate-Value Members,New York City,39190.25,952,409
+2022,2,Engaged Moderate-Value Members,San Mateo,7854.0,207,99
+2022,2,Engaged Moderate-Value Members,Seattle,26223.5,668,316
+2022,2,High-Value Loyal Members,Boston,172170.5,4243,1677
+2022,2,High-Value Loyal Members,Denver,422880.25,9876,4712
+2022,2,High-Value Loyal Members,New York City,329443.5,7790,3157
+2022,2,High-Value Loyal Members,San Mateo,669.0,16,8
+2022,2,High-Value Loyal Members,Seattle,232144.75,5597,2569
+2022,2,Inactive Low-Spending Members,Boston,10189.25,273,131
+2022,2,Inactive Low-Spending Members,Denver,756.0,16,9
+2022,2,Inactive Low-Spending Members,New York City,4345.5,117,53
+2022,2,Inactive Low-Spending Members,San Mateo,37441.0,984,530
+2022,2,Inactive Low-Spending Members,Seattle,1519.5,38,19
+2022,3,Active Low-Spending Members,Boston,66840.0,1849,831
+2022,3,Active Low-Spending Members,Denver,4909.0,132,75
+2022,3,Active Low-Spending Members,New York City,29033.75,761,377
+2022,3,Active Low-Spending Members,San Mateo,410975.0,10708,6076
+2022,3,Active Low-Spending Members,Seattle,14787.75,397,183
+2022,3,Active Moderate-Value Members,Boston,500676.5,13239,5172
+2022,3,Active Moderate-Value Members,Denver,189555.5,4622,2372
+2022,3,Active Moderate-Value Members,New York City,458869.5,11469,4924
+2022,3,Active Moderate-Value Members,San Mateo,117555.5,2875,1403
+2022,3,Active Moderate-Value Members,Seattle,340655.25,8734,3388
+2022,3,Engaged Moderate-Value Members,Boston,63835.75,1638,619
+2022,3,Engaged Moderate-Value Members,Denver,30547.75,737,344
+2022,3,Engaged Moderate-Value Members,New York City,44136.0,1102,442
+2022,3,Engaged Moderate-Value Members,San Mateo,9345.0,231,99
+2022,3,Engaged Moderate-Value Members,Seattle,35778.5,906,349
+2022,3,High-Value Loyal Members,Boston,203890.25,5098,1734
+2022,3,High-Value Loyal Members,Denver,460409.75,10805,4897
+2022,3,High-Value Loyal Members,New York City,352278.0,8352,3226
+2022,3,High-Value Loyal Members,San Mateo,956.0,19,10
+2022,3,High-Value Loyal Members,Seattle,351998.0,8385,2849
+2022,3,Inactive Low-Spending Members,Boston,13179.5,351,150
+2022,3,Inactive Low-Spending Members,Denver,738.0,17,11
+2022,3,Inactive Low-Spending Members,New York City,5113.75,136,56
+2022,3,Inactive Low-Spending Members,San Mateo,36802.5,930,534
+2022,3,Inactive Low-Spending Members,Seattle,2689.75,71,26
+2022,4,Active Low-Spending Members,Boston,69570.75,1811,832
+2022,4,Active Low-Spending Members,Denver,5705.0,159,84
+2022,4,Active Low-Spending Members,New York City,29487.75,797,390
+2022,4,Active Low-Spending Members,San Mateo,530053.75,13350,6652
+2022,4,Active Low-Spending Members,Seattle,13449.75,344,175
+2022,4,Active Moderate-Value Members,Boston,515047.5,12900,5176
+2022,4,Active Moderate-Value Members,Denver,195506.25,5131,2481
+2022,4,Active Moderate-Value Members,New York City,469158.5,11894,4995
+2022,4,Active Moderate-Value Members,San Mateo,146404.25,3454,1494
+2022,4,Active Moderate-Value Members,Seattle,293366.25,7510,3314
+2022,4,Engaged Moderate-Value Members,Boston,64880.5,1610,612
+2022,4,Engaged Moderate-Value Members,Denver,32204.0,825,343
+2022,4,Engaged Moderate-Value Members,New York City,43932.25,1094,421
+2022,4,Engaged Moderate-Value Members,San Mateo,11195.0,275,112
+2022,4,Engaged Moderate-Value Members,Seattle,35743.75,865,342
+2022,4,High-Value Loyal Members,Boston,210798.75,5019,1743
+2022,4,High-Value Loyal Members,Denver,484104.5,11855,4988
+2022,4,High-Value Loyal Members,New York City,372020.25,8866,3271
+2022,4,High-Value Loyal Members,San Mateo,1054.5,26,10
+2022,4,High-Value Loyal Members,Seattle,294594.25,7226,2738
+2022,4,Inactive Low-Spending Members,Boston,14024.25,332,144
+2022,4,Inactive Low-Spending Members,Denver,765.0,27,12
+2022,4,Inactive Low-Spending Members,New York City,4540.5,119,55
+2022,4,Inactive Low-Spending Members,San Mateo,50712.75,1266,599
+2022,4,Inactive Low-Spending Members,Seattle,2062.5,54,26
+2022,5,Active Low-Spending Members,Boston,68537.0,1733,818
+2022,5,Active Low-Spending Members,Denver,6564.5,185,79
+2022,5,Active Low-Spending Members,New York City,32679.5,915,395
+2022,5,Active Low-Spending Members,San Mateo,558373.75,14072,6775
+2022,5,Active Low-Spending Members,Seattle,12029.0,319,161
+2022,5,Active Moderate-Value Members,Boston,493928.25,12282,5071
+2022,5,Active Moderate-Value Members,Denver,262813.5,6787,2715
+2022,5,Active Moderate-Value Members,New York City,545201.25,13827,5144
+2022,5,Active Moderate-Value Members,San Mateo,154040.5,3725,1525
+2022,5,Active Moderate-Value Members,Seattle,288204.5,7389,3254
+2022,5,Engaged Moderate-Value Members,Boston,62315.5,1509,602
+2022,5,Engaged Moderate-Value Members,Denver,39600.0,980,368
+2022,5,Engaged Moderate-Value Members,New York City,51418.5,1298,447
+2022,5,Engaged Moderate-Value Members,San Mateo,12668.0,297,112
+2022,5,Engaged Moderate-Value Members,Seattle,31882.25,786,335
+2022,5,High-Value Loyal Members,Boston,196959.0,4738,1715
+2022,5,High-Value Loyal Members,Denver,621842.75,15423,5326
+2022,5,High-Value Loyal Members,New York City,429041.0,10229,3350
+2022,5,High-Value Loyal Members,San Mateo,1025.0,20,8
+2022,5,High-Value Loyal Members,Seattle,295190.0,7132,2736
+2022,5,Inactive Low-Spending Members,Boston,12972.5,325,136
+2022,5,Inactive Low-Spending Members,Denver,1238.5,34,16
+2022,5,Inactive Low-Spending Members,New York City,6420.25,157,58
+2022,5,Inactive Low-Spending Members,San Mateo,52607.5,1291,600
+2022,5,Inactive Low-Spending Members,Seattle,1736.5,59,25
+2022,6,Active Low-Spending Members,Boston,62117.25,1627,790
+2022,6,Active Low-Spending Members,Denver,5748.0,158,80
+2022,6,Active Low-Spending Members,New York City,27383.5,737,385
+2022,6,Active Low-Spending Members,San Mateo,516838.75,13148,6565
+2022,6,Active Low-Spending Members,Seattle,14111.0,394,182
+2022,6,Active Moderate-Value Members,Boston,467679.25,11784,5070
+2022,6,Active Moderate-Value Members,Denver,259821.75,6692,2707
+2022,6,Active Moderate-Value Members,New York City,466080.0,11867,4958
+2022,6,Active Moderate-Value Members,San Mateo,152392.75,3588,1503
+2022,6,Active Moderate-Value Members,Seattle,312281.5,8012,3321
+2022,6,Engaged Moderate-Value Members,Boston,61763.25,1502,621
+2022,6,Engaged Moderate-Value Members,Denver,39974.25,975,373
+2022,6,Engaged Moderate-Value Members,New York City,44609.25,1092,425
+2022,6,Engaged Moderate-Value Members,San Mateo,12439.0,288,111
+2022,6,Engaged Moderate-Value Members,Seattle,33626.5,842,329
+2022,6,High-Value Loyal Members,Boston,192035.0,4575,1710
+2022,6,High-Value Loyal Members,Denver,613326.75,14977,5278
+2022,6,High-Value Loyal Members,New York City,364354.75,8745,3254
+2022,6,High-Value Loyal Members,San Mateo,1514.0,34,10
+2022,6,High-Value Loyal Members,Seattle,322626.0,7843,2804
+2022,6,Inactive Low-Spending Members,Boston,12336.25,310,140
+2022,6,Inactive Low-Spending Members,Denver,1769.0,45,16
+2022,6,Inactive Low-Spending Members,New York City,5766.75,145,57
+2022,6,Inactive Low-Spending Members,San Mateo,46910.75,1173,578
+2022,6,Inactive Low-Spending Members,Seattle,1434.75,42,20
+2022,7,Active Low-Spending Members,Boston,68452.0,1869,832
+2022,7,Active Low-Spending Members,Denver,7306.25,209,87
+2022,7,Active Low-Spending Members,New York City,35896.25,934,404
+2022,7,Active Low-Spending Members,San Mateo,501078.25,12499,6464
+2022,7,Active Low-Spending Members,Seattle,15453.5,398,178
+2022,7,Active Moderate-Value Members,Boston,546802.5,13834,5218
+2022,7,Active Moderate-Value Members,Denver,268248.75,7009,2725
+2022,7,Active Moderate-Value Members,New York City,555382.25,13982,5159
+2022,7,Active Moderate-Value Members,San Mateo,142338.0,3311,1463
+2022,7,Active Moderate-Value Members,Seattle,342274.0,8672,3360
+2022,7,Engaged Moderate-Value Members,Boston,66046.0,1693,620
+2022,7,Engaged Moderate-Value Members,Denver,41009.75,1034,381
+2022,7,Engaged Moderate-Value Members,New York City,52582.25,1296,442
+2022,7,Engaged Moderate-Value Members,San Mateo,11360.75,268,112
+2022,7,Engaged Moderate-Value Members,Seattle,41595.5,974,343
+2022,7,High-Value Loyal Members,Boston,222424.0,5310,1748
+2022,7,High-Value Loyal Members,Denver,643510.25,15673,5325
+2022,7,High-Value Loyal Members,New York City,436324.75,10466,3340
+2022,7,High-Value Loyal Members,San Mateo,1409.75,30,10
+2022,7,High-Value Loyal Members,Seattle,350977.25,8502,2849
+2022,7,Inactive Low-Spending Members,Boston,14535.5,357,146
+2022,7,Inactive Low-Spending Members,Denver,1890.25,43,15
+2022,7,Inactive Low-Spending Members,New York City,5385.25,149,56
+2022,7,Inactive Low-Spending Members,San Mateo,46449.0,1155,591
+2022,7,Inactive Low-Spending Members,Seattle,2091.25,52,25
+2022,8,Active Low-Spending Members,Boston,79686.0,2125,884
+2022,8,Active Low-Spending Members,Denver,7374.5,207,86
+2022,8,Active Low-Spending Members,New York City,33199.75,888,394
+2022,8,Active Low-Spending Members,San Mateo,596563.25,15083,6973
+2022,8,Active Low-Spending Members,Seattle,16420.75,417,183
+2022,8,Active Moderate-Value Members,Boston,610888.75,15268,5334
+2022,8,Active Moderate-Value Members,Denver,285582.5,7331,2756
+2022,8,Active Moderate-Value Members,New York City,504469.25,12888,5096
+2022,8,Active Moderate-Value Members,San Mateo,167307.5,3937,1549
+2022,8,Active Moderate-Value Members,Seattle,357235.5,9034,3453
+2022,8,Engaged Moderate-Value Members,Boston,79827.5,1930,629
+2022,8,Engaged Moderate-Value Members,Denver,43148.5,1060,382
+2022,8,Engaged Moderate-Value Members,New York City,47362.25,1188,445
+2022,8,Engaged Moderate-Value Members,San Mateo,13743.25,300,112
+2022,8,Engaged Moderate-Value Members,Seattle,41136.75,1014,351
+2022,8,High-Value Loyal Members,Boston,245297.5,5906,1772
+2022,8,High-Value Loyal Members,Denver,684806.25,16706,5409
+2022,8,High-Value Loyal Members,New York City,397247.0,9568,3319
+2022,8,High-Value Loyal Members,San Mateo,782.0,17,8
+2022,8,High-Value Loyal Members,Seattle,361102.25,8686,2843
+2022,8,Inactive Low-Spending Members,Boston,16204.75,403,148
+2022,8,Inactive Low-Spending Members,Denver,1859.75,44,15
+2022,8,Inactive Low-Spending Members,New York City,4746.0,124,57
+2022,8,Inactive Low-Spending Members,San Mateo,56847.0,1453,617
+2022,8,Inactive Low-Spending Members,Seattle,3075.75,67,26
+2022,9,Active Low-Spending Members,Boston,57766.0,1571,786
+2022,9,Active Low-Spending Members,Denver,6008.25,162,82
+2022,9,Active Low-Spending Members,New York City,27572.25,708,371
+2022,9,Active Low-Spending Members,San Mateo,565617.0,14226,6780
+2022,9,Active Low-Spending Members,Seattle,14735.5,403,183
+2022,9,Active Moderate-Value Members,Boston,441952.25,11076,4977
+2022,9,Active Moderate-Value Members,Denver,245987.5,6307,2651
+2022,9,Active Moderate-Value Members,New York City,418305.5,10599,4818
+2022,9,Active Moderate-Value Members,San Mateo,154142.5,3652,1524
+2022,9,Active Moderate-Value Members,Seattle,319652.0,8246,3339
+2022,9,Engaged Moderate-Value Members,Boston,61136.75,1495,618
+2022,9,Engaged Moderate-Value Members,Denver,33993.75,856,368
+2022,9,Engaged Moderate-Value Members,New York City,41130.0,1021,437
+2022,9,Engaged Moderate-Value Members,San Mateo,13907.25,313,119
+2022,9,Engaged Moderate-Value Members,Seattle,36643.25,914,347
+2022,9,High-Value Loyal Members,Boston,184740.0,4331,1672
+2022,9,High-Value Loyal Members,Denver,581592.5,14266,5255
+2022,9,High-Value Loyal Members,New York City,336107.5,8088,3194
+2022,9,High-Value Loyal Members,San Mateo,1129.5,25,9
+2022,9,High-Value Loyal Members,Seattle,334150.25,8028,2829
+2022,9,Inactive Low-Spending Members,Boston,5875.75,157,93
+2022,9,Inactive Low-Spending Members,Denver,394.0,9,8
+2022,9,Inactive Low-Spending Members,New York City,1427.25,46,33
+2022,9,Inactive Low-Spending Members,San Mateo,34716.0,882,504
+2022,9,Inactive Low-Spending Members,Seattle,1149.75,29,16
+2022,10,Active Low-Spending Members,Boston,69281.25,1841,922
+2022,10,Active Low-Spending Members,Denver,7904.0,212,99
+2022,10,Active Low-Spending Members,New York City,38595.5,1000,435
+2022,10,Active Low-Spending Members,San Mateo,647207.0,16379,7564
+2022,10,Active Low-Spending Members,Seattle,14618.0,398,197
+2022,10,Active Moderate-Value Members,Boston,592733.0,14926,5641
+2022,10,Active Moderate-Value Members,Denver,337503.5,8717,2957
+2022,10,Active Moderate-Value Members,New York City,644828.75,16447,5505
+2022,10,Active Moderate-Value Members,San Mateo,189933.75,4543,1670
+2022,10,Active Moderate-Value Members,Seattle,395894.0,10199,3657
+2022,10,Engaged Moderate-Value Members,Boston,9796.25,229,195
+2022,10,Engaged Moderate-Value Members,Denver,6247.0,161,140
+2022,10,Engaged Moderate-Value Members,New York City,6193.75,182,159
+2022,10,Engaged Moderate-Value Members,San Mateo,1540.75,26,24
+2022,10,Engaged Moderate-Value Members,Seattle,3904.5,123,102
+2022,10,High-Value Loyal Members,Boston,230234.5,5540,1829
+2022,10,High-Value Loyal Members,Denver,764216.0,18774,5578
+2022,10,High-Value Loyal Members,New York City,482383.25,11711,3460
+2022,10,High-Value Loyal Members,San Mateo,1259.0,28,10
+2022,10,High-Value Loyal Members,Seattle,392995.5,9417,2955
+2022,11,Active Low-Spending Members,Denver,74.0,2,2
+2022,11,Active Low-Spending Members,New York City,840.0,28,28
+2022,11,Active Low-Spending Members,San Mateo,17386.0,441,441
+2022,11,Active Low-Spending Members,Seattle,420.25,14,14
+2022,11,Active Moderate-Value Members,Denver,5146.75,140,140
+2022,11,Active Moderate-Value Members,New York City,22845.75,599,599
+2022,11,Active Moderate-Value Members,San Mateo,7400.75,177,177
+2022,11,Active Moderate-Value Members,Seattle,20556.5,535,535
+2022,11,High-Value Loyal Members,Denver,11232.25,286,286
+2022,11,High-Value Loyal Members,New York City,16251.25,405,405
+2022,11,High-Value Loyal Members,San Mateo,102.0,2,2
+2022,11,High-Value Loyal Members,Seattle,18337.0,448,448
