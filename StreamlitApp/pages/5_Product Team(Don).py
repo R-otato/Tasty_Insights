@@ -131,6 +131,164 @@ def get_health_metrics_menu_table(menu_table_df):
     
     return menu_table_df
 
+# Function: get_prediction
+# the purpose of this function is to carry out data pre-processing so data can be fed to the machine learning model to get a prediction
+def get_prediction():
+    # extract MENU_ITEM_ID from the option string
+    menu_item_id = int(selected_item_cat.split(")")[0][1:])
+
+    menu_item_name = selected_item_cat.split(") ")[1]
+    
+    item_info_df = menu_table[menu_table["MENU_ITEM_ID"] == menu_item_id]
+    
+    item_info_df = item_info_df.drop(["MENU_ITEM_NAME", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"], axis=1)
+    
+    item_info_df = item_info_df.rename(columns={'UNIT_PRICE': 'SALE_PRICE_USD'})
+    
+    # retrieve year and month from order timestamp
+    order_df = pd.read_csv('assets/datasets/total_qty_by_item.csv')
+    
+
+    # Convert the 'YEAR' column to numeric values
+    order_df['YEAR'] = order_df['YEAR'].astype(str).replace(',', '').astype(int)
+    
+    
+    # get the total qty sold over the years for a particular menu item
+    total_qty_by_item_over_time = order_df[order_df["MENU_ITEM_ID"]==menu_item_id]
+    
+    
+    # Plotly Line Chart
+    ## create the line chart
+    fig = go.Figure(data=go.Line(x=total_qty_by_item_over_time['YEAR'], y=total_qty_by_item_over_time['TOTAL_QTY_SOLD_PER_YEAR'], mode='lines+markers'))
+
+    ## update the layout
+    fig.update_layout(title='Total Quantity Sold per Year',
+                    xaxis_title='Year',
+                    yaxis_title='Total Qty Sold')
+
+
+
+    # get one year after the latest year provided in the data
+    year = total_qty_by_item_over_time["YEAR"].max() + 1
+    
+    
+    # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
+    item_info_df = item_info_df.replace({'Yes': 1, 'No': 0})
+    
+    
+    
+    # MANUAL ONT HOT ENCODING
+    
+    # Define the mapping dictionary
+    temperature_mapping = {'Cold Option': 0, 'Warm Option': 1, 'Hot Option': 2}
+
+    # Apply the mapping to the 'ITEM_SUBCATEGORY' column in item_info_df
+    item_info_df['ITEM_SUBCATEGORY'] = item_info_df['ITEM_SUBCATEGORY'].map(temperature_mapping)
+
+    item_info_df.head()
+    
+    ## state cat cols to carry out manual encoding on
+    categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY"]
+    
+    ## loop through each categorical column
+    for col in categorical_cols:
+        ## get the unique values in the column
+        unique_values = menu_table[col].unique()
+
+        ## loop through unique values in the column
+        for value in unique_values:
+            ## check if the value in the menu_table table matches the corresponding value in item_info_df
+            if value == item_info_df[col].values[0]:
+                ## create a column with the name 'column_selected_value' and set its value to 1
+                menu_table[f'{col}_{value}'] = 1
+
+                ## add this column to the item_info_df
+                item_info_df[f'{col}_{value}'] = 1
+            else:
+                ## create a column with the name 'column_unique_value' and set its value to 0
+                menu_table[f'{col}_{value}'] = 0
+
+                ## add this column to the item_info_df
+                item_info_df[f'{col}_{value}'] = 0
+
+    ## drop the original categorical columns from item_info_df
+    item_info_df.drop(columns=categorical_cols, inplace=True)
+    
+    
+    
+    ## assign the columsn YEAR with their respective values
+    item_info_df['YEAR'] = year
+    
+    # define the desired column order
+    desired_columns = ['SALE_PRICE_USD', 'YEAR', 'ITEM_CATEGORY_Beverage', 'MENU_ITEM_ID',
+    'MENU_TYPE_Ramen', 'MENU_TYPE_Chinese', 'MENU_TYPE_Vegetarian',
+    'MENU_TYPE_Gyros', 'DAIRY_FREE', 'MENU_TYPE_Crepes',
+    'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Ethiopian', 'MENU_TYPE_Hot Dogs',
+    'ITEM_SUBCATEGORY', 'ITEM_CATEGORY_Main', 'MENU_TYPE_Tacos',
+    'MENU_TYPE_BBQ']
+
+    # drop columns not in the desired column list
+    item_info_df = item_info_df[desired_columns]
+
+    # convert SALE_PRICE_USD column value to float
+    item_info_df["SALE_PRICE_USD"] = item_info_df["SALE_PRICE_USD"].astype(float)
+
+    
+    # retrieve min max scaler
+    min_max_scaler = joblib.load("assets/models/product_qty_year_min_max_scaler.joblib")
+    
+    min_max_scaler.fit(item_info_df)
+    
+    min_max_scaler.transform(item_info_df)
+    
+    
+    # retrieve regression model
+    product_qty_per_year_model = joblib.load("assets/models/product_qty_year_xgb_model.joblib")
+    
+    model_prediction = product_qty_per_year_model.predict(item_info_df)
+    
+    return model_prediction, menu_item_id, menu_item_name, total_qty_by_item_over_time, fig
+
+# Function: calculate_prediction_metrics
+# the purpose of this function is to carry out the necessary calculations to show the different metrics to the user after they select a menu item
+def calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_over_time):
+    # Round off the prediction to the nearest whole number
+    rounded_prediction = round(model_prediction[0])
+    
+    # retrieve the unit price for selected item
+    unit_price = menu_table.loc[menu_table['MENU_ITEM_ID'] == menu_item_id, 'UNIT_PRICE'].values[0]
+    
+    # get the total sales for the next year
+    sales_next_year = float(unit_price) * int(rounded_prediction)
+    
+    
+    # Get previous year sales
+    ## sort the DataFrame by 'YEAR' in descending order
+    total_qty_by_item_over_time_sorted = total_qty_by_item_over_time.sort_values(by='YEAR', ascending=False)
+    
+    ## keep only the first row for each 'MENU_ITEM_ID' which is the latest
+    total_qty_by_item_over_time = total_qty_by_item_over_time_sorted.groupby('MENU_ITEM_ID').first().reset_index()
+    
+    ## get the quantity sold for the latest year
+    qty_sold_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"])
+    
+    ## get the total sales for the latest year
+    sales_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"]) * float(unit_price)
+
+    
+    # Get the percentage change in quantity sold
+    qty_percent_change = ((rounded_prediction - qty_sold_last_year) / qty_sold_last_year) * 100
+    
+    
+    # Get the percentage change in sales comparing previous year and predicted year
+    
+    ## Get the sales change from latest year (latest to predicted)
+    sales_change = (rounded_prediction*float(unit_price)) - sales_last_year
+    
+    ## calculate the percentage change in sales
+    sales_percent_change = ((sales_change / sales_last_year)*100)
+
+    return rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price
 
 #####################
 ##### MAIN CODE #####
@@ -188,12 +346,35 @@ increase could be slightly larger or smaller. However, this is only one month of
 
 # TAB 2: Model Prediction
 with tab2:
-    st.markdown("## Menu Item Next Month Sales Prediction")
+    st.markdown("## Menu Item Next Year Sales Prediction")
     
-    default_option = None
+    st.write("""This page allows us to predict the total quantity sold for a menu item next year. This page aims to help reach hit the high level goal
+             of increasing sales from \$105m to \$320m, a 25% year on year increase over the course of the next 5 years. \n
+The ability to predict the total quantity sold for a menu item next year, will allow you to know if this menu item is hitting the success metric of 25% year
+on year average increase in sales across all menu items. Tasty Bytes will be able to make changes in time, if necessary, to ensure that the menu items's potential
+is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
     
+    
+    # Display the different table information for different menu items
+    st.markdown("### Menu Item Data")
     menu_table_df = retrieve_menu_table()
     menu_table = get_health_metrics_menu_table(menu_table_df)
+    
+    with st.expander("Menu Item Categories"):
+        st.dataframe(menu_table_df[["MENU_ITEM_ID", "MENU_ITEM_NAME", "MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]], hide_index=True)
+    
+    with st.expander("Menu Item Unit Metrics"):
+        st.dataframe(menu_table_df[["MENU_ITEM_ID", "MENU_ITEM_NAME", "UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]], hide_index=True)
+    
+    with st.expander("Menu Items Health Metrics"):
+        st.dataframe(menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "HEALTHY", "GLUTEN_FREE", "DAIRY_FREE", "NUT_FREE"]], hide_index=True)
+    
+    
+    # Model Prediction
+    st.markdown("### Menu Item Sales Predictor")
+    
+    # set default option to none
+    default_option = None
     # get menu item options for users to choose
     menu_item_options = [
     f"({row['MENU_ITEM_ID']}) {row['MENU_ITEM_NAME']}"
@@ -202,175 +383,21 @@ with tab2:
 
     # use the updated list of options for the selectbox
     # user can select menu item they want to predict next month quantity sold for
-    selected_item_cat = st.selectbox("Menu Item: ", [default_option] + list(menu_item_options))
+    selected_item_cat = st.selectbox("Select Menu Item: ", [default_option] + list(menu_item_options))
     
     if selected_item_cat == None:
         st.error("Please fill in the required field to get a prediction")
     
     else:
-        # extract MENU_ITEM_ID from the option string
-        menu_item_id = int(selected_item_cat.split(")")[0][1:])
-
-        menu_item_name = selected_item_cat.split(") ")[1]
+        # retrieve the model's prediction
+        model_prediction, menu_item_id, menu_item_name, total_qty_by_item_over_time, fig = get_prediction()
         
-        item_info_df = menu_table[menu_table["MENU_ITEM_ID"] == menu_item_id]
-        
-        item_info_df = item_info_df.drop(["MENU_ITEM_NAME", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"], axis=1)
-        
-        item_info_df = item_info_df.rename(columns={'UNIT_PRICE': 'SALE_PRICE_USD'})
-        
-        # retrieve year and month from order timestamp
-        order_df = pd.read_csv('assets/total_qty_by_item.csv')
-        
-
-        # Convert the 'YEAR' column to numeric values
-        order_df['YEAR'] = order_df['YEAR'].astype(str).replace(',', '').astype(int)
-        
-        
-        # get the total qty sold over the years for a particular menu item
-        total_qty_by_item_over_time = order_df[order_df["MENU_ITEM_ID"]==menu_item_id]
-        
-        
-        # Plotly Line Chart
-        ## create the line chart
-        fig = go.Figure(data=go.Line(x=total_qty_by_item_over_time['YEAR'], y=total_qty_by_item_over_time['TOTAL_QTY_SOLD_PER_YEAR'], mode='lines+markers'))
-
-        ## update the layout
-        fig.update_layout(title='Total Quantity Sold per Year',
-                        xaxis_title='Year',
-                        yaxis_title='Total Qty Sold')
-
-
-
-        # get one year after the latest year provided in the data
-        year = total_qty_by_item_over_time["YEAR"].max() + 1
-        
-        
-        # Replace 'Y' with 'Yes' and 'N' with 'No' in the DataFrame
-        item_info_df = item_info_df.replace({'Yes': 1, 'No': 0})
-        
-        
-        
-        # MANUAL ONT HOT ENCODING
-        
-        # Define the mapping dictionary
-        temperature_mapping = {'Cold Option': 0, 'Warm Option': 1, 'Hot Option': 2}
-
-        # Apply the mapping to the 'ITEM_SUBCATEGORY' column in item_info_df
-        item_info_df['ITEM_SUBCATEGORY'] = item_info_df['ITEM_SUBCATEGORY'].map(temperature_mapping)
-
-        item_info_df.head()
-        
-        ## state cat cols to carry out manual encoding on
-        categorical_cols = ["MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY"]
-        
-        ## loop through each categorical column
-        for col in categorical_cols:
-            ## get the unique values in the column
-            unique_values = menu_table[col].unique()
-
-            ## loop through unique values in the column
-            for value in unique_values:
-                ## check if the value in the menu_table table matches the corresponding value in item_info_df
-                if value == item_info_df[col].values[0]:
-                    ## create a column with the name 'column_selected_value' and set its value to 1
-                    menu_table[f'{col}_{value}'] = 1
-
-                    ## add this column to the item_info_df
-                    item_info_df[f'{col}_{value}'] = 1
-                else:
-                    ## create a column with the name 'column_unique_value' and set its value to 0
-                    menu_table[f'{col}_{value}'] = 0
-
-                    ## add this column to the item_info_df
-                    item_info_df[f'{col}_{value}'] = 0
-
-        ## drop the original categorical columns from item_info_df
-        item_info_df.drop(columns=categorical_cols, inplace=True)
-        
-        
-        
-        ## assign the columsn YEAR with their respective values
-        item_info_df['YEAR'] = year
-        
-        # define the desired column order
-        desired_columns = ['MENU_ITEM_ID', 'ITEM_SUBCATEGORY', 'SALE_PRICE_USD', 'YEAR',
-       'DAIRY_FREE', 'GLUTEN_FREE', 'HEALTHY', 'NUT_FREE',
-       'MENU_TYPE_Ethiopian', 'MENU_TYPE_Ice Cream', 'MENU_TYPE_Chinese',
-       'MENU_TYPE_BBQ', 'MENU_TYPE_Hot Dogs', 'MENU_TYPE_Gyros',
-       'MENU_TYPE_Tacos', 'MENU_TYPE_Vegetarian', 'MENU_TYPE_Ramen',
-       'MENU_TYPE_Crepes', 'MENU_TYPE_Poutine', 'MENU_TYPE_Sandwiches',
-       'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Mac & Cheese',
-       'TRUCK_BRAND_NAME_Tasty Tibs', 'TRUCK_BRAND_NAME_Freezing Point',
-       'TRUCK_BRAND_NAME_Peking Truck', 'TRUCK_BRAND_NAME_Smoky BBQ',
-       'TRUCK_BRAND_NAME_Amped Up Franks', 'TRUCK_BRAND_NAME_Cheeky Greek',
-       'TRUCK_BRAND_NAME_Guac n\' Roll', 'TRUCK_BRAND_NAME_Plant Palace',
-       'TRUCK_BRAND_NAME_Kitakata Ramen Bar',
-       'TRUCK_BRAND_NAME_Le Coin des Crêpes',
-       'TRUCK_BRAND_NAME_Revenge of the Curds',
-       'TRUCK_BRAND_NAME_Better Off Bread', 'TRUCK_BRAND_NAME_The Mega Melt',
-       'TRUCK_BRAND_NAME_The Mac Shack', 'ITEM_CATEGORY_Beverage',
-       'ITEM_CATEGORY_Dessert', 'ITEM_CATEGORY_Main']
-
-        # drop columns not in the desired column list
-        item_info_df = item_info_df[desired_columns]
-
-        # convert SALE_PRICE_USD column value to float
-        item_info_df["SALE_PRICE_USD"] = item_info_df["SALE_PRICE_USD"].astype(float)
-
-        
-        # retrieve min max scaler
-        min_max_scaler = joblib.load("assets/product_qty_year_min_max_scaler.joblib")
-        
-        min_max_scaler.fit(item_info_df)
-        
-        min_max_scaler.transform(item_info_df)
-        
-        
-        # retrieve regression model
-        product_qty_per_year_model = joblib.load("assets/product_qty_year_xgb_model.joblib")
-        
-        model_prediction = product_qty_per_year_model.predict(item_info_df)
-        
-        
-        # Round off the prediction to the nearest whole number
-        rounded_prediction = round(model_prediction[0])
-        
-        # retrieve the unit price for selected item
-        unit_price = menu_table.loc[menu_table['MENU_ITEM_ID'] == menu_item_id, 'UNIT_PRICE'].values[0]
-        
-        # get the total sales for the next year
-        sales_next_year = float(unit_price) * int(rounded_prediction)
-        
-        
-        # Get previous year sales
-        ## sort the DataFrame by 'YEAR' in descending order
-        total_qty_by_item_over_time_sorted = total_qty_by_item_over_time.sort_values(by='YEAR', ascending=False)
-        
-        ## keep only the first row for each 'MENU_ITEM_ID' which is the latest
-        total_qty_by_item_over_time = total_qty_by_item_over_time_sorted.groupby('MENU_ITEM_ID').first().reset_index()
-        
-        ## get the quantity sold for the latest year
-        qty_sold_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"])
-        
-        ## get the total sales for the latest year
-        sales_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"]) * float(unit_price)
-
-        
-        # Get the percentage month to month change (latest to predicted)
-        sales_change = (rounded_prediction*float(unit_price)) - sales_last_year
-        
-        # get the percentage change in sales comparing previous year and predicted year
-        percent_change = ((sales_change / sales_last_year)*100)
-
-
+        # retrieve the metrics to be displayed to user
+        rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price = calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_over_time)
 
         # DISPLAY
-        st.markdown("## Prediction:")
-        
-        st.markdown("### No. of {} sold next year: {}".format(menu_item_name, rounded_prediction))
-        st.markdown("### Estimated sales next year: ${:.2f}".format(sales_next_year))
-        st.markdown("### Estimated YoY sales growth: {:.2f}%".format(percent_change))
+        st.write('')
+        st.markdown("### Prediction for {}:".format(selected_item_cat))
         
         with st.expander("{} Historical Sales Data".format(menu_item_name)):
             # show historical qty sold over the years
@@ -391,3 +418,23 @@ with tab2:
             # show the plot in the Streamlit app 
             st.plotly_chart(fig)
         
+        # Display the different metrics
+        col1,col2,col3=st.columns(3)
+        col1.metric('Estimated quantity sold next year', f"{round(rounded_prediction, 2)}")
+        col2.metric('Estimated sales next year', f"${round(sales_next_year, 2)}")
+
+        col1.metric('Estimated YoY quantity sold growth', f"{round(qty_percent_change, 2)}%")
+        col2.metric('Estimated YoY sales growth', f"{round(sales_percent_change, 2)}%")
+
+        # Prediction Summary
+        st.write('')
+        st.markdown("#### Prediction Summary")
+        st.write("""{} is estimated to sell {} units next year. This is a {:.2f}% increase from the previous year. This will translate to ${:.2f} of sales
+                 which is a {:.2f}% increase in sales from the previous year. From this prediction, Tasty Bytes can expect an increase in sales from this
+                 menu item next year.""".format(menu_item_name, rounded_prediction, qty_percent_change, sales_next_year,
+                                                                                sales_percent_change))
+        # How can this help Tasty Bytes
+        st.markdown("#### What\'s Next?")
+        st.write("""With the ability to predict the sales performance of a menu item next year, Tasty Bytes can better carry out inventory management
+                 to ensure inventory levels are sufficient to meet demand, but also to prevent overstocking, reducing waste and minimising carrying costs. 
+                 In addition, Tasty Bytes can tailor marketing efforts and promotions to maximise the impact of the menu item's demand.""")  
