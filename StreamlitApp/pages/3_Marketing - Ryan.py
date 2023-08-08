@@ -186,13 +186,13 @@ def automate_sales_pred(current_date,data,sales_model):
     next_year_df['NEXT_YEAR_SALES']= pd.DataFrame(sales_model.predict(next_year_pred_df),columns=['NEXT_YEAR_SALES'])
     return next_month_pred, next_quarter_df, next_year_df
 
-def get_sales_growth(sales_model_input,current_date):
+def get_sales_growth(sales_model_input,current_date,seg_Sales):
     #Get dates
     prev_month_date = current_date - pd.DateOffset(months=1)
     prev_quarter_date = current_date - pd.DateOffset(months=3)
     prev_year_date = current_date - pd.DateOffset(years=1)
-    #Load sales csv
-    seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
+
+    #Merge the segment sales with sales model input to get 
     seg_Sales=pd.merge(seg_Sales,right=sales_model_input[['CLUSTER','CITY']],on=['CLUSTER','CITY'],how='inner')
 
     # Get the prev month, quarter, year from dataframe
@@ -235,17 +235,22 @@ def main() -> None:
     with tab1:
         # High level goals
         st.markdown("## High Level Goals")
-        st.write("""As stated in our homepage, our team is dedicated to assisting Tasty Bytes in achieving its ambitious goals over the next 5 years. 
-                 In particular, we aim to help Tasty Bytes achieve a remarkable 25% Year-Over-Year increase in sales. This page is exclusively focused 
+        st.markdown("""As stated in our homepage, our team is dedicated to assisting Tasty Bytes in achieving its ambitious goals over the next 5 years. 
+                 In particular, we aim to help Tasty Bytes achieve a remarkable **:blue[25% Year-Over-Year increase in sales]**. This page is exclusively focused 
                  on churn prediction, which is a twin concept of member retention. It is designed to empower and elevate your marketing strategies with 
                  our data-driven approach, ultimately driving significant sales growth by retaining valuable customers and understanding their likelihood of churning.""")
+        st.markdown("## Success Metrics")
+        st.write("In order to assess the effectiveness of our churn prediction model, we have established a key success metric.")
+        st.markdown("Success Metric: Achieve a **:blue[20% Year-over-Year (YoY) Member Sales Growth]** for 2022")
+        st.write("""To achieve this growth, we will leverage the insights from our churn prediction model to optimize member engagement.
+                 Assuming that we can encourage members to make two purchases per month through targeted strategies, we aim to drive the desired YoY growth.""")
         # How to use predictions
         st.markdown('## How to Utilize the Predictions')
         st.write(
             """
             In the Model Prediction tab, you will have access to valuable insights derived from both the Segmentation and Churn prediction models. 
-            Additionally, we have incorporated a Sales Prediction model that predicts customer sales based on Frequency, Average Order Sales, and 
-            Tenure Month. Once you filter the segments and churn predictions, you can input your own frequency and months data to get personalized sales predictions.
+            Additionally, we have incorporated a Sales Prediction model that predicts the segment's sales for the next month. Once you filter the segments and churn 
+            predictions, you can input the estimated frequency for each month to get personalized sales predictions.
 
             With these powerful predictions, you can unlock various opportunities:
 
@@ -271,7 +276,7 @@ def main() -> None:
             upload a new Excel file in the Input Data section.
             2. Predictions: After uploading your file, the predictions will be automatically generated and shown.
             3. Filter Data: Use filters to explore specific segments or refine the data for analysis.
-            4. Sales Forecast: Input the expected number of purchases for all members in the next month to assume the impact of your marketing strategy and generate forecasted sales.
+            4. Sales Forecast: Input the expected number of purchases for all members in each month to assume the impact of your marketing strategy and generate forecasted sales.
             """)
 
         # Input data
@@ -398,6 +403,8 @@ def main() -> None:
             current_date=pd.to_datetime('2022-11-01')
             #Update frequency
             sales_model_input['FREQUENCY']=estimated_frequency*sales_model_input['NUMBER OF MEMBERS']
+            #Load sales csv
+            seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
             #Get predictions
             next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
             
@@ -406,13 +413,14 @@ def main() -> None:
             next_quarter_sales=next_quarter_df['NEXT_QUARTER_SALES'].sum()/ 10**6
             next_year_sales=next_year_df['NEXT_YEAR_SALES'].sum()/ 10**6
             # Get MoM,QoQ,YoY growth
-            prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date)
+            prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date,seg_Sales)
             mom_sales=(next_month_pred['NEXT_MONTH_SALES'].sum()-prev_month_sales['SALES'].sum())/prev_month_sales['SALES'].sum()*100
             qoq_sales=(next_quarter_df['NEXT_QUARTER_SALES'].sum()-prev_quarter_sales['SALES'].sum())/prev_quarter_sales['SALES'].sum()*100
             yoy_sales=(next_year_df['NEXT_YEAR_SALES'].sum()-prev_year_sales['SALES'].sum())/prev_year_sales['SALES'].sum()*100
           
             # Display assumption
             st.write('Assuming you are able to get each customers to purchase from you ',estimated_frequency,' time every month.')
+            st.write('Latest date is based on the data lastest date which is 2022-11-01')
             st.write('These are your predicted sales:')
             # Display metrics
             col1,col2,col3=st.columns(3)
@@ -422,7 +430,41 @@ def main() -> None:
             col1.metric('Month-over-month', f"{round(mom_sales, 2)}%")
             col2.metric('Quarter-over-quarter', f"{round(qoq_sales, 2)}%")
             col3.metric('Year-over-year', f"{round(yoy_sales, 2)}%")
+            
+            # Success Metrics
+            st.markdown('## Did we hit our Success Metrics?')
+            st.markdown("""Currently, our current *:blue[Year on Year Member Sales Growth for 2022 stands at 16.05%]*. With data available up until 2022-11-01, 
+                        we utilized our sales prediction model to forecast sales for the next two months. Under the assumption that our Churn Prediction model
+                        has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year on Year 
+                        Member Sales Growth of 36.5%]* for 2022. This accomplishment aligns with our Success Metrics, as we have 
+                         *:blue[ attained more than 20% Year-over-Year (YoY) Member Sales Growth]* for 2022.""")
 
+
+            sales_model_input=data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
+            sales_model_input['FREQUENCY']=2*sales_model_input['NUMBER OF MEMBERS']
+            current_date=pd.to_datetime('2022-01-01')
+            #Get previous sales
+            prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date,seg_Sales)
+            #Get next year actual sales
+            next_year = pd.DataFrame(pd.date_range(current_date,current_date+pd.DateOffset(years=1)-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
+            next_year['YEAR'] = next_year['DATE'].dt.year
+            next_year['MONTH'] = next_year['DATE'].dt.month
+            next_year.drop('DATE',axis=1,inplace=True)
+            next_year_sales=pd.merge(seg_Sales,right=next_year,on=['YEAR','MONTH'],how='inner')
+        
+            #Get predictions
+            next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
+            # Calculate YoY
+            actual_sales=next_year_sales['SALES'].sum()
+            pred_sales=next_month_pred['NEXT_MONTH_SALES']*2
+            pred_sales=actual_sales+pred_sales.sum()
+            prev_sales=prev_year_sales['SALES'].sum()
+            actual_yoy_sales=(actual_sales-prev_sales)/prev_sales.sum()*100
+            pred_yoy_sales=(pred_sales-prev_sales)/prev_sales.sum()*100
+            st.metric('Actual Year-over-year', f"{round(actual_yoy_sales, 2)}%")
+            st.metric('Predicted Year-over-year', f"{round(pred_yoy_sales, 2)}%")
+
+          
  
 ###########################
 ### Page Configurations ### 
