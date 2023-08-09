@@ -530,28 +530,28 @@ with tab3:
         
         # Display the different metrics
         col1,col2,col3=st.columns(3)
-        col1.metric('Estimated quantity sold next year', f"{round(rounded_prediction, 2)}", round(rounded_prediction, 2) - qty_sold_last_year, delta_color="normal", help="Model's Predicted total no. of units sold next year")
-        col2.metric('Estimated sales next year', f"${round(sales_next_year, 2)}", round(sales_next_year, 2)-sales_last_year, delta_color="normal", help="Estimated sales ($) next year based on quantity predicted")
+        col1.metric('Estimated quantity sold next year', f"{format(round(rounded_prediction, 2), ',')}", round(rounded_prediction, 2) - qty_sold_last_year, delta_color="normal", help="Model's Predicted total no. of units sold next year")
+        col2.metric('Estimated sales next year', f"${format(round(sales_next_year, 2), ',')}", round(sales_next_year, 2)-sales_last_year, delta_color="normal", help="Estimated sales ($) next year based on quantity predicted")
 
         # Display percentage change in quantity
         ## Check if more than 0, no change, or less than 0 percentage increase
         ## Each case has a different arrow and color
         if qty_percent_change > 0:
-            col1.metric('Estimated YoY quantity sold growth', f"↑ {round(qty_percent_change, 2)}%", help="")
+            col1.metric('Estimated YoY quantity sold growth', f"↑ {format(round(qty_percent_change, 2), ',')}%")
         elif qty_percent_change == 0:
-            col1.metric('Estimated YoY quantity sold growth', f"↔ {round(qty_percent_change, 2)}%")
+            col1.metric('Estimated YoY quantity sold growth', f"↔ {format(round(qty_percent_change, 2), ',')}%")
         else:
-            col1.metric('Estimated YoY quantity sold growth', f"↓ {round(qty_percent_change, 2)}%")
+            col1.metric('Estimated YoY quantity sold growth', f"↓ {format(round(qty_percent_change, 2), ',')}%")
 
         # Display percentage change in sales
         ## Check if more than 0, no change, or less than 0 percentage increase
         ## Each case has a different arrow and color
         if sales_percent_change > 0:
-            col2.metric('Estimated YoY sales growth', f"↑ {round(sales_percent_change, 2)}%")
+            col2.metric('Estimated YoY sales growth', f"↑ {format(round(sales_percent_change, 2), ',')}%")
         elif sales_percent_change == 0:
-            col2.metric('Estimated YoY sales growth', f"↔ {round(sales_percent_change, 2)}%")
+            col2.metric('Estimated YoY sales growth', f"↔ {format(round(sales_percent_change, 2), ',')}%")
         else:
-            col2.metric('Estimated YoY sales growth', f"↓ {round(sales_percent_change, 2)}%")
+            col2.metric('Estimated YoY sales growth', f"↓ {format(round(sales_percent_change, 2), ',')}%")
 
 
         # Prediction Summary
@@ -559,14 +559,14 @@ with tab3:
         st.markdown("#### Prediction Summary")
         
         if qty_percent_change > 0 and sales_percent_change > 0:
-            st.markdown("""**{}** is estimated to sell **:green[{}]** units next year. This is up by **:green[{:.0f}]** units or a **:green[{:.2f}%]** increase
-                        from the previous year. This will translate to **:green[${:.2f}]** of sales which is a **:green[{:.2f}%]** increase in sales from the
+            st.markdown("""**{}** is estimated to sell **:green[{:,}]** units next year. This is up by **:green[{:,.0f}]** units or a **:green[{:,.2f}%]** increase
+                        from the previous year. This will translate to **:green[${:,.2f}]** of sales which is a **:green[{:,.2f}%]** increase in sales from the
                         previous year. From this prediction, Tasty Bytes can expect an increase in sales from this menu item next year.""".format(
                             menu_item_name, rounded_prediction, round(rounded_prediction, 2) - qty_sold_last_year, qty_percent_change, sales_next_year, 
                             sales_percent_change))
         else:
-            st.markdown("""**{}** is estimated to sell **:red[{}]** units next year. This is down by units **:red[{:.0f}]** or a **:red[{:.2f}%]** decrease
-                        from the previous year. This will translate to **:red[${:.2f}]** of sales which is a **:red[{:.2f}%]** decrease in sales from the 
+            st.markdown("""**{}** is estimated to sell **:red[{:,}]** units next year. This is down by units **:red[{:,.0f}]** or a **:red[{:,.2f}%]** decrease
+                        from the previous year. This will translate to **:red[${:,.2f}]** of sales which is a **:red[{:,.2f}%]** decrease in sales from the 
                         previous year. From this prediction, Tasty Bytes can expect an decrease in sales from this menu item next year.""".format(
                             menu_item_name, rounded_prediction, abs(round(rounded_prediction, 2) - qty_sold_last_year), qty_percent_change, sales_next_year,
                             sales_percent_change))
