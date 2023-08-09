@@ -199,6 +199,7 @@ input_data["AVERAGE_AGE"] = using["AGE"].mean()
 
 
 st.markdown("### Based on month initial information")
+st.write("This prediction is an inital view of next month sales and may not be accurate")
 # data to input in the model
 st.write(input_data)
 
@@ -227,3 +228,8 @@ st.metric("Adjusted Predicted Sales", f"${new_pred_sales[0]:.2f}")
 
 change_sales_new = (new_pred_sales - lastMonthSales)/lastMonthSales * 100
 st.metric("Adjusted Change in Sales", f"{change_sales_new[0]:.2f}%")
+
+
+with st.expander(label="Understanding output"):
+    st.write("""Looking at the adjusted sales allows you to see what churn rate and distinct customer counts will need to be achieved.
+             Use the new values as a guide to make informed business decisions.""")
