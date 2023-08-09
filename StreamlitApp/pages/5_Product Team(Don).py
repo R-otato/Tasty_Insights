@@ -274,7 +274,6 @@ def calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_ove
     
     ## get the total sales for the latest year
     sales_last_year = int(total_qty_by_item_over_time["TOTAL_QTY_SOLD_PER_YEAR"]) * float(unit_price)
-
     
     # Get the percentage change in quantity sold
     qty_percent_change = ((rounded_prediction - qty_sold_last_year) / qty_sold_last_year) * 100
@@ -504,7 +503,7 @@ with tab3:
         
         # retrieve the metrics to be displayed to user
         rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price, qty_sold_last_year, sales_last_year = calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_over_time)
-
+        
         # DISPLAY
         st.write('')
         st.markdown("### Prediction for {}:".format(selected_item_cat))
@@ -514,15 +513,34 @@ with tab3:
             total_qty_by_item_over_time_sorted = total_qty_by_item_over_time_sorted.sort_values(by='YEAR', ascending=True)
             qty_sold_historic_year = total_qty_by_item_over_time_sorted.drop("MENU_ITEM_ID", axis=1)
             
-            # Calculate the 'TOTAL_SALES' column by multiplying 'TOTAL_QTY_SOLD_PER_YEAR' with 'unit_price'
-            qty_sold_historic_year['TOTAL_SALES'] = qty_sold_historic_year['TOTAL_QTY_SOLD_PER_YEAR'].astype(float) * float(unit_price)
+            # calculate the 'TOTAL_SALES' column by multiplying 'TOTAL_QTY_SOLD_PER_YEAR' with 'unit_price'
+            qty_sold_historic_year['TOTAL_SALES'] = (qty_sold_historic_year['TOTAL_QTY_SOLD_PER_YEAR'].astype(float) * float(unit_price))
             
             # convert the 'YEAR' column to string to remove ','
             qty_sold_historic_year['YEAR'] = qty_sold_historic_year['YEAR'].astype(str).replace(',', '').astype(str)
 
+            qty_sold_historic_year = qty_sold_historic_year.rename(columns={'TOTAL_QTY_SOLD_PER_YEAR': 'TOTAL_QUANTITY_SOLD'})
+            
             # display table
             st.dataframe(qty_sold_historic_year, hide_index=True)
-        
+
+
+
+            # Calculate percentage changes
+            total_qty_percent_change = qty_sold_historic_year["TOTAL_QUANTITY_SOLD"].pct_change() * 100
+            total_sales_percent_change = qty_sold_historic_year["TOTAL_SALES"].pct_change() * 100
+
+            # Create the historic_percentage_change table
+            historic_percentage_change = pd.DataFrame({
+                "TIME_PERIOD": [
+                    f"{int(year) - 1} - {int(year)}" for year in qty_sold_historic_year["YEAR"].iloc[1:]
+                ],  # Generate time period strings dynamically
+                "QTY_%_CHANGE": total_qty_percent_change.iloc[1:].tolist(),     # Exclude the first year
+                "SALES_%_CHANGE": total_sales_percent_change.iloc[1:].tolist()  # Exclude the first year
+            })
+
+            st.dataframe(historic_percentage_change, hide_index=True)
+
         
         
             # show the plot in the Streamlit app 
@@ -536,6 +554,7 @@ with tab3:
         # Display percentage change in quantity
         ## Check if more than 0, no change, or less than 0 percentage increase
         ## Each case has a different arrow and color
+        
         if qty_percent_change > 0:
             col1.metric('Estimated YoY quantity sold growth', f"↑ {format(round(qty_percent_change, 2), ',')}%")
         elif qty_percent_change == 0:
