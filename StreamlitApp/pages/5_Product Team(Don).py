@@ -446,7 +446,7 @@ is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
     st.markdown("### Menu Item Sales Predictor")
     
     # set default option to none
-    default_option = None
+    default_option = ''
     # get menu item options for users to choose
     menu_item_options = [
     f"({row['MENU_ITEM_ID']}) {row['MENU_ITEM_NAME']}"
@@ -455,9 +455,9 @@ is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
 
     # use the updated list of options for the selectbox
     # user can select menu item they want to predict next month quantity sold for
-    selected_item_cat = st.selectbox("Select Menu Item: ", [default_option] + list(menu_item_options))
+    selected_item_cat = st.selectbox("Select Menu Item: ", [default_option] + list(menu_item_options), key="menu_item_select")
     
-    if selected_item_cat == None:
+    if selected_item_cat == '':
         st.error("Please fill in the required field to get a prediction")
     
     else:
