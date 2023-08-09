@@ -341,6 +341,9 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
              
 The assumption that my model makes is that the December 2022 quantity sold is the average of the past 11 months of 2022. The year-on-year percentage 
 increase could be slightly larger or smaller. However, this is only one month of assumption therefore, it should not impact the model to a large extent.
+
+Another assumption my model makes is that the unit price of each menu item does not change. This can potentially affect the prediction if Tasty Bytes 
+changed the unit price since the unit price is the factor that plays the biggest role in the model’s decision-making process.
 """)
         
 
