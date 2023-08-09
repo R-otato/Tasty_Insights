@@ -471,9 +471,9 @@ with tab2:
 with tab3:
     st.markdown("## Sales Prediction for Next Year (Menu Item)")
     
-    st.write("""This page allows you to predict the total quantity sold for a menu item next year. The success metric is defined as 25% YoY growth in 
-             quantity sold for each menu item. Hence, the ability to predict the total quantity sold for a menu item will allow you to best manage your 
-             resources on where to drive for better impact in contributing to the high-level goal.""")
+    st.write("""This page allows you to predict the total quantity sold for a menu item next year. The success metric is defined as 25% YoY increase in 
+             the average quantity sold for all products in order to achieve the high-level goal. Hence, the ability to predict the total quantity sold for
+             a menu item will allow you to best manage your resources on where to drive for better impact in contributing to the high-level goal.""")
     
     
     # retrive menu item info
@@ -559,8 +559,8 @@ with tab3:
         st.markdown("#### Prediction Summary")
         
         if qty_percent_change > 0 and sales_percent_change > 0:
-            st.markdown("""**{}** is estimated to sell **:blue[{}]** units next year. This is up by **:blue[{:.0f}]** units or a **:blue[{:.2f}%]** increase
-                        from the previous year. This will translate to **:blue[${:.2f}]** of sales which is a **:blue[{:.2f}%]** increase in sales from the
+            st.markdown("""**{}** is estimated to sell **:green[{}]** units next year. This is up by **:green[{:.0f}]** units or a **:green[{:.2f}%]** increase
+                        from the previous year. This will translate to **:green[${:.2f}]** of sales which is a **:green[{:.2f}%]** increase in sales from the
                         previous year. From this prediction, Tasty Bytes can expect an increase in sales from this menu item next year.""".format(
                             menu_item_name, rounded_prediction, round(rounded_prediction, 2) - qty_sold_last_year, qty_percent_change, sales_next_year, 
                             sales_percent_change))
