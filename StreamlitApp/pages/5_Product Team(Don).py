@@ -557,10 +557,20 @@ with tab3:
         # Prediction Summary
         st.write('')
         st.markdown("#### Prediction Summary")
-        st.markdown("""**{}** is estimated to sell **:blue[{}]** units next year. This is a **:blue[{:.2f}%]** increase from the previous year. This will translate to **:blue[${:.2f}]**
-                 of sales which is a **:blue[{:.2f}%]** increase in sales from the previous year. From this prediction, Tasty Bytes can expect an increase in sales from this
-                 menu item next year.""".format(menu_item_name, rounded_prediction, qty_percent_change, sales_next_year, sales_percent_change))
-
+        
+        if qty_percent_change > 0 and sales_percent_change > 0:
+            st.markdown("""**{}** is estimated to sell **:blue[{}]** units next year. This is up by **:blue[{:.0f}]** units or a **:blue[{:.2f}%]** increase
+                        from the previous year. This will translate to **:blue[${:.2f}]** of sales which is a **:blue[{:.2f}%]** increase in sales from the
+                        previous year. From this prediction, Tasty Bytes can expect an increase in sales from this menu item next year.""".format(
+                            menu_item_name, rounded_prediction, round(rounded_prediction, 2) - qty_sold_last_year, qty_percent_change, sales_next_year, 
+                            sales_percent_change))
+        else:
+            st.markdown("""**{}** is estimated to sell **:red[{}]** units next year. This is down by units **:red[{:.0f}]** or a **:red[{:.2f}%]** decrease
+                        from the previous year. This will translate to **:red[${:.2f}]** of sales which is a **:red[{:.2f}%]** decrease in sales from the 
+                        previous year. From this prediction, Tasty Bytes can expect an decrease in sales from this menu item next year.""".format(
+                            menu_item_name, rounded_prediction, abs(round(rounded_prediction, 2) - qty_sold_last_year), qty_percent_change, sales_next_year,
+                            sales_percent_change))
+            
         # How can this help Tasty Bytes
         st.markdown("#### What\'s Next?")
         st.write("""With the ability to predict the sales performance of a menu item next year, Tasty Bytes can better carry out inventory management
