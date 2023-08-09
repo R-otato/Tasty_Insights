@@ -295,155 +295,190 @@ def calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_ove
 #####################
 
 st.markdown("# Product Team")
-tab1, tab2 = st.tabs(['About', 'Model Prediction'])
+tab1, tab2, tab3 = st.tabs(['About', 'Explore Menu Item Catalog', 'Model Prediction'])
 
 # TAB 1: About
 with tab1:
     # High Level Goals Explanations
     st.markdown("# High Level Goals")
-    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a 25% YoY sales increase, from \$105M to \$320M over 5 years with 
-             the sucess metric being the increase of average quantity sold of all products by 25% YoY to achieve the high level goal.
+    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a 25% YoY sales increase, from $105M to $320M over 5 years. The 
+             success metric is defined to be a 25% YoY increase in the average quantity sold for all products in order to achieve the high-level goal.
 
-Combining the power of data analysis and machine learning, the page predicts the quantity sold for a specific menu item based on historical
-                data. Accurately forecasting the next month's quantity sold of a specific menu item can help Tasty Bytes can make informed decisions and 
-                implement targeted strategies to optimise sales for menu items. With a clear understanding of upcoming sales trends, Tasty Bytes can 
-                proactively adjust inventory, marketing efforts, and operational aspects, maximizing revenue potential.
+Combining the power of data analysis and machine learning, the page predicts the quantity sold for a specific menu item based on historical data. Accurately 
+forecasting the next year's quantity sold of a specific menu item can help Tasty Bytes make informed decisions and implement targeted strategies to optimise 
+sales of menu items. With a clear understanding of upcoming sales trends, Tasty Bytes can proactively adjust inventory, tailor their marketing efforts, and
+make arrangements on operational aspects, thereby maximizing revenue potential.
 
-The data-driven insights provided by this page offer Tasty Bytes a competitive advantage, enabling Tasty Bytes to stay ahead in the highly
-                dynamic food truck industry. By leveraging the personalized predictions for each menu item, the product team can focus on strategic 
-                decision-making tailored to the performance of individual products. This personalized approach enhances customer satisfaction, fosters 
-                loyalty, and boosts overall profitability.""")
+The data-driven insights provided by this page offer Tasty Bytes a competitive advantage, enabling Tasty Bytes to stay ahead in the highly dynamic food 
+truck industry. By leveraging the predictions for each menu item, the product team can focus on strategic decision-making tailored to driving the 
+performance of individual products. This approach can boost efficiency, effectiveness and overall profitability.""")
 
 
 
     # Utilisation of model's prediction
-    st.markdown("# How to utilise predictions?")
+    st.markdown("# Prediction Model for Better Insights and Planning")
     
-    st.write("""The model prediction tab will allow you to gain insights from the next month quantity sold prediction model. You can select the different
-             menu items from the dropdown and view the model's predicted quantities sold for the next month.""")
+    st.write("""The model prediction tab will allow you to gain insights from the next year's quantity sold prediction. You can select the different menu 
+             items from the dropdown and view the model's predicted quantities sold for the next year.""")
     
     st.write("""
              The model's prediction can provide insights and support the following:
              - Inventory Management: Enable the product team to optimise inventory levels for each menu item. Avoid overstocking or understocking, reducing
              waste and minimising carrying costs.
              - Marketing Strategies: Tailor marketing efforts and promotions to maximise the impact. Focus marketing campaigns on menu items that are 
-             predicted to perform well and amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
+             predicted to perform well and amplify marketing efforts for underperforming menu items with high margins, driving customer interest and 
+             boosting sales.
+             - Managing Sales resources and focus: The Sales team will be able to value-add better to the Franchisees by providing meaningful insights 
+             and advice.
              - Facilitate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and 
              budgeting purposes.
              """)
 
     
     # Limitations and Assumptions the model makes
-    st.markdown("# Limitations and Assumptions the model makes")
-    st.write("""The limitation of my model is that it assumes that all the time business is as usual. It does not take into account external factors such 
-             as changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to 
-             inaccurate insights and data-driven decisions such as menu optimisation, marketing strategies and inventory management.
-             
-The assumption that my model makes is that the December 2022 quantity sold is the average of the past 11 months of 2022. The year-on-year percentage 
-increase could be slightly larger or smaller. However, this is only one month of assumption therefore, it should not impact the model to a large extent.
+    st.markdown("# Limitations and Assumptions of the model")
+    st.write("""The limitation of the model is that it assumes there is no seasonality impact on the sales revenue. It does not take into account external 
+             factors such as changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can 
+             lead to inaccurate insights and data-driven decisions such as menu optimisation, marketing strategies and inventory management.
 
-Another assumption my model makes is that the unit price of each menu item does not change. This can potentially affect the prediction if Tasty Bytes 
-changed the unit price since the unit price is the factor that plays the biggest role in the model’s decision-making process.
+The assumption made is that the December 2022 quantity sold is the average of the past 11 months of 2022 due to missing data. However, this is only one 
+month of assumption therefore, it should not impact the model to a large extent.
+
+An observation is that the unit price of all menu items did not change over the years based on the data presented. The assumption made then is that the 
+unit price of each menu item remains the same in the following year. This can potentially affect the prediction if Tasty Bytes changes the unit price 
+since the unit price is the key factor in the model’s decision-making process.
 """)
         
-
-# TAB 2: Model Prediction
-with tab2:
-    st.markdown("## Menu Item Next Year Sales Prediction")
+# TAB 2: Explore Menu Item Catalog
+with tab2: 
+    st.markdown("# Menu Item Catalogue")
     
-    st.write("""This page allows us to predict the total quantity sold for a menu item next year. This page aims to help reach hit the high level goal
-             of increasing sales from \$105m to \$320m, a 25% year on year increase over the course of the next 5 years. \n
-The ability to predict the total quantity sold for a menu item next year, will allow you to know if this menu item is hitting the success metric of 25% year
-on year average increase in sales across all menu items. Tasty Bytes will be able to make changes in time, if necessary, to ensure that the menu items's potential
-is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
+    st.write("""This page allows you to explore the different menu items in the catalogue which can help you pinpoint important menu items to focus on to 
+             hit the success metric and hence the high-level goal.""")
     
-    
-    # Display the different table information for different menu items
-    st.markdown("### Menu Item Data")
     menu_table_df = retrieve_menu_table()
     menu_table = get_health_metrics_menu_table(menu_table_df)
     
-    with st.expander("Menu Item Categories"):
-        menu_categories_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]]
-        # Checkbox to enable/disable filtering
-        add_filters = st.checkbox("Add Filters")
-        
-        if add_filters:
-            # Show checkboxes for each column to filter
-            for column in menu_categories_table.columns:
-                filter_values = menu_categories_table[column].unique()
-                selected_values = st.multiselect(f"Select {column}", filter_values)
+    
+    
+    ##############################
+    # MENU ITEM CATEGORIES TABLE #
+    ##############################
+    st.markdown("## Menu Item Categories")
+    # select required cols
+    menu_categories_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "MENU_TYPE", "TRUCK_BRAND_NAME", "ITEM_CATEGORY", "ITEM_SUBCATEGORY"]]
+    
+    # Checkbox to enable/disable filtering
+    add_filters = st.checkbox("Add Filters")
+    
+    if add_filters:
+        # Show checkboxes for each column to filter
+        for column in menu_categories_table.columns:
+            filter_values = menu_categories_table[column].unique()
+            selected_values = st.multiselect(f"Select {column}", filter_values)
+            
+            # Filter data based on selected values
+            if selected_values:
+                menu_categories_table = menu_categories_table[menu_categories_table[column].isin(selected_values)]
+    
+    st.dataframe(menu_categories_table, hide_index=True)
+
+    
+    
+    
+    
+    ################################
+    # MENU ITEM UNIT METRICS TABLE #
+    ################################
+    st.markdown("## Menu Item Unit Metrics")
+    # select required columns
+    menu_pricing_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]]
+    
+    # Convert Data Types
+    ## convert numerical cols to float type    
+    menu_pricing_table[["UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]] = menu_pricing_table[["UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]].astype(float)
+    ## convert menu item id col to integer type
+    menu_pricing_table["MENU_ITEM_ID"] = menu_pricing_table["MENU_ITEM_ID"].astype(int)
+    
+    # Checkbox to enable/disable filtering
+    add_filters = st.checkbox("Add Filters", key="add_filters_pricing")
+    
+    if add_filters:
+        # Show filters for each column
+        for column in menu_pricing_table.columns:
+            if column == "MENU_ITEM_NAME":
+                filter_values = menu_pricing_table[column].unique()
+                selected_values = st.multiselect(f"Select {column}", filter_values, key="pricing_item_name")
                 
                 # Filter data based on selected values
                 if selected_values:
-                    menu_categories_table = menu_categories_table[menu_categories_table[column].isin(selected_values)]
-        
-        st.dataframe(menu_categories_table, hide_index=True)
+                    menu_pricing_table = menu_pricing_table[menu_pricing_table[column].isin(selected_values)]
+            elif column == "MENU_ITEM_ID":
+                min_id = int(menu_pricing_table["MENU_ITEM_ID"].min())
+                max_id = int(menu_pricing_table["MENU_ITEM_ID"].max())
+                selected_id_min, selected_id_max = st.slider(f"Select {column} range", min_value=min_id, max_value=max_id, value=(min_id, max_id), key=f"slider_{column}")
+                
+                # Filter data based on selected range
+                menu_pricing_table = menu_pricing_table[(menu_pricing_table[column] >= selected_id_min) & (menu_pricing_table[column] <= selected_id_max)]
+            else:
+                min_value = float(menu_pricing_table[column].min())
+                max_value = float(menu_pricing_table[column].max())
+                selected_min, selected_max = st.slider(f"Select range for {column}", min_value=min_value, max_value=max_value, value=(min_value, max_value), key=f"slider_{column}")
+                
+                # Filter data based on selected range
+                menu_pricing_table = menu_pricing_table[(menu_pricing_table[column] >= selected_min) & (menu_pricing_table[column] <= selected_max)]
     
-    with st.expander("Menu Item Unit Metrics"):
-        menu_pricing_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]]
-        
-        menu_pricing_table[["UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]] = menu_pricing_table[["UNIT_PRICE", "COST_OF_GOODS", "UNIT_PROFIT", "UNIT_GROSS_PROFIT_MARGIN (%)", "UNIT_NET_PROFIT_MARGIN (%)"]].astype(float)
-        
-        menu_pricing_table["MENU_ITEM_ID"] = menu_pricing_table["MENU_ITEM_ID"].astype(int)
-        
-        # Checkbox to enable/disable filtering
-        add_filters = st.checkbox("Add Filters", key="add_filters_pricing")
-        
-        if add_filters:
-            # Show filters for each column
-            for column in menu_pricing_table.columns:
-                if column == "MENU_ITEM_NAME":
-                    filter_values = menu_pricing_table[column].unique()
-                    selected_values = st.multiselect(f"Select {column}", filter_values, key="pricing_item_name")
-                    
-                    # Filter data based on selected values
-                    if selected_values:
-                        menu_pricing_table = menu_pricing_table[menu_pricing_table[column].isin(selected_values)]
-                elif column == "MENU_ITEM_ID":
-                    min_id = int(menu_pricing_table["MENU_ITEM_ID"].min())
-                    max_id = int(menu_pricing_table["MENU_ITEM_ID"].max())
-                    selected_id_min, selected_id_max = st.slider(f"Select {column} range", min_value=min_id, max_value=max_id, value=(min_id, max_id), key=f"slider_{column}")
-                    
-                    # Filter data based on selected range
-                    menu_pricing_table = menu_pricing_table[(menu_pricing_table[column] >= selected_id_min) & (menu_pricing_table[column] <= selected_id_max)]
-                else:
-                    min_value = float(menu_pricing_table[column].min())
-                    max_value = float(menu_pricing_table[column].max())
-                    selected_min, selected_max = st.slider(f"Select range for {column}", min_value=min_value, max_value=max_value, value=(min_value, max_value), key=f"slider_{column}")
-                    
-                    # Filter data based on selected range
-                    menu_pricing_table = menu_pricing_table[(menu_pricing_table[column] >= selected_min) & (menu_pricing_table[column] <= selected_max)]
-        
-        # Display filtered table
-        st.dataframe(menu_pricing_table, hide_index=True)
-    
-    with st.expander("Menu Items Health Metrics"):
-        menu_health_metrics_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "HEALTHY", "GLUTEN_FREE", "DAIRY_FREE", "NUT_FREE"]]
-        
-        menu_pricing_table["MENU_ITEM_ID"] = menu_pricing_table["MENU_ITEM_ID"].astype(int)
-        
-        # Checkbox to enable/disable filtering
-        add_filters = st.checkbox("Add Filters", key="add_filters_health_metrics")
+    # Display filtered table
+    st.dataframe(menu_pricing_table, hide_index=True)
 
-        if add_filters:
-            # Filter for MENU_ITEM_ID using a slider
-            min_id = int(menu_health_metrics_table["MENU_ITEM_ID"].min())
-            max_id = int(menu_health_metrics_table["MENU_ITEM_ID"].max())
-            selected_id_min, selected_id_max = st.slider("Select MENU_ITEM_ID range", min_value=min_id, max_value=max_id, value=(min_id, max_id), key="menu_item_id_slider")
-            menu_health_metrics_table = menu_health_metrics_table[(menu_health_metrics_table["MENU_ITEM_ID"] >= selected_id_min) & (menu_health_metrics_table["MENU_ITEM_ID"] <= selected_id_max)]
-            
-            # Filter for other columns using drop-downs
-            for column in menu_health_metrics_table.columns:
-                if column != "MENU_ITEM_ID":
-                    filter_values = menu_health_metrics_table[column].unique()
-                    selected_values = st.multiselect(f"Select {column}", filter_values, key=f"{column}_multiselect")
+
+
+
+    ##################################
+    # MENU ITEM HEALTH METRICS TABLE #
+    ##################################
+    st.markdown("## Menu Items Health Metrics")
+    
+    # select required columns
+    menu_health_metrics_table = menu_table[["MENU_ITEM_ID", "MENU_ITEM_NAME", "HEALTHY", "GLUTEN_FREE", "DAIRY_FREE", "NUT_FREE"]]
+    
+    # convert menu item id columns to integer type    
+    menu_pricing_table["MENU_ITEM_ID"] = menu_pricing_table["MENU_ITEM_ID"].astype(int)
+    
+    # Checkbox to enable/disable filtering
+    add_filters = st.checkbox("Add Filters", key="add_filters_health_metrics")
+
+    if add_filters:
+        # Filter for MENU_ITEM_ID using a slider
+        min_id = int(menu_health_metrics_table["MENU_ITEM_ID"].min())
+        max_id = int(menu_health_metrics_table["MENU_ITEM_ID"].max())
+        selected_id_min, selected_id_max = st.slider("Select MENU_ITEM_ID range", min_value=min_id, max_value=max_id, value=(min_id, max_id), key="menu_item_id_slider")
+        menu_health_metrics_table = menu_health_metrics_table[(menu_health_metrics_table["MENU_ITEM_ID"] >= selected_id_min) & (menu_health_metrics_table["MENU_ITEM_ID"] <= selected_id_max)]
+        
+        # Filter for other columns using drop-downs
+        for column in menu_health_metrics_table.columns:
+            if column != "MENU_ITEM_ID":
+                filter_values = menu_health_metrics_table[column].unique()
+                selected_values = st.multiselect(f"Select {column}", filter_values, key=f"{column}_multiselect")
+                
+                # Filter data based on selected values
+                if selected_values:
+                    menu_health_metrics_table = menu_health_metrics_table[menu_health_metrics_table[column].isin(selected_values)]
                     
-                    # Filter data based on selected values
-                    if selected_values:
-                        menu_health_metrics_table = menu_health_metrics_table[menu_health_metrics_table[column].isin(selected_values)]
-                        
-        st.dataframe(menu_health_metrics_table, hide_index=True)
+    st.dataframe(menu_health_metrics_table, hide_index=True)  
+
+# TAB 3: Model Prediction
+with tab3:
+    st.markdown("## Sales Prediction for Next Year (Menu Item)")
+    
+    st.write("""This page allows you to predict the total quantity sold for a menu item next year. The success metric is defined as 25% YoY growth in 
+             quantity sold for each menu item. Hence, the ability to predict the total quantity sold for a menu item will allow you to best manage your 
+             resources on where to drive for better impact in contributing to the high-level goal.""")
+    
+    
+    # retrive menu item info
+    menu_table_df = retrieve_menu_table()
+    menu_table = get_health_metrics_menu_table(menu_table_df)
     
     # Model Prediction
     st.markdown("### Menu Item Sales Predictor")
