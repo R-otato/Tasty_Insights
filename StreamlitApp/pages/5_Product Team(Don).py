@@ -329,7 +329,7 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
              - Marketing Strategies: Tailor marketing efforts and promotions to maximise the impact. Focus marketing campaigns on menu items that are 
              predicted to perform well and amplify marketing efforts for underperforming menu items, driving customer interest and boosting sales.
              - Facilitate Franchisees' Overall Planning: Aid franchisees' overall planning in terms of inventory management, logistic management, and 
-             budgeting purposes
+             budgeting purposes.
              """)
 
     
