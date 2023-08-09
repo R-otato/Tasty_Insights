@@ -240,13 +240,11 @@ def main() -> None:
                  on churn prediction, which is a twin concept of member retention. It is designed to empower and elevate your marketing strategies with 
                  our data-driven approach, ultimately driving significant sales growth by retaining valuable customers and understanding their likelihood of churning.""")
         st.markdown("## Success Metrics")
-        st.write("In order to assess the effectiveness of our churn prediction model, we have established a key success metric.")
+        st.write("To assess if the marketing page is a success, I have established a key success metric.")
         st.markdown("Success Metric: Achieve a **:blue[25% Year-over-Year (YoY) Member Sales Growth]** for 2022")
         st.write('''The achievement of at least 25% Year on Year Member Sales Growth for 2022, serves as a tangible step 
                  towards realizing the high-level goal of achieving 25% year on year sales growth for non-member 
-                 and member purchases over the next 5 years. To achieve this growth, we will leverage the insights from our 
-                 churn prediction model to optimize member engagement. Assuming that we can encourage members to make two 
-                 purchases per month through targeted strategies, we aim to drive the desired YoY growth.''')
+                 and member purchases over the next 5 years.''')
         
         # How to use predictions
         st.markdown('## How to Utilize the Predictions')
