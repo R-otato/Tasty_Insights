@@ -380,7 +380,7 @@ def main() -> None:
         st.dataframe(churn_counts, hide_index=True)
         with st.expander('Marketing Opportunities cont.'):
             st.write("""
-            - **Win-Back Campaigns:** For the customers who churned (i.e., did not make a purchase in the last 14 days), design targeted win-back campaigns. Offer them personalized incentives, 
+            - **Win-Back Campaigns:** For the customers who churned (i.e., did not make a purchase in the last 14 days), design targeted win-back campaigns. Provide personalized incentives, exclusive discounts, or time-limited offers to entice their return.
 
             - **Customer Retention Programs:** Focus on retaining the existing customers who did not churn. Implement loyalty programs, offer rewards, and provide exceptional customer service to enhance their loyalty and encourage repeat purchases.
             """)
