@@ -241,7 +241,7 @@ def main() -> None:
                  our data-driven approach, ultimately driving significant sales growth by retaining valuable customers and understanding their likelihood of churning.""")
         st.markdown("## Success Metrics")
         st.write("In order to assess the effectiveness of our churn prediction model, we have established a key success metric.")
-        st.markdown("Success Metric: Achieve a **:blue[20% Year-over-Year (YoY) Member Sales Growth]** for 2022")
+        st.markdown("Success Metric: Achieve a **:blue[25% Year-over-Year (YoY) Member Sales Growth]** for 2022")
         st.write("""To achieve this growth, we will leverage the insights from our churn prediction model to optimize member engagement.
                  Assuming that we can encourage members to make two purchases per month through targeted strategies, we aim to drive the desired YoY growth.""")
         # How to use predictions
@@ -437,7 +437,7 @@ def main() -> None:
                         we utilized our sales prediction model to forecast sales for the next two months. Under the assumption that our Churn Prediction model
                         has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year on Year 
                         Member Sales Growth of 36.5%]* for 2022. This accomplishment aligns with our Success Metrics, as we have 
-                         *:blue[ attained more than 20% Year-over-Year (YoY) Member Sales Growth]* for 2022.""")
+                         *:blue[ attained more than 25% Year-over-Year (YoY) Member Sales Growth]* for 2022.""")
 
 
             sales_model_input=data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
