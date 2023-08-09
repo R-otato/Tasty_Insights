@@ -242,7 +242,7 @@ def main() -> None:
         st.markdown("## Success Metrics")
         st.write("In order to assess the effectiveness of our churn prediction model, we have established a key success metric.")
         st.markdown("Success Metric: Achieve a **:blue[25% Year-over-Year (YoY) Member Sales Growth]** for 2022")
-        st.write('''The achievement of at least 25% Year on Year Member Sales Growth for 2022, as determined by our created models, 
+        st.write('''The achievement of at least 25% Year on Year Member Sales Growth for 2022,  
                  serves as a tangible step towards realizing the overarching high-level goal of achieving 25% year on year sales growth 
                  for non-member and member purchases over the next 5 years.''')
         st.write("""To achieve this growth, we will leverage the insights from our churn prediction model to optimize member engagement.
