@@ -334,7 +334,7 @@ The data-driven insights provided by this page offer Tasty Bytes a competitive a
 
     
     # Limitations and Assumptions the model makes
-    st.markdown("# Limitations and assumptions the model makes")
+    st.markdown("# Limitations and Assumptions the model makes")
     st.write("""The limitation of my model is that it assumes that all the time business is as usual. It does not take into account external factors such 
              as changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can lead to 
              inaccurate insights and data-driven decisions such as menu optimisation, marketing strategies and inventory management.
