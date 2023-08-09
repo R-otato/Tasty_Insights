@@ -288,7 +288,7 @@ def calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_ove
     ## calculate the percentage change in sales
     sales_percent_change = ((sales_change / sales_last_year)*100)
 
-    return rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price
+    return rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price, qty_sold_last_year, sales_last_year
 
 #####################
 ##### MAIN CODE #####
@@ -465,7 +465,7 @@ is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
         model_prediction, menu_item_id, menu_item_name, total_qty_by_item_over_time, fig = get_prediction()
         
         # retrieve the metrics to be displayed to user
-        rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price = calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_over_time)
+        rounded_prediction, sales_next_year, qty_percent_change, sales_percent_change, total_qty_by_item_over_time_sorted, unit_price, qty_sold_last_year, sales_last_year = calculate_prediction_metrics(menu_table, menu_item_id, total_qty_by_item_over_time)
 
         # DISPLAY
         st.write('')
@@ -492,19 +492,37 @@ is maximised, and that Tasty Bytes is on track to hit their high level goal.""")
         
         # Display the different metrics
         col1,col2,col3=st.columns(3)
-        col1.metric('Estimated quantity sold next year', f"{round(rounded_prediction, 2)}")
-        col2.metric('Estimated sales next year', f"${round(sales_next_year, 2)}")
+        col1.metric('Estimated quantity sold next year', f"{round(rounded_prediction, 2)}", round(rounded_prediction, 2) - qty_sold_last_year, delta_color="normal", help="Model's Predicted total no. of units sold next year")
+        col2.metric('Estimated sales next year', f"${round(sales_next_year, 2)}", round(sales_next_year, 2)-sales_last_year, delta_color="normal", help="Estimated sales ($) next year based on quantity predicted")
 
-        col1.metric('Estimated YoY quantity sold growth', f"{round(qty_percent_change, 2)}%")
-        col2.metric('Estimated YoY sales growth', f"{round(sales_percent_change, 2)}%")
+        # Display percentage change in quantity
+        ## Check if more than 0, no change, or less than 0 percentage increase
+        ## Each case has a different arrow and color
+        if qty_percent_change > 0:
+            col1.metric('Estimated YoY quantity sold growth', f"↑ {round(qty_percent_change, 2)}%", help="")
+        elif qty_percent_change == 0:
+            col1.metric('Estimated YoY quantity sold growth', f"↔ {round(qty_percent_change, 2)}%")
+        else:
+            col1.metric('Estimated YoY quantity sold growth', f"↓ {round(qty_percent_change, 2)}%")
+
+        # Display percentage change in sales
+        ## Check if more than 0, no change, or less than 0 percentage increase
+        ## Each case has a different arrow and color
+        if sales_percent_change > 0:
+            col2.metric('Estimated YoY sales growth', f"↑ {round(sales_percent_change, 2)}%")
+        elif sales_percent_change == 0:
+            col2.metric('Estimated YoY sales growth', f"↔ {round(sales_percent_change, 2)}%")
+        else:
+            col2.metric('Estimated YoY sales growth', f"↓ {round(sales_percent_change, 2)}%")
+
 
         # Prediction Summary
         st.write('')
         st.markdown("#### Prediction Summary")
-        st.write("""{} is estimated to sell {} units next year. This is a {:.2f}% increase from the previous year. This will translate to ${:.2f} of sales
-                 which is a {:.2f}% increase in sales from the previous year. From this prediction, Tasty Bytes can expect an increase in sales from this
-                 menu item next year.""".format(menu_item_name, rounded_prediction, qty_percent_change, sales_next_year,
-                                                                                sales_percent_change))
+        st.markdown("""**{}** is estimated to sell **:blue[{}]** units next year. This is a **:blue[{:.2f}%]** increase from the previous year. This will translate to **:blue[${:.2f}]**
+                 of sales which is a **:blue[{:.2f}%]** increase in sales from the previous year. From this prediction, Tasty Bytes can expect an increase in sales from this
+                 menu item next year.""".format(menu_item_name, rounded_prediction, qty_percent_change, sales_next_year, sales_percent_change))
+
         # How can this help Tasty Bytes
         st.markdown("#### What\'s Next?")
         st.write("""With the ability to predict the sales performance of a menu item next year, Tasty Bytes can better carry out inventory management
