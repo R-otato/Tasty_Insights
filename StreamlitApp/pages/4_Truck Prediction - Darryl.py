@@ -97,63 +97,6 @@ def retrieve_location_table():
 
 
 
-# # Function: retrieve order_header table
-# # the purpose of this function is to retrieve the order_header table from snowflake containing all the details of the order_header items
-# def retrieve_order_header():
-#     # RETRIEVE order_header TABLE FROM SNOWFLAKE
-#     ## get connection to snowflake
-#     my_cnx = snowflake.connector.connect(
-#         user = "RLIAM",
-#         password = "Cats2004",
-#         account = "LGHJQKA-DJ92750",
-#         role = "TASTY_BI",
-#         warehouse = "TASTY_BI_WH",
-#         database = "frostbyte_tasty_bytes",
-#         schema = "raw_pos"
-#     )
-
-#     ## retrieve order_header table from snowflake
-#     my_cur = my_cnx.cursor()
-    
-#     # Retrieve the list of customer IDs from the 'data' table
-#     customer_ids = data['CUSTOMER_ID'].tolist()
-
-#     # Split the list into smaller chunks of 1,000 customer IDs
-#     chunk_size = 1000
-#     customer_id_chunks = [customer_ids[i:i+chunk_size] for i in range(0, len(customer_ids), chunk_size)]
-
-#     # Execute queries for each customer ID chunk
-#     order_details = []
-#     for chunk in customer_id_chunks:
-#         # Create a comma-separated string of the customer IDs in the current chunk
-#         customer_ids_str = ','.join(map(str, chunk))
-
-#         # Construct the SQL query for the current chunk
-#         query = f"SELECT TRUCK_ID, LOCATION_ID, CUSTOMER_ID, ORDER_AMOUNT, ORDER_TOTAL, ORDER_CURRENCY from order_header WHERE CUSTOMER_ID IN ({customer_ids_str})"
-
-#         # Execute the SQL query for the current chunk
-#         my_cur.execute(query)
-
-#         # Fetch the result for the current chunk
-#         chunk_result = my_cur.fetchall()
-
-#         # Append the chunk result to the overall result
-#         order_details.extend(chunk_result)
-
-#     # Create a DataFrame from the fetched result
-#     order_header_df = pd.DataFrame(order_details, columns=['TRUCK_ID', 'LOCATION_ID', 'CUSTOMER_ID', 'ORDER_AMOUNT', 'ORDER_TOTAL', 'ORDER_CURRENCY'])
-
-#     # Convert ORDER_ID to string and then remove commas
-#     #order_details_df['ORDER_ID'] = order_details_df['ORDER_ID'].astype(str).str.replace(',', '')
-
-#     # Format ORDER_TOTAL and PRODUCT_TOTAL_PRICE columns to 2 decimal places
-#     order_header_df['ORDER_TOTAL'] = order_header_df['ORDER_TOTAL'].apply(lambda x: '{:.2f}'.format(x))
-
-#     order_header_df = order_header_df.sort_values(by='CUSTOMER_ID')
-
-#     return order_header_df
-
-
 # Function: retrieve_order_header_table()
 # the purpose of this function is to retrieve the header details for USA from Snowflake to merge with the menu column to get total sales for a current menu type
 def retrieve_order_header_table():
@@ -231,32 +174,6 @@ def get_overall_truck_sales_table(truck_table_df, order_header_df):
     }).reset_index()
     
     return overall_truck_sales_df_grouped
-
-# # Function: retrieve order_header table
-# # the purpose of this function is to retrieve the order_header table from snowflake containing all the details of the order_header items
-# def retrieve_order_header_table():
-#     # RETRIEVE order_header TABLE FROM SNOWFLAKE
-#     ## get connection to snowflake
-#     my_cnx = snowflake.connector.connect(
-#         user = "RLIAM",
-#         password = "Cats2004",
-#         account = "LGHJQKA-DJ92750",
-#         role = "TASTY_BI",
-#         warehouse = "TASTY_BI_WH",
-#         database = "frostbyte_tasty_bytes",
-#         schema = "raw_pos"
-#     )
-
-#     ## retrieve order_header table from snowflake
-#     my_cur = my_cnx.cursor()
-
-#     my_cur.execute("select TRUCK_ID, ORDER_AMOUNT, ORDER_TAX_AMOUNT, ORDER_DISCOUNT_AMOUNT, ORDER_TOTAL from order_header where ORDER_CURRENCY = 'USD'")
-#     order_header_table = my_cur.fetchall()
-    
-#     ## create a DataFrame from the fetched result
-#     order_header_table_df = pd.DataFrame(order_header_table, columns=['TRUCK_ID', 'ORDER_AMOUNT', 'ORDER_TAX_AMOUNT', 'ORDER_DISCOUNT_AMOUNT', 'ORDER_TOTAL'])
-
-#     return order_header_table_df
 
 
 # Function: get_overall_table
