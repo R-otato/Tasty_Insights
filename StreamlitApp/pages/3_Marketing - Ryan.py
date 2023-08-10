@@ -242,7 +242,7 @@ def main() -> None:
         st.markdown("## Success Metrics")
         st.write("To assess if the marketing page is a success, I have established a key success metric.")
         st.markdown("Success Metric: Achieve a **:blue[25% Year-over-Year (YoY) Member Sales Growth]** for 2022")
-        st.write('''The achievement of at least 25% Year on Year Member Sales Growth for 2022, serves as a stepping stone 
+        st.write('''The achievement of at least 25% Year over Year Member Sales Growth for 2022, serves as a stepping stone 
                  towards achieving the high-level goal of achieving 25% year on year sales growth for non-member 
                  and member purchases over the next 5 years.''')
         
