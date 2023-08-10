@@ -347,132 +347,135 @@ def main() -> None:
         churn_Options = ['All'] + data['CHURNED'].unique().tolist()
         selected_Churn= st.multiselect("Filter by Churn:",churn_Options, default=['All'])
         filtered_data=filter(selected_Churn,'CHURNED',filtered_data)
-        
-        # Number of members of each cluster
-        st.markdown("""### Member's Segments""")
-        cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='NUMBER OF MEMBERS')
-        st.dataframe(cluster_counts, hide_index=True)
-        with st.expander('Cluster terms'):
-            st.write("""
-                     1. Active: Members who have made a transaction recently
-                     2. Engaged: Members who have made a transaction quite recently
-                     3. Inactive: Members who have not made a transaction in a significant period.
-                     4. High-Value: Members with a high monetary and frequency value
-                     5. Moderate-Value: Members with a moderate monetary and frequency value
-                     6. Low-Value: Members with a low monetary and frequency value.
-                     """)
-        with st.expander('Marketing Opportunities'):
-            st.write("""
-            - **Personalized Offers:** Tailor offers and promotions to active low-spending and engaged moderate-value members to increase their spending and encourage repeat purchases.
 
-            - **Loyalty Programs:** Reward high-value loyal members with exclusive perks and incentives to strengthen their loyalty and retain them as brand advocates.
-
-            - **Reactivation Campaigns:** Design targeted campaigns to reactivate inactive low-spending members and bring them back into the fold.
-
-            - **Upselling and Cross-selling:** Identify opportunities to upsell and cross-sell to active moderate-value members, maximizing their average order value.
-            """)
-
-        # Number of members who churned and not churned
-        st.markdown("""### Churn Analysis""")
-        # Display assumption
-        st.write('*Note: Churn is defined by whether or not a member will purchase from us in the next 14 days')
-        # Display churn analysis
-        churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='NUMBER OF MEMBERS')
-        st.dataframe(churn_counts, hide_index=True)
-        with st.expander('Marketing Opportunities cont.'):
-            st.write("""
-            - **Win-Back Campaigns:** For the customers who churned (i.e., did not make a purchase in the last 14 days), design targeted win-back campaigns. Provide personalized incentives, exclusive discounts, or time-limited offers to entice their return.
-
-            - **Customer Retention Programs:** Focus on retaining the existing customers who did not churn. Implement loyalty programs, offer rewards, and provide exceptional customer service to enhance their loyalty and encourage repeat purchases.
-            """)
-        
-
-        # Display forecasted sales
-        st.write('### Member Forecasted Sales')
-        # #Get user input
-        # Get the input from the user
-        expected_purchases_input = st.text_input("Expected number of orders in each month:", "1")
-
-        # Validate the input
-        estimated_frequency = validate_integer_input(expected_purchases_input)
-
-        # Display error message if input is not an integer
-        if estimated_frequency is None:
-            st.error("Please enter a valid integer for the expected number of orders.")
+        if selected_Churn==[] or selected_Cluster==[]:
+            st.error("Please select an option for the filters.")
         else:
-            # Setup data
-            sales_model_input=filtered_data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
-            #Hardcode last date as Tasty Bytes data will not update
-            current_date=pd.to_datetime('2022-11-01')
-            #Update frequency
-            sales_model_input['FREQUENCY']=estimated_frequency*sales_model_input['NUMBER OF MEMBERS']
-            #Load sales csv
-            seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
-            #Get predictions
-            next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
-            
-            #Total Sales by month,quarter,year
-            next_month_sales=next_month_pred['NEXT_MONTH_SALES'].sum()/ 10**6
-            next_quarter_sales=next_quarter_df['NEXT_QUARTER_SALES'].sum()/ 10**6
-            next_year_sales=next_year_df['NEXT_YEAR_SALES'].sum()/ 10**6
-            # Get MoM,QoQ,YoY growth
-            prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date,seg_Sales)
-            mom_sales=(next_month_pred['NEXT_MONTH_SALES'].sum()-prev_month_sales['SALES'].sum())/prev_month_sales['SALES'].sum()*100
-            qoq_sales=(next_quarter_df['NEXT_QUARTER_SALES'].sum()-prev_quarter_sales['SALES'].sum())/prev_quarter_sales['SALES'].sum()*100
-            yoy_sales=(next_year_df['NEXT_YEAR_SALES'].sum()-prev_year_sales['SALES'].sum())/prev_year_sales['SALES'].sum()*100
-          
+            # Number of members of each cluster
+            st.markdown("""### Member's Segments""")
+            cluster_counts = filtered_data.groupby('CLUSTER').size().reset_index(name='NUMBER OF MEMBERS')
+            st.dataframe(cluster_counts, hide_index=True)
+            with st.expander('Cluster terms'):
+                st.write("""
+                        1. Active: Members who have made a transaction recently
+                        2. Engaged: Members who have made a transaction quite recently
+                        3. Inactive: Members who have not made a transaction in a significant period.
+                        4. High-Value: Members with a high monetary and frequency value
+                        5. Moderate-Value: Members with a moderate monetary and frequency value
+                        6. Low-Value: Members with a low monetary and frequency value.
+                        """)
+            with st.expander('Marketing Opportunities'):
+                st.write("""
+                - **Personalized Offers:** Tailor offers and promotions to active low-spending and engaged moderate-value members to increase their spending and encourage repeat purchases.
+
+                - **Loyalty Programs:** Reward high-value loyal members with exclusive perks and incentives to strengthen their loyalty and retain them as brand advocates.
+
+                - **Reactivation Campaigns:** Design targeted campaigns to reactivate inactive low-spending members and bring them back into the fold.
+
+                - **Upselling and Cross-selling:** Identify opportunities to upsell and cross-sell to active moderate-value members, maximizing their average order value.
+                """)
+
+            # Number of members who churned and not churned
+            st.markdown("""### Churn Analysis""")
             # Display assumption
-            filtered_clusters=', '.join(sales_model_input['CLUSTER'].unique())
-            filtered_churn=' and '.join(filtered_data['CHURNED'].unique())
-            st.markdown("""Given for all members in the cluster **{}** who are expected to **{}**
-                        are estimated to purchase from us **:green[{:,}]** time a month. """.format(filtered_clusters,filtered_churn,estimated_frequency))
-            st.write('These are your predicted sales from 2022-11-01 onwards:')
+            st.write('*Note: Churn is defined by whether or not a member will purchase from us in the next 14 days')
+            # Display churn analysis
+            churn_counts = filtered_data.groupby('CHURNED').size().reset_index(name='NUMBER OF MEMBERS')
+            st.dataframe(churn_counts, hide_index=True)
+            with st.expander('Marketing Opportunities cont.'):
+                st.write("""
+                - **Win-Back Campaigns:** For the customers who churned (i.e., did not make a purchase in the last 14 days), design targeted win-back campaigns. Provide personalized incentives, exclusive discounts, or time-limited offers to entice their return.
 
-            # Display metrics
-            col1,col2,col3=st.columns(3)
-            col1.metric('Next Month Sales', f"${round(next_month_sales, 2)}M")
-            col2.metric('Next Quarter Sales', f"${round(next_quarter_sales, 2)}M")
-            col3.metric('Next Year Sales', f"${round(next_year_sales, 2)}M")
-            col1.metric('Month-over-month', f"{round(mom_sales, 2)}%")
-            col2.metric('Quarter-over-quarter', f"{round(qoq_sales, 2)}%")
-            col3.metric('Year-over-year', f"{round(yoy_sales, 2)}%")
+                - **Customer Retention Programs:** Focus on retaining the existing customers who did not churn. Implement loyalty programs, offer rewards, and provide exceptional customer service to enhance their loyalty and encourage repeat purchases.
+                """)
             
-            # Success Metrics
-            st.markdown('## Did we hit our KPI & Success Metrics?')
-            st.markdown("""Currently, our actual *:blue[Year over Year Member Sales Growth for 2022 stands at 16.05%]*. With data available up until 2022-11-01, 
-                        we utilized our sales prediction model to forecast sales for the next two months. Under the assumption that our Churn Prediction model
-                        has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year over Year 
-                        Member Sales Growth of 36.5%]* for 2022. This accomplishment aligns with our Success Metrics, as we have 
-                         *:blue[ attained more than 25% Year-over-Year (YoY) Member Sales Growth]* for 2022. Meeting the success metrics underscores our ability to attain 
-                        the KPI of *:blue[$44 million in member sales]* for 2022""")
 
+            # Display forecasted sales
+            st.write('### Member Forecasted Sales')
+            # #Get user input
+            # Get the input from the user
+            expected_purchases_input = st.text_input("Expected number of orders in each month:", "1")
 
-            sales_model_input=data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
-            sales_model_input['FREQUENCY']=2*sales_model_input['NUMBER OF MEMBERS']
-            current_date=pd.to_datetime('2022-01-01')
-            #Get previous sales
-            prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date,seg_Sales)
-            #Get next year actual sales
-            next_year = pd.DataFrame(pd.date_range(current_date,current_date+pd.DateOffset(years=1)-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
-            next_year['YEAR'] = next_year['DATE'].dt.year
-            next_year['MONTH'] = next_year['DATE'].dt.month
-            next_year.drop('DATE',axis=1,inplace=True)
-            next_year_sales=pd.merge(seg_Sales,right=next_year,on=['YEAR','MONTH'],how='inner')
+            # Validate the input
+            estimated_frequency = validate_integer_input(expected_purchases_input)
+
+            # Display error message if input is not an integer
+            if estimated_frequency is None:
+                st.error("Please enter a valid integer for the expected number of orders.")
+            else:
+                # Setup data
+                sales_model_input=filtered_data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
+                #Hardcode last date as Tasty Bytes data will not update
+                current_date=pd.to_datetime('2022-11-01')
+                #Update frequency
+                sales_model_input['FREQUENCY']=estimated_frequency*sales_model_input['NUMBER OF MEMBERS']
+                #Load sales csv
+                seg_Sales=pd.read_csv('assets/datasets/seg_sales.csv')
+                #Get predictions
+                next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
+                
+                #Total Sales by month,quarter,year
+                next_month_sales=next_month_pred['NEXT_MONTH_SALES'].sum()/ 10**6
+                next_quarter_sales=next_quarter_df['NEXT_QUARTER_SALES'].sum()/ 10**6
+                next_year_sales=next_year_df['NEXT_YEAR_SALES'].sum()/ 10**6
+                # Get MoM,QoQ,YoY growth
+                prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date,seg_Sales)
+                mom_sales=(next_month_pred['NEXT_MONTH_SALES'].sum()-prev_month_sales['SALES'].sum())/prev_month_sales['SALES'].sum()*100
+                qoq_sales=(next_quarter_df['NEXT_QUARTER_SALES'].sum()-prev_quarter_sales['SALES'].sum())/prev_quarter_sales['SALES'].sum()*100
+                yoy_sales=(next_year_df['NEXT_YEAR_SALES'].sum()-prev_year_sales['SALES'].sum())/prev_year_sales['SALES'].sum()*100
             
-            #Get predictions
-            next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
-            # Calculate YoY
-            actual_sales=next_year_sales['SALES'].sum()
-            pred_sales=next_month_pred['NEXT_MONTH_SALES']*2
-            pred_sales=actual_sales+pred_sales.sum()
-            prev_sales=prev_year_sales['SALES'].sum()
-            actual_yoy_sales=(actual_sales-prev_sales)/prev_sales.sum()*100
-            pred_yoy_sales=(pred_sales-prev_sales)/prev_sales.sum()*100
-            col1,col2=st.columns(2)
-            col1.metric('Current Sales for 2022', f"${round(prev_sales/ 10**6, 2)}M")
-            col1.metric('Predicted Sales for 2022',f"${round(pred_sales/ 10**6, 2)}M")
-            col2.metric('Actual Year-over-year', f"{round(actual_yoy_sales, 2)}%")
-            col2.metric('Predicted Year-over-year', f"{round(pred_yoy_sales, 2)}%")
+                # Display assumption
+                filtered_clusters=', '.join(sales_model_input['CLUSTER'].unique())
+                filtered_churn=' and '.join(filtered_data['CHURNED'].unique())
+                st.markdown("""Given for all members in the cluster **{}** who are expected to **{}**
+                            are estimated to purchase from us **:green[{:,}]** time a month. """.format(filtered_clusters,filtered_churn,estimated_frequency))
+                st.write('These are your predicted sales from 2022-11-01 onwards:')
+
+                # Display metrics
+                col1,col2,col3=st.columns(3)
+                col1.metric('Next Month Sales', f"${round(next_month_sales, 2)}M")
+                col2.metric('Next Quarter Sales', f"${round(next_quarter_sales, 2)}M")
+                col3.metric('Next Year Sales', f"${round(next_year_sales, 2)}M")
+                col1.metric('Month-over-month', f"{round(mom_sales, 2)}%")
+                col2.metric('Quarter-over-quarter', f"{round(qoq_sales, 2)}%")
+                col3.metric('Year-over-year', f"{round(yoy_sales, 2)}%")
+                
+                # Success Metrics
+                st.markdown('## Did we hit our KPI & Success Metrics?')
+                st.markdown("""Currently, our actual *:blue[Year over Year Member Sales Growth for 2022 stands at 16.05%]*. With data available up until 2022-11-01, 
+                            we utilized our sales prediction model to forecast sales for the next two months. Under the assumption that our Churn Prediction model
+                            has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year over Year 
+                            Member Sales Growth of 36.5%]* for 2022. This accomplishment aligns with our Success Metrics, as we have 
+                            *:blue[ attained more than 25% Year-over-Year (YoY) Member Sales Growth]* for 2022. Meeting the success metrics underscores our ability to attain 
+                            the KPI of *:blue[$44 million in member sales]* for 2022""")
+
+
+                sales_model_input=data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
+                sales_model_input['FREQUENCY']=2*sales_model_input['NUMBER OF MEMBERS']
+                current_date=pd.to_datetime('2022-01-01')
+                #Get previous sales
+                prev_month_sales,prev_quarter_sales,prev_year_sales=get_sales_growth(sales_model_input,current_date,seg_Sales)
+                #Get next year actual sales
+                next_year = pd.DataFrame(pd.date_range(current_date,current_date+pd.DateOffset(years=1)-pd.DateOffset(months=1), freq='MS'), columns=['DATE'])
+                next_year['YEAR'] = next_year['DATE'].dt.year
+                next_year['MONTH'] = next_year['DATE'].dt.month
+                next_year.drop('DATE',axis=1,inplace=True)
+                next_year_sales=pd.merge(seg_Sales,right=next_year,on=['YEAR','MONTH'],how='inner')
+                
+                #Get predictions
+                next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
+                # Calculate YoY
+                actual_sales=next_year_sales['SALES'].sum()
+                pred_sales=next_month_pred['NEXT_MONTH_SALES']*2
+                pred_sales=actual_sales+pred_sales.sum()
+                prev_sales=prev_year_sales['SALES'].sum()
+                actual_yoy_sales=(actual_sales-prev_sales)/prev_sales.sum()*100
+                pred_yoy_sales=(pred_sales-prev_sales)/prev_sales.sum()*100
+                col1,col2=st.columns(2)
+                col1.metric('Current Sales for 2022', f"${round(prev_sales/ 10**6, 2)}M")
+                col1.metric('Predicted Sales for 2022',f"${round(pred_sales/ 10**6, 2)}M")
+                col2.metric('Actual Year-over-year', f"{round(actual_yoy_sales, 2)}%")
+                col2.metric('Predicted Year-over-year', f"{round(pred_yoy_sales, 2)}%")
 
           
  
