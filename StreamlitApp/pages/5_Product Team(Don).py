@@ -220,12 +220,12 @@ def get_prediction():
     item_info_df['YEAR'] = year
     
     # define the desired column order
-    desired_columns = ['SALE_PRICE_USD', 'YEAR', 'ITEM_CATEGORY_Beverage', 'MENU_ITEM_ID',
-    'MENU_TYPE_Ramen', 'MENU_TYPE_Chinese', 'MENU_TYPE_Vegetarian',
-    'MENU_TYPE_Gyros', 'DAIRY_FREE', 'MENU_TYPE_Crepes',
-    'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Ethiopian', 'MENU_TYPE_Hot Dogs',
-    'ITEM_SUBCATEGORY', 'ITEM_CATEGORY_Main', 'MENU_TYPE_Tacos',
-    'MENU_TYPE_BBQ']
+    desired_columns = ['SALE_PRICE_USD', 'YEAR', 'MENU_ITEM_ID', 'ITEM_CATEGORY_Beverage',
+       'MENU_TYPE_Ramen', 'MENU_TYPE_Chinese', 'MENU_TYPE_Vegetarian',
+       'MENU_TYPE_Gyros', 'DAIRY_FREE', 'MENU_TYPE_Mac & Cheese',
+       'MENU_TYPE_Grilled Cheese', 'MENU_TYPE_Crepes', 'MENU_TYPE_Ethiopian',
+       'ITEM_SUBCATEGORY', 'MENU_TYPE_Tacos', 'ITEM_CATEGORY_Main',
+       'MENU_TYPE_Hot Dogs', 'MENU_TYPE_BBQ']
 
     # drop columns not in the desired column list
     item_info_df = item_info_df[desired_columns]
