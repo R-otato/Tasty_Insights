@@ -535,12 +535,12 @@ with tab2:
             
             # Display metrics
             col1,col2=st.columns(2)
-            # col1.metric("Next Month Sales", f"${round(final_prediction, 2)}")
-            # col2.metric("Next Year Sales", f"${round(sales_next_year / 10**6, 2)}M")
             
-            col1.metric('Estimated sales next month', f"${format(round(final_prediction, 2), ',')}", delta_color="normal", help="This is the estimated sales predicted for next month")
-            col2.metric('Estimated sales next year', f"${format(round(sales_next_year, 2), ',')}", delta_color="normal", help="This is the estimated sales predicted for next year")
-            # col1.metric('Month-over-month', f"{round(month_percent_change, 2)}%")
+            col1.metric('Estimated sales next month', f"${format(round(final_prediction, 2), ',')}", help="This is the estimated sales predicted for next month")
+            col2.metric('Estimated sales next year', f"${format(round(sales_next_year, 2), ',')}", help="This is the estimated sales predicted for next year")
+            
+            # col1.metric('Estimated sales next month', f"${format(round(final_prediction, 2), ',')}", f"${round(final_prediction, 2)-sales_last_month}", delta_color="normal", help="This is the estimated sales predicted for next month")
+            # col2.metric('Estimated sales next year', f"${format(round(sales_next_year, 2), ',')}", f"${round(sales_next_year, 2)-sales_last_year}", delta_color="normal", help="This is the estimated sales predicted for next year")
             
             # Display percentage change for each month
             ## Check if more than 0, no change, or less than 0 percentage increase
@@ -553,6 +553,7 @@ with tab2:
             
             
             # Display percentage change for each year
+            
             ## Check if more than 0, no change, or less than 0 percentage increase
             if year_percent_change > 0:
                 col2.metric('Estimated YoY sales growth', f"↑ {format(round(year_percent_change, 2), ',')}%")
@@ -561,27 +562,43 @@ with tab2:
             else:
                 col2.metric('Estimated YoY sales growth', f"↓ {format(round(year_percent_change, 2), ',')}%")
             
-            # ## display the rounded prediction
-            # st.markdown("### Estimated sales next month: ${:.2f}".format(final_prediction))
-            # st.markdown("### Estimated sales next year: ${:.2f} million".format(sales_next_year / 10**6))
-
             
+            # Summary
+            if year_percent_change > 0:
+                st.markdown("""Based on your selections, we have identified that the truck you have selected has shown **:green[positive sales growth]** over the past year. 
+                            The analysis indicates **:green[an increase of]** **:green[{:,.2f}%]** **:green[in sales]** compared to the previous year. This indicates an upward trend in sales 
+                            for this specific truck. From this prediction, Tasty Bytes can expect a continuation of this **:green[positive trend]** into the upcoming year. This projection 
+                            suggests that the sales performance for this truck is likely to continue improving in the next year.""" .format(year_percent_change))
+            else:
+                st.markdown("""Based on your selections, we have identified that the truck you have selected has shown **:red[negative sales growth]** over the past year. 
+                            The analysis indicates **:red[a decrease of]** **:red[{:,.2f}%]** **:red[in sales]** compared to the previous year. This indicates a downward trend in sales 
+                            for this specific truck. From this prediction, Tasty Bytes can anticipate a continuation of this **:red[negative trend]** into the upcoming year. This projection 
+                            suggests that the sales performance for this truck is likely to continue declining in the next year.""" .format(year_percent_change))
+
+                     
             
     else:
         st.error("Please fill in all required fields before proceeding with the prediction.")
     
-    ## Summary
-    # st.markdown("""Based on your selections, we have identified that you've chosen Truck ID *:green[{:,}]* in the city of *{}*. 
-    #             Utilizing our predictive analysis, we anticipate that the sales for this specific truck and city combination will be approximately 
-    #             for the upcoming year. This forecast is calculated using historical data and advanced predictive models to provide you with an informed estimation of sales performance.""".format(
-    #                         user_input_df['TRUCK_ID'], user_input_df['PRIMARY_CITY']))
-    
+            
     # Benefits
     st.markdown("## How it helps Tasty Bytes towards its high level goal of 25% YoY Sales")
-    st.markdown("My ultimate goal in predicting future sales of food trucks is to increase Tasty Bytes sales by 5 percent, \
-                contributing significantly to achieving a remarkable 25% YoY sales increase.  \
-                By accurately forecasting sales for each food truck, \
-                Tasty Bytes can optimize their inventory, and streamline their operations.")
+    
+    st.markdown("""
+        Predicting the future sales of food trucks, whether they are **:blue[increasing]** or **:blue[decreasing]**, is a crucial strategy that aligns directly with Tasty Bytes' high-level goal of achieving a **:blue[25% Year-over-Year (YoY) sales growth]**. By leveraging advanced data analysis and predictive models, Tasty Bytes can gain valuable insights into the upcoming trends and shifts in their customer preferences.
+
+        By accurately anticipating sales growth, Tasty Bytes can proactively allocate resources, plan inventory, and optimize operations to accommodate **:blue[increasing demand]**. This enables them to provide a seamless customer experience, prevent stockouts, and maintain high customer satisfaction levels. Moreover, the ability to cater to **:blue[rising sales]** effectively positions Tasty Bytes to capitalize on their projected growth, thereby helping them work towards their high level goal of a **:blue[25% YoY sales target]**.
+
+        Conversely, if a **:blue[sales decrease]** were ot be predicted, Tasty Bytes can make informed decisions to mitigate the impact by exploring and adjusting their marketing strategies, introducing new offerings, or identifying potential factors causing the decline. Addressing these challenges head-on allows Tasty Bytes to **:blue[strategize and adapt]** swiftly, minimizing any adverse effects on their sales figures.
+
+        In both scenarios, **:blue[accurate predictions]** empower Tasty Bytes to align its resources and efforts more effectively with the expected market conditions which ultimately helps them in reaching their high level goal of a **:blue[25% Year-over-Year (YoY) sales growth]**.
+        """)
+    
+    
+    # st.markdown("My ultimate goal in predicting future sales of food trucks is to increase Tasty Bytes sales by 5 percent, \
+    #             contributing significantly to achieving a remarkable 25% YoY sales increase.  \
+    #             By accurately forecasting sales for each food truck, \
+    #             Tasty Bytes can optimize their inventory, and streamline their operations.")
     
 
 
