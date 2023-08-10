@@ -470,8 +470,8 @@ with tab2:
 with tab3:
     st.markdown("## Sales Prediction for Next Year (Menu Item)")
     
-    st.write("""This page allows you to predict the total quantity sold for a menu item next year. The success metric is defined as 25% YoY increase in 
-             the average quantity sold for all products in order to achieve the high-level goal. Hence, the ability to predict the total quantity sold for
+    st.write("""This page allows you to predict the total quantity sold for a menu item next year. The **success metric** is defined as **:blue[25% YoY increase in 
+             the average quantity sold for all products]** in order to achieve the high-level goal. Hence, the ability to predict the total quantity sold for
              a menu item will allow you to best manage your resources on where to drive for better impact in contributing to the high-level goal.""")
     
     
