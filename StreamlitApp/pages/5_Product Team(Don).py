@@ -300,8 +300,8 @@ tab1, tab2, tab3 = st.tabs(['About', 'Explore Menu Item Catalog', 'Model Predict
 with tab1:
     # High Level Goals Explanations
     st.markdown("# High Level Goals")
-    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a 25% YoY sales increase, from $105M to $320M over 5 years. The 
-             success metric is defined to be a 25% YoY increase in the average quantity sold for all products in order to achieve the high-level goal.
+    st.write("""This page is dedicated to helping Tasty Bytes reach its goal of achieving a **:blue[25% YoY sales increase, from \$105M to \$320M over 5 years.]** The 
+             success metric is defined to be a **:blue[25% YoY increase in the average quantity sold for all menu items]** in order to achieve the high-level goal.
 
 Combining the power of data analysis and machine learning, the page predicts the quantity sold for a specific menu item based on historical data. Accurately 
 forecasting the next year's quantity sold of a specific menu item can help Tasty Bytes make informed decisions and implement targeted strategies to optimise 
