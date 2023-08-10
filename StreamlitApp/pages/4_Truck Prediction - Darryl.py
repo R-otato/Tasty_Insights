@@ -23,11 +23,11 @@ import snowflake.connector
 # user so that it can be fed into the machine learning model for prediction
 def pipeline(data):
     # Load the necessary transformations
-    windsorizer_iqr = joblib.load("assets/windsorizer_iqr.jbl")
-    windsorizer_gau = joblib.load("assets/windsorizer_gau.jbl")
-    yjt = joblib.load("assets/yjt.jbl")
-    ohe_enc = joblib.load("assets/ohe_enc.jbl")
-    minMaxScaler = joblib.load("assets/minMaxScaler.jbl")
+    windsorizer_iqr = joblib.load("assets/models/windsorizer_iqr.jbl")
+    windsorizer_gau = joblib.load("assets/models/windsorizer_gau.jbl")
+    yjt = joblib.load("assets/models/yjt.jbl")
+    ohe_enc = joblib.load("assets/models/ohe_enc.jbl")
+    minMaxScaler = joblib.load("assets/models/minMaxScaler.jbl")
 
     # Apply the transformations to the data
     data = windsorizer_iqr.transform(data)  # Apply IQR Windsorization
