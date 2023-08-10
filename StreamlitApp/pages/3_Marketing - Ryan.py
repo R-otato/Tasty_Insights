@@ -221,7 +221,7 @@ def get_sales_growth(sales_model_input,current_date,seg_Sales):
     prev_year_sales=pd.merge(prev_year_sales,right=prev_year,on=['YEAR','MONTH'],how='inner')
     return prev_month_sales,prev_quarter_sales,prev_year_sales
 
-
+    
 
 #################
 ### MAIN CODE ### 
@@ -243,7 +243,7 @@ def main() -> None:
         st.write("To assess if the marketing page is a success, I have established a key success metric.")
         st.markdown("Success Metric: Achieve a **:blue[25% Year-over-Year (YoY) Member Sales Growth]** for 2022")
         st.write('''The achievement of at least 25% Year over Year Member Sales Growth for 2022, serves as a stepping stone 
-                 towards achieving the high-level goal of achieving 25% year on year sales growth for non-member 
+                 towards achieving the high-level goal of achieving 25% year over year sales growth for non-member 
                  and member purchases over the next 5 years.''')
         
         # How to use predictions
@@ -323,7 +323,7 @@ def main() -> None:
         cluster_pred=pd.DataFrame(seg_clf_model.predict(kmeans_df[kmeans_cols]),columns=['CLUSTER'])
         
         # Setup: Map predictions to understandable insights
-        churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churned', 1: 'Churned'})
+        churn_pred['CHURNED'] = churn_pred['CHURNED'].map({0: 'Not Churn', 1: 'Churn'})
         cluster_pred['CLUSTER'] =cluster_pred['CLUSTER'].map({
         0: "Active Moderate-Value Members",
         1: "Inactive Low-Spending Members",
@@ -421,9 +421,12 @@ def main() -> None:
             yoy_sales=(next_year_df['NEXT_YEAR_SALES'].sum()-prev_year_sales['SALES'].sum())/prev_year_sales['SALES'].sum()*100
           
             # Display assumption
-            st.write('Assuming you are able to get each customers to purchase from you ',estimated_frequency,' time every month.')
-            st.write('Latest date is based on the data lastest date which is 2022-11-01')
-            st.write('These are your predicted sales:')
+            filtered_clusters=', '.join(sales_model_input['CLUSTER'].unique())
+            filtered_churn=' and '.join(filtered_data['CHURNED'].unique())
+            st.markdown("""Given for all members in the cluster **{}** who are expected to **{}**
+                        are estimated to purchase from us **:green[{:,}]** time a month. """.format(filtered_clusters,filtered_churn,estimated_frequency))
+            st.write('These are your predicted sales from 2022-11-01 onwards:')
+
             # Display metrics
             col1,col2,col3=st.columns(3)
             col1.metric('Next Month Sales', f"${round(next_month_sales, 2)}M")
@@ -435,9 +438,9 @@ def main() -> None:
             
             # Success Metrics
             st.markdown('## Did we hit our Success Metrics?')
-            st.markdown("""Currently, our current *:blue[Year on Year Member Sales Growth for 2022 stands at 16.05%]*. With data available up until 2022-11-01, 
+            st.markdown("""Currently, our actual *:blue[Year over Year Member Sales Growth for 2022 stands at 16.05%]*. With data available up until 2022-11-01, 
                         we utilized our sales prediction model to forecast sales for the next two months. Under the assumption that our Churn Prediction model
-                        has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year on Year 
+                        has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year over Year 
                         Member Sales Growth of 36.5%]* for 2022. This accomplishment aligns with our Success Metrics, as we have 
                          *:blue[ attained more than 25% Year-over-Year (YoY) Member Sales Growth]* for 2022.""")
 
