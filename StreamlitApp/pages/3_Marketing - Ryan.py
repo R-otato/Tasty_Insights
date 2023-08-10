@@ -239,8 +239,9 @@ def main() -> None:
                  In particular, we aim to help Tasty Bytes achieve a remarkable **:blue[25% Year-Over-Year increase in sales]**. This page is exclusively focused 
                  on churn prediction, which is a twin concept of member retention. It is designed to empower and elevate your marketing strategies with 
                  our data-driven approach, ultimately driving significant sales growth by retaining valuable customers and understanding their likelihood of churning.""")
-        st.markdown("## Success Metrics")
+        st.markdown("## KPI & Success Metrics")
         st.write("To assess if the marketing page is a success, I have established a key success metric.")
+        st.write("KPI: Achieve **:blue[$44 million in member sales]** for 2022")
         st.markdown("Success Metric: Achieve a **:blue[25% Year-over-Year (YoY) Member Sales Growth]** for 2022")
         st.write('''The achievement of at least 25% Year over Year Member Sales Growth for 2022, serves as a stepping stone 
                  towards achieving the high-level goal of achieving 25% year over year sales growth for non-member 
@@ -336,7 +337,7 @@ def main() -> None:
         data=pd.concat([data, churn_pred], axis=1)
         
         # Display predictions
-        st.markdown("## Member Segmentation and Churn Prediction Results")
+        st.markdown("## Member Segmentation, Churn Prediction and Segment Sales Prediction Results")
 
         # Display a filter for selecting clusters
         cluster_Options = ['All'] + data['CLUSTER'].unique().tolist()
@@ -437,12 +438,13 @@ def main() -> None:
             col3.metric('Year-over-year', f"{round(yoy_sales, 2)}%")
             
             # Success Metrics
-            st.markdown('## Did we hit our Success Metrics?')
+            st.markdown('## Did we hit our KPI & Success Metrics?')
             st.markdown("""Currently, our actual *:blue[Year over Year Member Sales Growth for 2022 stands at 16.05%]*. With data available up until 2022-11-01, 
                         we utilized our sales prediction model to forecast sales for the next two months. Under the assumption that our Churn Prediction model
                         has helped the marketing team to get each member to purchase at least twice a month, we *:blue[anticipate an impressive Year over Year 
                         Member Sales Growth of 36.5%]* for 2022. This accomplishment aligns with our Success Metrics, as we have 
-                         *:blue[ attained more than 25% Year-over-Year (YoY) Member Sales Growth]* for 2022.""")
+                         *:blue[ attained more than 25% Year-over-Year (YoY) Member Sales Growth]* for 2022. Meeting the success metrics underscores our ability to attain 
+                        the KPI of *:blue[$44 million in member sales]* for 2022""")
 
 
             sales_model_input=data.groupby(['CLUSTER','CITY']).size().reset_index(name='NUMBER OF MEMBERS')
@@ -456,7 +458,7 @@ def main() -> None:
             next_year['MONTH'] = next_year['DATE'].dt.month
             next_year.drop('DATE',axis=1,inplace=True)
             next_year_sales=pd.merge(seg_Sales,right=next_year,on=['YEAR','MONTH'],how='inner')
-        
+            
             #Get predictions
             next_month_pred, next_quarter_df, next_year_df=automate_sales_pred(current_date,sales_model_input,sales_model)
             # Calculate YoY
@@ -466,8 +468,11 @@ def main() -> None:
             prev_sales=prev_year_sales['SALES'].sum()
             actual_yoy_sales=(actual_sales-prev_sales)/prev_sales.sum()*100
             pred_yoy_sales=(pred_sales-prev_sales)/prev_sales.sum()*100
-            st.metric('Actual Year-over-year', f"{round(actual_yoy_sales, 2)}%")
-            st.metric('Predicted Year-over-year', f"{round(pred_yoy_sales, 2)}%")
+            col1,col2=st.columns(2)
+            col1.metric('Current Sales for 2022', f"${round(prev_sales/ 10**6, 2)}M")
+            col1.metric('Predicted Sales for 2022',f"${round(pred_sales/ 10**6, 2)}M")
+            col2.metric('Actual Year-over-year', f"{round(actual_yoy_sales, 2)}%")
+            col2.metric('Predicted Year-over-year', f"{round(pred_yoy_sales, 2)}%")
 
           
  
