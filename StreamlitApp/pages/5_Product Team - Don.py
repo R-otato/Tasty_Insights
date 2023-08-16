@@ -340,8 +340,8 @@ performance of individual products. This approach can boost efficiency, effectiv
              factors such as changes in customer preferences, economic conditions, or marketing campaigns that could significantly impact sales which can 
              lead to inaccurate insights and data-driven decisions such as menu optimisation, marketing strategies and inventory management.
 
-The assumption made is that the December 2022 quantity sold is the average of the past 11 months of 2022 due to missing data. However, this is only one 
-month of assumption therefore, it should not impact the model to a large extent.
+The assumption made is that the November and December 2022 quantity sold is the average of the past 10 months of 2022 due to missing data. This is a two
+month assumption and therefore, it should not impact the model to a large extent.
 
 An observation is that the unit price of all menu items did not change over the years based on the data presented. The assumption made then is that the 
 unit price of each menu item remains the same in the following year. This can potentially affect the prediction if Tasty Bytes changes the unit price 
